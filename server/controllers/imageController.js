@@ -1,9 +1,37 @@
 const axios = require('axios');
 
-exports.generateIamges = async (req, res) => {
-    const { inputTest } = req.body;
-    // Split inputText into items and call AI API for each
-    // Example: const response = await axios.post('AI_API_URL', { prompt: item });
-    // Send back generated image URLs
-    res.json({ images: [] }); // Replace with actual image data
+exports.generateImages = async (req, res) => {
+    const { inputText } = req.body; //Get the input text from the request body
+
+    // Split inputText into an array of items
+    const items = inputText.split('\n').map(item => item.trim()).filter(item => item);
+
+    try {
+        // Prepare an array to hold the generated image URLs
+        const imageUrls = [];
+
+        // Loop through each item and call the OpenAI API
+        for (const item of items) {
+            const response = await axios.post('https://api.openai.com/v1/images/generations', {
+                prompt: item,
+                n: 1, //Number of images to generate
+                size: "1024x1024" // Size of the generated image
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Extract the image URL from the response
+            const imageUrl = response.data.data[0].url;
+            imageUrls.push({ prompts: item, url: imageUrl });
+        }
+
+        // Send the generated image URLs back to the client
+        res.json({ images: imageUrls });
+    } catch (error) {
+        console.error('Errorgenerating images:', error);
+        res.status(500).json({ error: 'Failed to generate images' });
+    }
 };
