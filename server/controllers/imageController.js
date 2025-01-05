@@ -2,6 +2,7 @@ const axios = require('axios');
 
 exports.generateImages = async (req, res) => {
     const { inputText } = req.body; //Get the input text from the request body
+    console.log('Input Text:', inputText);
 
     // Split inputText into an array of items
     const items = inputText.split('\n').map(item => item.trim()).filter(item => item);
@@ -31,7 +32,12 @@ exports.generateImages = async (req, res) => {
         // Send the generated image URLs back to the client
         res.json({ images: imageUrls });
     } catch (error) {
-        console.error('Errorgenerating images:', error);
+        console.error('Error generating images:', error.response ? error.response.data : error.message);
+
+        if (error.response && error.response.data.error.code === 'billing_hard_limit_reached') {
+            return res.status(402).json({ error: 'Billing limit reached. Please check your account.'})
+        }
+
         res.status(500).json({ error: 'Failed to generate images' });
     }
 };
