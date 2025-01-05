@@ -19,7 +19,7 @@ exports.generateImages = async (req, res) => {
                 size: "1024x1024" // Size of the generated image
             }, {
                 headers: {
-                    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                    'Authorization': `Bearer ${process.env.PALACE_KEY}`,
                     'Content-Type': 'application/json'
                 }
             });
