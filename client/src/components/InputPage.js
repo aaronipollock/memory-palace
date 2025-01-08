@@ -3,24 +3,45 @@ import axios from 'axios';
 
 const InputPage = () => {
     const [inputText, setInputText] = useState('');
-    const [file, setFile] = useState(null);
+    const [images, setImages] = useState(null);
 
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
+    const handleInputChange = (e) => {
+        setInputText(e.target.value);
     };
 
-    const handleSubmit = async () => {
-        // Process input and call the AI API
-        const response = await axios.post('/api/generate-images', { inputText });
-        // Handle response and navigate to gallery
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('/http://localhost:5000/api/generate-images', {
+                inputText: inputText
+            });
+            setImages(response.data.images);
+        } catch (error) {
+            console.error('Error generating images:', error);
+        }
     };
 
     return (
         <div>
-            <h2>Input Your Items</h2>
-            <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} />
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={handleSubmit}>Process List</button>
+            <h1>Memory Palace Input</h1>
+            <form onSubmit={handleSubmit}>
+                <textarea
+                    value={inputText}
+                    onChange={handleInputChange}
+                    placeholder="Enter your list of items here..."
+                />
+                <button type="submit">Generate Images</button>
+            </form>
+            {images && (
+                <div>
+                    <h2>Generated Images</h2>
+                    <div>
+                        {images.map((image, index) => (
+                            <img key={index} src={image.url} alt={image.prompt} />
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
