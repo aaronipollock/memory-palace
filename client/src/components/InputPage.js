@@ -1,47 +1,59 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const InputPage = () => {
+const InputPage = ({ onImagesGenerated }) => {
     const [inputText, setInputText] = useState('');
-    const [images, setImages] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleInputChange = (e) => {
         setInputText(e.target.value);
+        setError(null);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError(null);
+
         try {
-            const response = await axios.post('/http://localhost:5000/api/generate-images', {
+            const response = await axios.post('http://localhost:5000/api/generate-images', {
                 inputText: inputText
             });
-            setImages(response.data.images);
-        } catch (error) {
-            console.error('Error generating images:', error);
+
+            console.log('Response:', response.data); // Debug log
+
+            if (response.data && response.data.images) {
+                // Pass the generated images up to the parent component
+                onImagesGenerated(response.data.images);
+                setInputText(''); // Clear the input after successful generation
+            } else {
+                throw new Error('No images received from the server');
+            }
+        } catch (err) {
+            console.error('Error details:', err);
+            setError(err.response?.data?.error || 'Failed to generate images. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div>
-            <h1>Memory Palace Input</h1>
+        <div className="input-container">
+            <h2>Create Your Memory Palace</h2>
             <form onSubmit={handleSubmit}>
                 <textarea
                     value={inputText}
                     onChange={handleInputChange}
-                    placeholder="Enter your list of items here..."
+                    placeholder="Enter your list of items (one per line)..."
+                    disabled={isLoading}
                 />
-                <button type="submit">Generate Images</button>
+                {error && <div className="error">{error}</div>}
+                <button type="submit" disabled={isLoading || !inputText.trim()}>
+                    {isLoading ? 'Generating...' : 'Generate Images'}
+                </button>
             </form>
-            {images && (
-                <div>
-                    <h2>Generated Images</h2>
-                    <div>
-                        {images.map((image, index) => (
-                            <img key={index} src={image.url} alt={image.prompt} />
-                        ))}
-                    </div>
-                </div>
-            )}
+            {isLoading && <div className="loading">Generating your images...</div>}
         </div>
     );
 };

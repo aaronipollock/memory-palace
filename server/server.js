@@ -1,6 +1,12 @@
+require('dotenv').config();
+
+// Add these debug lines at the top of your server.js
+console.log('Current directory:', __dirname);
+console.log('Environment variables loaded:', process.env.OPENAI_API_KEY ? 'Yes' : 'No');
+console.log('API Key first few characters:', process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) + '...' : 'Not found');
+
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

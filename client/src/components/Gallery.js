@@ -1,16 +1,20 @@
 import React from 'react';
 
-const Gallery = ({ images }) => {
+const Gallery = ({ images = [] }) => {
+    if (images.length === 0) {
+        return null; // Don't render anything if there are no images
+    }
+
     return (
-        <div>
-            <h2>Generated Images</h2>
-            <div style={{ display: 'flex', flexwrap: 'wrap' }}>
-                {images.map((images, index) => (
-                    <div key={index} style={{ margin: '10px' }}>
-                        <img src={image.url} alt={image.prompt} style={{ width: '200px', height: 'auto'}} />
-                    </div>
-                ))}
-            </div>
+        <div className="gallery-container">
+            {images.map((image, index) => (
+                <div key={index} className="gallery-item">
+                    <img
+                        src={image.url}
+                        alt={image.prompt || `Generated image ${index + 1}`}
+                    />
+                </div>
+            ))}
         </div>
     );
 };

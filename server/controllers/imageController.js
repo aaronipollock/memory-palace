@@ -3,41 +3,41 @@ const axios = require('axios');
 exports.generateImages = async (req, res) => {
     const { inputText } = req.body; //Get the input text from the request body
     console.log('Input Text:', inputText);
+    console.log('API Key check in controller:', process.env.OPENAI_API_KEY ? 'Present' : 'Missing')
 
     // Split inputText into an array of items
-    const items = inputText.split('\n').map(item => item.trim()).filter(item => item);
 
     try {
         // Prepare an array to hold the generated image URLs
-        const imageUrls = [];
+        const prompts = inputText.split('\n').map(item => item.trim()).filter(item => item);
+        const generatedImages = [];
 
         // Loop through each item and call the OpenAI API
-        for (const item of items) {
+        for (const prompt of prompts) {
             const response = await axios.post('https://api.openai.com/v1/images/generations', {
-                prompt: item,
+                prompt: prompt,
                 n: 1, //Number of images to generate
                 size: "1024x1024" // Size of the generated image
             }, {
                 headers: {
-                    'Authorization': `Bearer ${process.env.PALACE_KEY}`,
+                    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
                     'Content-Type': 'application/json'
                 }
             });
 
-            // Extract the image URL from the response
-            const imageUrl = response.data.data[0].url;
-            imageUrls.push({ prompts: item, url: imageUrl });
+            generatedImages.push({
+                prompt: prompt,
+                url: response.data.data[0].url
+            });
         }
 
         // Send the generated image URLs back to the client
-        res.json({ images: imageUrls });
+        res.json({ images: generatedImages });
     } catch (error) {
-        console.error('Error generating images:', error.response ? error.response.data : error.message);
-
-        if (error.response && error.response.data.error.code === 'billing_hard_limit_reached') {
-            return res.status(402).json({ error: 'Billing limit reached. Please check your account.'})
-        }
-
-        res.status(500).json({ error: 'Failed to generate images' });
+        console.error('Error generating images:', error.response?.data || error.message);
+        res.status(500).json({
+            error: 'Failed to generate images',
+            details: error.response?.data?.error?.message || error.message
+        });
     }
 };
