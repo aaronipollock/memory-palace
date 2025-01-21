@@ -1,42 +1,62 @@
 const axios = require('axios');
 
-exports.generateImages = async (req, res) => {
-    const { roomFeatures, itemsToRemember } = req.body; //Get the input text from the request body
-    console.log('Room Features:', roomFeatures);
-    console.log('Items to Remember:', itemsToRemember)
+// Helper function to create memorable associations
+const createAssociation = (item, roomFeature) => {
+    // List of action verbs to make scenes more dynamic
+    const actionVerbs = [
+        'dramatically interacts with',
+        'unexpectedly appears in',
+        'humorously transforms',
+        'explosively emerges from',
+        'magically floats around',
+        'chaotically disrupts',
+        'mysteriously merges with',
+        'playfully bounces off',
+        'dramatically crashes into',
+        'comically slides down'
+    ];
 
-    // Split inputText into an array of items
+    // List of descriptive adjectives to enhance visualization
+    const adjectives = [
+        'giant', 'tiny', 'glowing', 'colorful',
+        'transparent', 'neon', 'sparkling', 'animated',
+        'surreal', 'vibrant'
+    ];
+
+    // Randomly select elements to create variety
+    const verb = actionVerbs[Math.floor(Math.random() * actionVerbs.length)];
+    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+
+    // Create a dramatic/humorous scenario
+    return `A ${adjective} ${item} ${verb} the ${roomFeature}, creating a memorable and surprising scene, digital art style`;
+};
+
+exports.generateImages = async (req, res) => {
+    const { roomFeatures, itemsToRemember } = req.body;
+    console.log('Room Features:', roomFeatures);
+    console.log('Items to Remember:', itemsToRemember);
 
     try {
         // Validate inputs
         if (!Array.isArray(roomFeatures) || !Array.isArray(itemsToRemember)) {
-            return res.status(400).json({ error: 'Both room features and items must be provided as arrays'});
+            return res.status(400).json({ error: 'Both room features and items must be provided as arrays' });
         }
 
-        if (roomFeatures.length === 0 || itemsToRemember.length == 0) {
+        if (roomFeatures.length === 0 || itemsToRemember.length === 0) {
             return res.status(400).json({ error: 'Both lists must contain at least one item' });
         }
 
-        // For MVP, we'll pair items sequentially
-        // Later this could be enhanced with more sophisticated matching
-        const pairs = itemsToRemember.map((item, index) => {
-            const roomFeature = roomFeatures[index % roomFeatures.length];
-            return {
-                item,
-                roomFeature,
-                // Create a dramatic/humorous scenario
-                prompt: `A dramatic and memorable scene where ${item} is interacting with ${roomFeature} in a surprising and attention-grabbing way, digital art style`
-            }
-        })
-
+        // Create associations and generate images
         const generatedImages = [];
+        for (let i = 0; i < itemsToRemember.length; i++) {
+            const item = itemsToRemember[i];
+            const roomFeature = roomFeatures[i % roomFeatures.length];
+            const prompt = createAssociation(item, roomFeature);
 
-        // Generate an image for each pair
-        for (const pair of pairs) {
             const response = await axios.post('https://api.openai.com/v1/images/generations', {
-                prompt: pair.prompt,
-                n: 1, //Number of images to generate
-                size: "1024x1024" // Size of the generated image
+                prompt: prompt,
+                n: 1,
+                size: "1024x1024"
             }, {
                 headers: {
                     'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -45,14 +65,13 @@ exports.generateImages = async (req, res) => {
             });
 
             generatedImages.push({
-                item: pair.item,
-                roomFeature: pair.roomFeature,
-                prompt: pair.prompt,
+                item: item,
+                roomFeature: roomFeature,
+                prompt: prompt,
                 url: response.data.data[0].url
             });
         }
 
-        // Send the generated image URLs back to the client
         res.json({ images: generatedImages });
     } catch (error) {
         console.error('Error details:', error.response?.data || error.message);

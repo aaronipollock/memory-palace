@@ -45,42 +45,46 @@ const InputPage = ({ onImagesGenerated }) => {
         <div className="input-container">
             <h2>Create Your Memory Palace</h2>
             <form onSubmit={handleSubmit}>
-                <div className="input-group">
-                    <label>Room Features (one per line):</label>
-                    <textarea
-                        value={roomFeatures}
-                        onChange={(e) => setRoomFeatures(e.target.value)}
-                        placeholder="Example:
+                <div className="form-grid">
+                    <div className="input-group">
+                        <label>Room Features (one per line):</label>
+                        <textarea
+                            value={roomFeatures}
+                            onChange={(e) => setRoomFeatures(e.target.value)}
+                            placeholder="Example:
 wall
 sofa
 tree outside window
 mirror
 fireplace"
-                        disabled={isLoading}
-                    />
-                </div>
+                            disabled={isLoading}
+                        />
+                    </div>
 
-                <div className="input-group">
-                    <label>Items to Remember (one per line):</label>
-                    <textarea
-                        value={itemsToRemember}
-                        onChange={(e) => setItemsToRemember(e.target.value)}
-                        placeholder="Example:
+                    <div className="input-group">
+                        <label>Items to Remember (one per line):</label>
+                        <textarea
+                            value={itemsToRemember}
+                            onChange={(e) => setItemsToRemember(e.target.value)}
+                            placeholder="Example:
 gun
 knife
 monkey
 beach ball"
-                        disabled={isLoading}
-                    />
+                            disabled={isLoading}
+                        />
+                    </div>
                 </div>
 
-                {error && <div className="error">{error}</div>}
-                <button
-                    type="submit"
-                    disabled={isLoading || !roomFeatures.trim() || !itemsToRemember.trim()}
-                >
-                    {isLoading ? 'Generating...' : 'Generate Associations'}
-                </button>
+                <div className="form-actions">
+                    {error && <div className="error">{error}</div>}
+                    <button
+                        type="submit"
+                        disabled={isLoading || !roomFeatures.trim() || !itemsToRemember.trim()}
+                    >
+                        {isLoading ? 'Generating...' : 'Generate Associations'}
+                    </button>
+                </div>
             </form>
             {isLoading && <div className="loading">Creating your memory associations...</div>}
         </div>
