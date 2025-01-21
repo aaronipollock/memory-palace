@@ -1,7 +1,15 @@
-import React from 'react';
-import App from '../App';
+import React, { useState } from 'react';
 
 const Gallery = ({ images = [] }) => {
+    const [feedback, setFeedBack] = useState({});
+
+    const handleFeedback = (index, type) => {
+        setFeedBack(prevFeedback => ({
+            ...prevFeedback,
+            [index]: type
+        }));
+    };
+
     if (images.length === 0) {
         return null; // Don't render anything if there are no images
     }
@@ -24,6 +32,20 @@ const Gallery = ({ images = [] }) => {
                             <span className='feature'>{image.roomFeature}</span>
                         </div>
                         <p className='prompt'>{image.prompt}</p>
+                        <div className='feedback-buttons'>
+                            <button
+                                className={`like-button ${feedback[index] === 'like' ? 'active' : ''}`}
+                                onClick={() => handleFeedback(index, 'like')}
+                            >
+                                👍 Like
+                            </button>
+                            <button
+                                className={`dislike-button ${feedback[index] === 'dislike' ? 'active' : ''}`}
+                                onClick={() => handleFeedback(index, 'dislike')}
+                            >
+                                👎 Dislike
+                            </button>
+                        </div>
                     </div>
                 </div>
             ))}
