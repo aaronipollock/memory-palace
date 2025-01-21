@@ -47,6 +47,13 @@ main {
   margin: 0 auto;
 }
 
+.input-container h2 {
+  color: #61dafb;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
 .form-grid {
   display: grid;
   gap: 2rem;
@@ -266,4 +273,33 @@ select:disabled {
 
 .like-button:hover, .dislike-button:hover {
     background-color: #4fa8d5;
+}
+
+.instructions {
+    background-color: #1a1e24;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #abb2bf;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.instructions p {
+    margin: 0 0 1rem 0;
+}
+
+.instructions ol {
+    padding-left: 1.5rem;
+    margin: 0;
+}
+
+.instructions li {
+    margin-bottom: 0.5rem;
+}
+
+.instructions strong {
+    color: #61dafb;
 }

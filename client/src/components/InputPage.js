@@ -3,8 +3,8 @@ import axios from 'axios';
 
 const InputPage = ({ onImagesGenerated }) => {
     // Initialize state with empty strings
-    const [roomFeatures, setRoomFeatures] = useState('');
-    const [itemsToRemember, setItemsToRemember] = useState('');
+    const [anchorPoints, setAnchorPoints] = useState('');
+    const [memorables, setMemorables] = useState('');
     const [pairingStrategy, setPairingStrategy] = useState('sequential'); // Default strategy
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -13,8 +13,8 @@ const InputPage = ({ onImagesGenerated }) => {
         e.preventDefault();
 
         // Validate that both inputs have content
-        if (!roomFeatures.trim() || !itemsToRemember.trim()) {
-            setError('Please provide both room features and items to remember');
+        if (!anchorPoints.trim() || !memorables.trim()) {
+            setError('Please provide both anchor points and memorables');
             return;
         }
 
@@ -23,8 +23,8 @@ const InputPage = ({ onImagesGenerated }) => {
 
         try {
             const response = await axios.post('http://localhost:5000/api/generate-images', {
-                roomFeatures: roomFeatures.split('\n').map(item => item.trim()).filter(Boolean),
-                itemsToRemember: itemsToRemember.split('\n').map(item => item.trim()).filter(Boolean),
+                anchorPoints: anchorPoints.split('\n').map(item => item.trim()).filter(Boolean),
+                memorables: memorables.split('\n').map(item => item.trim()).filter(Boolean),
                 pairingStrategy: pairingStrategy
             });
 
@@ -41,33 +41,39 @@ const InputPage = ({ onImagesGenerated }) => {
     return (
         <div className="input-container">
             <h2>Create Your Memory Palace</h2>
+            <div className="instructions">
+                <p>To create your memory palace, follow these steps:</p>
+                <ol>
+                    <li><strong>Anchor Points:</strong> List features or locations in your space, such as "sofa", "window", or "bookshelf". These will serve as reference points for your memory associations.</li>
+                    <li><strong>Memorables:</strong> List the items or concepts you want to remember, such as "grocery list", "meeting agenda", or "historical dates".</li>
+                    <li>Choose a <strong>Pairing Strategy</strong> to determine how your memorables will be associated with anchor points.</li>
+                </ol>
+                <p>Ensure that each item is on a new line for clarity.</p>
+            </div>
             <form onSubmit={handleSubmit}>
                 <div className="form-grid">
                     <div className="input-group">
-                        <label>Room Features (one per line):</label>
+                        <label>Anchor Points (one per line):</label>
                         <textarea
-                            value={roomFeatures}
-                            onChange={(e) => setRoomFeatures(e.target.value)}
+                            value={anchorPoints}
+                            onChange={(e) => setAnchorPoints(e.target.value)}
                             placeholder="Example:
-wall
 sofa
-tree outside window
-mirror
-fireplace"
+window
+bookshelf"
                             disabled={isLoading}
                         />
                     </div>
 
                     <div className="input-group">
-                        <label>Items to Remember (one per line):</label>
+                        <label>Memorables (one per line):</label>
                         <textarea
-                            value={itemsToRemember}
-                            onChange={(e) => setItemsToRemember(e.target.value)}
+                            value={memorables}
+                            onChange={(e) => setMemorables(e.target.value)}
                             placeholder="Example:
-gun
-knife
-monkey
-beach ball"
+grocery list
+meeting agenda
+historical dates"
                             disabled={isLoading}
                         />
                     </div>
@@ -89,7 +95,7 @@ beach ball"
                     {error && <div className="error">{error}</div>}
                     <button
                         type="submit"
-                        disabled={isLoading || !roomFeatures.trim() || !itemsToRemember.trim()}
+                        disabled={isLoading || !anchorPoints.trim() || !memorables.trim()}
                     >
                         {isLoading ? 'Generating...' : 'Generate Associations'}
                     </button>
