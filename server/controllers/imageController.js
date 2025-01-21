@@ -31,8 +31,32 @@ const createAssociation = (item, roomFeature) => {
     return `A ${adjective} ${item} ${verb} the ${roomFeature}, creating a memorable and surprising scene, digital art style`;
 };
 
+// Function to pair items with room features
+const pairItemsWithFeatures = (items, features, strategy = 'sequential') => {
+    const pairs = [];
+    const featureCount = features.length;
+
+    switch (strategy) {
+        case 'random':
+            items.forEach(item => {
+                const randomFeature = features[Math.floor(Math.random() * featureCount)];
+                pairs.push({ item, roomFeature: randomFeature });
+            });
+            break;
+        case 'sequential':
+        default:
+            items.forEach((item, index) => {
+                const roomFeature = features[index % featureCount];
+                pairs.push({ item, roomFeature });
+            });
+            break;
+    }
+
+    return pairs;
+}
+
 exports.generateImages = async (req, res) => {
-    const { roomFeatures, itemsToRemember } = req.body;
+    const { roomFeatures, itemsToRemember, pairingStrategy } = req.body;
     console.log('Room Features:', roomFeatures);
     console.log('Items to Remember:', itemsToRemember);
 
@@ -46,12 +70,12 @@ exports.generateImages = async (req, res) => {
             return res.status(400).json({ error: 'Both lists must contain at least one item' });
         }
 
+        const pairs = pairItemsWithFeatures(itemsToRemember, roomFeatures, pairingStrategy);
+
         // Create associations and generate images
         const generatedImages = [];
-        for (let i = 0; i < itemsToRemember.length; i++) {
-            const item = itemsToRemember[i];
-            const roomFeature = roomFeatures[i % roomFeatures.length];
-            const prompt = createAssociation(item, roomFeature);
+        for (const pair of pairs) {
+            const prompt = createAssociation(pair.item, pair.roomFeature);
 
             const response = await axios.post('https://api.openai.com/v1/images/generations', {
                 prompt: prompt,
@@ -65,8 +89,8 @@ exports.generateImages = async (req, res) => {
             });
 
             generatedImages.push({
-                item: item,
-                roomFeature: roomFeature,
+                item: pair.item,
+                roomFeature: pair.roomFeature,
                 prompt: prompt,
                 url: response.data.data[0].url
             });

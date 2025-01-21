@@ -5,13 +5,9 @@ const InputPage = ({ onImagesGenerated }) => {
     // Initialize state with empty strings
     const [roomFeatures, setRoomFeatures] = useState('');
     const [itemsToRemember, setItemsToRemember] = useState('');
+    const [pairingStrategy, setPairingStrategy] = useState('sequential'); // Default strategy
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    // const handleInputChange = (e) => {
-    //     setInputText(e.target.value);
-    //     setError(null);
-    // };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,7 +24,8 @@ const InputPage = ({ onImagesGenerated }) => {
         try {
             const response = await axios.post('http://localhost:5000/api/generate-images', {
                 roomFeatures: roomFeatures.split('\n').map(item => item.trim()).filter(Boolean),
-                itemsToRemember: itemsToRemember.split('\n').map(item => item.trim()).filter(Boolean)
+                itemsToRemember: itemsToRemember.split('\n').map(item => item.trim()).filter(Boolean),
+                pairingStrategy: pairingStrategy
             });
 
             if (response.data && response.data.images) {
@@ -74,6 +71,18 @@ beach ball"
                             disabled={isLoading}
                         />
                     </div>
+                </div>
+
+                <div className='form-group'>
+                    <label>Pairing Strategy:</label>
+                    <select
+                        value={pairingStrategy}
+                        onChange={(e) => setPairingStrategy(e.target.value)}
+                        disabled={isLoading}
+                    >
+                        <option value="sequential">Sequential</option>
+                        <option value="random">Random</option>
+                    </select>
                 </div>
 
                 <div className="form-actions">

@@ -212,3 +212,32 @@ button:hover {
     transform: rotate(360deg);
   }
 }
+
+.form-group {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #61dafb;
+  font-size: 1.1rem;
+}
+
+select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #61dafb;
+  border-radius: 4px;
+  background-color: #2c313c;
+  color: white;
+  font-size: 1rem;
+  appearance: none;
+  cursor: pointer;
+}
+
+select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
