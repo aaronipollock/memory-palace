@@ -1,39 +1,46 @@
 import React from 'react';
-import * as THREE from 'three';
 
-const MemoryPalace = () => {
-    useEffect(() => {
-        // scene setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+const MemoryPalace = ({ associations = [] }) => {
+    if (associations.length === 0) {
+        return <p>No associations to display. Please generate some first.</p>;
+    }
 
-        // simple box
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-
-        camera.position.z = 5;
-
-        const animate = function () {
-            requestAnimationFrame(animate);
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-            renderer.render(scene, camera);
-        };
-
-        animate();
-
-        // cleanup on account unmount
-        return () => {
-            document.body.removeChild(renderer.domElement);
-        };
-    }, []);
-
-    return null; // doesn't render in the DOM
+    return (
+        <div className="memory-palace-container">
+            <div className="memory-palace-header">
+                <h3>Your Memory Palace Journey</h3>
+                <p>Follow the path from left to right to review your associations</p>
+            </div>
+            <div className="memory-palace-path">
+                {associations.map((association, index) => (
+                    <div key={index} className="memory-station">
+                        <div className="station-number">{index + 1}</div>
+                        <div className="station-content">
+                            <div className="image-container">
+                                <img
+                                    src={association.url}
+                                    alt={association.prompt}
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div className="station-details">
+                                <div className="location">
+                                    <span className="label">Location:</span>
+                                    <span className="value">{association.roomFeature}</span>
+                                </div>
+                                <div className="memorable">
+                                    <span className="label">Remember:</span>
+                                    <span className="value">{association.item}</span>
+                                </div>
+                                <p className="association-description">{association.prompt}</p>
+                            </div>
+                        </div>
+                        {index < associations.length - 1 && <div className="path-connector">→</div>}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 };
 
 export default MemoryPalace;

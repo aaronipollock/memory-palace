@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const InputPage = ({ onImagesGenerated }) => {
+const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     // Initialize state with empty strings
     const [anchorPoints, setAnchorPoints] = useState('');
     const [memorables, setMemorables] = useState('');
     const [pairingStrategy, setPairingStrategy] = useState('sequential'); // Default strategy
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate that both inputs have content
         if (!anchorPoints.trim() || !memorables.trim()) {
             setError('Please provide both anchor points and memorables');
             return;
@@ -33,7 +31,6 @@ const InputPage = ({ onImagesGenerated }) => {
             }
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to generate images. Please try again.');
-        } finally {
             setIsLoading(false);
         }
     };
@@ -61,7 +58,7 @@ const InputPage = ({ onImagesGenerated }) => {
 sofa
 window
 bookshelf"
-                            disabled={isLoading}
+                            disabled={setIsLoading}
                         />
                     </div>
 
@@ -74,7 +71,7 @@ bookshelf"
 grocery list
 meeting agenda
 historical dates"
-                            disabled={isLoading}
+                            disabled={setIsLoading}
                         />
                     </div>
                 </div>
@@ -84,7 +81,7 @@ historical dates"
                     <select
                         value={pairingStrategy}
                         onChange={(e) => setPairingStrategy(e.target.value)}
-                        disabled={isLoading}
+                        disabled={setIsLoading}
                     >
                         <option value="sequential">Sequential</option>
                         <option value="random">Random</option>
@@ -95,9 +92,9 @@ historical dates"
                     {error && <div className="error">{error}</div>}
                     <button
                         type="submit"
-                        disabled={isLoading || !anchorPoints.trim() || !memorables.trim()}
+                        disabled={setIsLoading || !anchorPoints.trim() || !memorables.trim()}
                     >
-                        {isLoading ? 'Generating...' : 'Generate Associations'}
+                        Generate Associations
                     </button>
                 </div>
             </form>

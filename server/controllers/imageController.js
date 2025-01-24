@@ -56,21 +56,20 @@ const pairItemsWithFeatures = (items, features, strategy = 'sequential') => {
 }
 
 exports.generateImages = async (req, res) => {
-    const { roomFeatures, itemsToRemember, pairingStrategy } = req.body;
-    console.log('Room Features:', roomFeatures);
-    console.log('Items to Remember:', itemsToRemember);
+    const { anchorPoints, memorables, pairingStrategy } = req.body;
+    console.log('Received data:', { anchorPoints, memorables, pairingStrategy });
 
     try {
         // Validate inputs
-        if (!Array.isArray(roomFeatures) || !Array.isArray(itemsToRemember)) {
+        if (!Array.isArray(anchorPoints) || !Array.isArray(memorables)) {
             return res.status(400).json({ error: 'Both room features and items must be provided as arrays' });
         }
 
-        if (roomFeatures.length === 0 || itemsToRemember.length === 0) {
+        if (anchorPoints.length === 0 || memorables.length === 0) {
             return res.status(400).json({ error: 'Both lists must contain at least one item' });
         }
 
-        const pairs = pairItemsWithFeatures(itemsToRemember, roomFeatures, pairingStrategy);
+        const pairs = pairItemsWithFeatures(memorables, anchorPoints, pairingStrategy);
 
         // Create associations and generate images
         const generatedImages = [];
