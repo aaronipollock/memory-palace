@@ -1,9 +1,9 @@
 const express = require('express');
-const { generateImages } = require('../controllers/imageController');
+const imageController = require('../controllers/imageController');
+const roomController = require('../controllers/roomController');
 const router = express.Router();
 
-console.log('generateImages:', generateImages); // Add this line to check if the function is defined
-
-router.post('/generate-images', generateImages);
+router.post('/generate-images', imageController.generateImages);
+router.post('/generate-room', roomController.generateRoom);
 
 module.exports = router;

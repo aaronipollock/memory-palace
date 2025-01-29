@@ -19,6 +19,9 @@ app.use(express.json());
 const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
+const roomController = require('./controllers/roomController');
+app.post('/api/generate-room', roomController.generateRoom);
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

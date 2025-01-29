@@ -95,7 +95,13 @@ exports.generateImages = async (req, res) => {
             });
         }
 
-        res.json({ images: generatedImages });
+        console.log('Sending response:', {
+            images: generatedImages
+        });
+
+        res.json({
+            images: generatedImages
+        });
     } catch (error) {
         console.error('Error details:', error.response?.data || error.message);
         res.status(500).json({
