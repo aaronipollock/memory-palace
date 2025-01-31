@@ -82,7 +82,24 @@ const Draggable = ({ children, onDrag, initialPosition, onClick }) => {
 const RoomVisualizer = ({ associations = [], roomType, onBack }) => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [roomImage, setRoomImage] = useState(null);
-    const [itemPositions, setItemPositions] = useState({});
+    const [itemPositions, setItemPositions] = useState(() => {
+        // Initialize positions in a grid layout
+        const positions = {};
+        const gridCols = Math.ceil(Math.sqrt(associations.length));
+        const cellWidth = 1333 / (gridCols + 1);  // Using our 16:9 width
+        const cellHeight = 750 / (gridCols + 1);   // Using our 16:9 height
+
+        associations.forEach((assoc, index) => {
+            const row = Math.floor(index / gridCols);
+            const col = index % gridCols;
+            positions[assoc.roomFeature] = {
+                x: cellWidth * (col + 1),
+                y: cellHeight * (row + 1)
+            };
+        });
+
+        return positions;
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -97,45 +114,21 @@ const RoomVisualizer = ({ associations = [], roomType, onBack }) => {
 
             setIsLoading(true);
             setError(null);
+            setRoomImage(null);  // Clear the image immediately
 
             try {
                 const anchorPoints = associations.map(assoc => assoc.roomFeature);
-                console.log('Starting room generation with:', { roomType, anchorPoints });
-
                 const response = await axios.post('http://localhost:5000/api/generate-room', {
                     roomType,
                     anchorPoints
-                }, {
-                    timeout: 30000  // 30 second timeout
                 });
-
-                console.log('Room generation response:', response.data);
 
                 if (response.data.roomImage) {
                     setRoomImage(response.data.roomImage);
-                    // Initialize positions in a grid layout
-                    const initialPositions = {};
-                    const gridCols = Math.ceil(Math.sqrt(associations.length));
-                    const cellWidth = 800 / (gridCols + 1);
-                    const cellHeight = 600 / (gridCols + 1);
-
-                    associations.forEach((assoc, index) => {
-                        const row = Math.floor(index / gridCols);
-                        const col = index % gridCols;
-                        initialPositions[assoc.roomFeature] = {
-                            x: cellWidth * (col + 1),
-                            y: cellHeight * (row + 1)
-                        };
-                    });
-
-                    setItemPositions(initialPositions);
-                    console.log('Set initial positions:', initialPositions);
-                } else {
-                    throw new Error('No room image in response');
                 }
             } catch (err) {
                 console.error('Room generation error:', err);
-                setError(err.message || 'Failed to generate room layout. Please try again.');
+                setError(err.message || 'Failed to generate room layout');
             } finally {
                 setIsLoading(false);
             }
@@ -165,8 +158,8 @@ const RoomVisualizer = ({ associations = [], roomType, onBack }) => {
     }
 
     return (
-        <div className='w-full max-w-[1200px] mx-auto p-8'>
-            <div className='relative w-[800px] h-[600px] mx-auto rounded-lg overflow-hidden bg-surface'>
+        <div className='w-full max-w-[1400px] mx-auto p-8'>
+            <div className='relative w-[1333px] h-[750px] mx-auto rounded-lg overflow-hidden bg-surface'>
                 {roomImage && (
                     <img
                         src={roomImage}
@@ -175,7 +168,7 @@ const RoomVisualizer = ({ associations = [], roomType, onBack }) => {
                     />
                 )}
                 {associations.map((item, index) => {
-                    const position = itemPositions[item.roomFeature] || { x: 400, y: 300 };
+                    const position = itemPositions[item.roomFeature] || { x: 666.5, y: 375 };
 
                     return (
                         <Draggable
@@ -207,7 +200,11 @@ const RoomVisualizer = ({ associations = [], roomType, onBack }) => {
                                         />
                                         <div className="text-center">
                                             <h4 className="text-primary mb-1">{item.item}</h4>
-                                            <p className="text-text text-sm">Associated with: {item.roomFeature}</p>
+                                            <p className="text-text text-sm mb-2">Associated with: {item.roomFeature}</p>
+                                            <p className="text-text text-sm italic">
+                                                "Remember this by how the {item.item} {item.description ||
+                                                `interacts with the ${item.roomFeature}, creating a memorable scene`}"
+                                            </p>
                                         </div>
                                     </div>
                                 )}
@@ -217,11 +214,11 @@ const RoomVisualizer = ({ associations = [], roomType, onBack }) => {
                 })}
             </div>
 
-            <div className="text-center mt-4 text-text text-sm mb-6">
+            <div className="text-center mt-4 text-text text-sm mb-4">
                 Drag the circles to position them over the room items
             </div>
 
-            <div className='flex justify-center mt-4'>
+            <div className='flex justify-center'>
                 <button
                     onClick={onBack}
                     className="px-6 py-3 bg-background text-primary border-2 border-primary rounded-lg

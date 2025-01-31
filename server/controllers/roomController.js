@@ -1,7 +1,27 @@
 const axios = require('axios');
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const generateRoomPrompt = (roomType, anchorPoints) => {
+    const itemList = anchorPoints.map((item, index) =>
+        `${index + 1}. A clear, detailed ${item} in high definition`
+    ).join('\n');
+
+    return `Create a clean, high-quality digital illustration showing these ${anchorPoints.length} objects in a ${roomType}:
+
+${itemList}
+
+Important: This is a memory training tool.
+- Draw each object in crisp, clear detail
+- Make objects large and easy to identify
+- Use bright lighting and sharp definition
+- Add the ${roomType} setting around the objects
+- View: straight-on, well-lit perspective`;
+};
 
 exports.generateRoom = async (req, res) => {
     const { roomType, anchorPoints } = req.body;
+    const maxRetries = 3;
+    let currentTry = 0;
 
     if (!process.env.OPENAI_API_KEY) {
         console.error('OPENAI_API_KEY is not set');
@@ -9,51 +29,50 @@ exports.generateRoom = async (req, res) => {
     }
 
     try {
+        const prompt = generateRoomPrompt(roomType, anchorPoints);
         console.log('=== Starting Room Generation ===');
         console.log('Room Type:', roomType);
         console.log('Anchor Points:', anchorPoints);
+        console.log('Image Prompt:', prompt);
 
-        // Generate room image with DALL-E
-        const imagePrompt = `A clear, eye-level view of a ${roomType}, like a sitcom set.
-            The room MUST prominently feature these specific items: ${anchorPoints.join(', ')}.
-            Each item should be clearly visible and naturally placed.
-            Style should be simple and clean, like a 3D rendered room.
-            The view should be straight-on, like looking at a TV set.`;
+        // Initial delay to handle rate limit after associations
+        await delay(30000);
 
-        console.log('Image Prompt:', imagePrompt);
+        while (currentTry < maxRetries) {
+            try {
+                if (currentTry > 0) {
+                    console.log(`Waiting 30 seconds before retry ${currentTry + 1}...`);
+                    await delay(30000);
+                }
 
-        const response = await axios.post('https://api.openai.com/v1/images/generations', {
-            prompt: imagePrompt,
-            n: 1,
-            size: "1024x1024",
-            style: "natural",
-            quality: "standard"  // Changed from "hd" to "standard" for faster generation
-        }, {
-            headers: {
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            timeout: 20000  // 20 second timeout
-        });
+                const response = await axios.post('https://api.openai.com/v1/images/generations', {
+                    prompt: prompt,
+                    n: 1,
+                    size: "1024x1024",
+                    style: "natural",
+                    quality: "standard"
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-        // Return the image URL and initial positions
-        const positions = anchorPoints.map((item, index) => ({
-            name: item,
-            x: 400,  // Center X
-            y: 200 + (index * 100)  // Stacked vertically with spacing
-        }));
+                console.log('Room generation successful');
+                return res.json({
+                    roomImage: response.data.data[0].url,
+                    prompt: prompt  // Include prompt in response for debugging
+                });
 
-        console.log('Sending response:', {
-            roomImage: response.data.data[0].url,
-            positions: positions
-        });
+            } catch (err) {
+                currentTry++;
+                console.log(`Attempt ${currentTry} failed:`, err.response?.data?.error || err.message);
 
-        res.json({
-            roomImage: response.data.data[0].url,
-            positions: positions,
-            prompt: imagePrompt
-        });
-
+                if (currentTry === maxRetries || (err.response?.status !== 429 && err.response?.status !== 500)) {
+                    throw err;
+                }
+            }
+        }
     } catch (error) {
         console.error('=== Error Details ===');
         console.error('Error type:', error.name);
