@@ -1,25 +1,29 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-// Use the living room image from InputPage
-const THRONE_ROOM_IMAGE = 'https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+// Use the throne room image from public/images
+const THRONE_ROOM_IMAGE = "/images/throne_room.webp";
 
 // Predefined clickable areas for each anchor point
 const ANCHOR_POSITIONS = {
-  'sofa': { top: '65%', left: '25%', width: '450px', height: '150px' },
-  'painting': { top: '35%', left: '25%', width: '250px', height: '170px' },
-  'coffee table': { top: '90%', left: '48%', width: '270px', height: '100px' },
-  'window': { top: '45%', left: '70%', width: '150px', height: '170px' },
-  'plant': { top: '60%', left: '90%', width: '100px', height: '200px' }
+  'throne': { top: '60%', left: '50%', width: '150px', height: '150px' },
+  'stained glass window': { top: '30%', left: '50%', width: '150px', height: '150px' },
+  'chandelier': { top: '15%', left: '50%', width: '150px', height: '100px' },
+  'banner': { top: '40%', left: '20%', width: '100px', height: '200px' },
+  'statue': { top: '60%', left: '80%', width: '100px', height: '200px' },
+  'candle': { top: '50%', left: '30%', width: '80px', height: '150px' },
+  'carpet': { top: '85%', left: '50%', width: '200px', height: '100px' }
 };
 
 // Fallback images only if API completely fails
 const FALLBACK_IMAGES = {
-  'sofa': 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&auto=format',
-  'painting': 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500&auto=format',
-  'coffee table': 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&auto=format',
-  'window': 'https://images.unsplash.com/photo-1592492152545-9695d3f473f4?w=500&auto=format',
-  'plant': 'https://images.unsplash.com/photo-1463320726281-696a485928c7?w=500&auto=format',
+  'throne': 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format',
+  'stained glass window': 'https://images.unsplash.com/photo-1508972036778-cd4cc1c4e71d?w=500&auto=format',
+  'chandelier': 'https://images.unsplash.com/photo-1543039625-14cbd3802e7d?w=500&auto=format',
+  'banner': 'https://images.unsplash.com/photo-1551373884-8a0750074df7?w=500&auto=format',
+  'statue': 'https://images.unsplash.com/photo-1543083115-638c4ef3334f?w=500&auto=format',
+  'candle': 'https://images.unsplash.com/photo-1514534925810-c589cdb1d9fa?w=500&auto=format',
+  'carpet': 'https://images.unsplash.com/photo-1575414003591-ece8d0416c7a?w=500&auto=format',
   'default': 'https://images.unsplash.com/photo-1579546929662-711aa81148cf?w=500&auto=format'
 };
 
@@ -37,7 +41,7 @@ const VisualizerPage = ({ associations, roomType }) => {
   console.log('Using associations:', storedAssociations);
 
   const generatePrompt = (association) => {
-    return `A vivid, surreal image of a ${association.memorable} interacting with a ${association.anchor} in a living room.
+    return `A vivid, surreal image of a ${association.memorable} interacting with a ${association.anchor} in a throne room.
     The scene should be clear and memorable, with the ${association.memorable} being the main focus as it interacts with the ${association.anchor}.
     Photorealistic style.`;
   };
@@ -49,10 +53,10 @@ const VisualizerPage = ({ associations, roomType }) => {
     // Adjust position based on the anchor type
     let transformValue = 'translate(-50%, -120%)'; // Default positioning (above)
 
-    // For painting, window, and sofa, position the popup below instead of above
-    if (association.anchor === 'painting' ||
-        association.anchor === 'window' ||
-        association.anchor === 'sofa') {
+    // For some anchor points, position the popup below instead of above
+    if (association.anchor === 'throne' ||
+        association.anchor === 'carpet' ||
+        association.anchor === 'stained glass window') {
       transformValue = 'translate(-50%, 20%)'; // Position below
     }
 
