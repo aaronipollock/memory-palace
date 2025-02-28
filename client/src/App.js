@@ -34,29 +34,31 @@ function App() {
     };
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route
-          path="/demo"
-          element={<InputPage onImagesGenerated={handleImagesGenerated} />}
-        />
-        <Route
-          path="/visualizer"
-          element={<VisualizerPage associations={associations} roomType={roomType} />}
-        />
-        {/* <Route path="/upload" element={<UploadPage />} /> */}
-      </Routes>
-      {/* <div>
-        <ul>
-            {associations.map((assoc, index) => (
-                <li key={index}>
-                    {assoc.anchor}: {assoc.memorable}
-                </li>
-            ))}
-        </ul>
-      </div> */}
-    </Router>
+    <div className="palace-bg min-h-screen">
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/demo"
+            element={<InputPage onImagesGenerated={handleImagesGenerated} />}
+          />
+          <Route
+            path="/visualizer"
+            element={<VisualizerPage associations={associations} roomType={roomType} />}
+          />
+          {/* <Route path="/upload" element={<UploadPage />} /> */}
+        </Routes>
+        {/* <div>
+          <ul>
+              {associations.map((assoc, index) => (
+                  <li key={index}>
+                      {assoc.anchor}: {assoc.memorable}
+                  </li>
+              ))}
+          </ul>
+        </div> */}
+      </Router>
+    </div>
   );
 }
 

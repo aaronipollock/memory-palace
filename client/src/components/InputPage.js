@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const ROOM_TYPES = [
-    "living room",
+    "throne room",
     "bedroom",
     "kitchen",
     "dining room",
@@ -45,8 +45,8 @@ const ROOM_TYPES = [
 //     }
 // ];
 
-const LIVING_ROOM_IMAGE = 'https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-const ANCHOR_POINTS = ["sofa", "painting", "coffee table", "window", "plant"];
+const THRONE_ROOM_IMAGE = 'https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const ANCHOR_POINTS = ["throne", "red carpet", "chandelier", "stained glass window", "statue"];
 
 const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     // Initialize state from localStorage or use default values
@@ -130,9 +130,9 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
 
     const handleDemoClick = () => {
         setIsDemoMode(true);
-        setImages(LIVING_ROOM_IMAGE);
+        setImages(THRONE_ROOM_IMAGE);
         setRoomType('living room');
-        onImagesGenerated(LIVING_ROOM_IMAGE, 'living room');
+        onImagesGenerated(THRONE_ROOM_IMAGE, 'living room');
     };
 
     const handleAddMemorable = (index, memorable) => {
@@ -158,183 +158,117 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-2">
-            {/* {!isDemoMode && !images.length && (
-                <div className="text-center mb-8">
-                    <button
-                        onClick={handleDemoClick}
-                        className="px-6 py-3 bg-primary text-background rounded-lg hover:bg-primary-dark
-                                 transition-colors duration-300 mb-4"
-                    >
-                        Try Demo with Sample Images
-                    </button>
-                    <p className="text-text text-sm">
-                        Or upload your own images below
-                    </p>
-                </div>
-            )} */}
+        <div className="mario-bg mario-clouds min-h-screen py-12 px-4">
+            <div className="max-w-4xl mx-auto mario-castle p-6">
+                <h2 className="mario-header text-2xl mb-8 text-center">CREATE YOUR MEMORY CASTLE</h2>
 
-            {/* {isDemoMode && (
-                <div className="mb-8">
-                    <h3 className="text-lg font-bold mb-4">Add Your Own Memorables</h3>
-                    <div className="mb-4">
-                        <img src={LIVING_ROOM_IMAGE} alt="Living Room" className="w-full h-auto object-cover mb-2" />
-                        <pre className="border p-3 w-full h-40 bg-background text-text rounded-lg whitespace-pre-wrap" style={{ fontFamily: 'inherit' }}>
-                            {ANCHOR_POINTS.join('\n')}
-                        </pre>
-                        <textarea
-                            value={memorables}
-                            onChange={(e) => setMemorables(e.target.value)}
-                            placeholder="Enter memorables, one per line"
-                            className="border p-2 w-full mt-2"
-                        />
+                <div className="bg-white rounded-lg p-6 mb-8 text-text">
+                    <p className="mb-4">To create your memory palace, follow these steps:</p>
+                    <ol className="list-decimal pl-6 space-y-2">
+                        <li><strong className="text-primary">Room Type:</strong> Choose the type of room for your memory palace.</li>
+                        <li><strong className="text-primary">Anchor Points:</strong> In Demo Mode, we've chosen these features for you.</li>
+                        <li><strong className="text-primary">Memorables:</strong> List the items or concepts you want to remember.</li>
+                        <li>Choose a <strong className="text-primary">Pairing Strategy</strong> to determine how your memorables will be associated with anchor points.</li>
+                    </ol>
+                </div>
+
+                <div className="bg-white rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-4">
+                        <label className="text-primary font-bold whitespace-nowrap">Room Type:</label>
+                        <select
+                            value={roomType}
+                            onChange={(e) => setRoomType(e.target.value)}
+                            className="flex-1 p-2 border-2 border-accent1 rounded-lg bg-white text-text"
+                            required
+                        >
+                            <option value="">Select a room type...</option>
+                            {ROOM_TYPES.map((type) => (
+                                <option key={type} value={type}>
+                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                    <button
-                        onClick={handleProceedToVisualizer}
-                        className="px-6 py-3 bg-primary text-background rounded-lg hover:bg-primary-dark transition-colors duration-300 mt-4"
-                    >
-                        Proceed to Visualizer
-                    </button>
                 </div>
-            )} */}
 
-            {!isDemoMode && (
-                <div className="max-w-4xl mx-auto p-6 bg-text rounded-xl">
-                    <div className="border-8 border-text rounded-lg p-6 bg-background">
-                        <h2 className="text-3xl font-bold text-primary mb-6 text-center">Create Your Memory Palace</h2>
-
-                        <div className="bg-surface rounded-lg p-6 mb-8 text-text">
-                            <p className="mb-4">To create your memory palace, follow these steps:</p>
-                            <ol className="list-decimal pl-6 space-y-2">
-                                <li><strong className="text-primary">Room Type:</strong> Choose the type of room for your memory palace.</li>
-                                <li><strong className="text-primary">Anchor Points:</strong>In Demo Mode, we've chosen these features for you.</li>
-                                <li><strong className="text-primary">Memorables:</strong> List the items or concepts you want to remember.</li>
-                                <li>Choose a <strong className="text-primary">Pairing Strategy</strong> to determine how your memorables will be associated with anchor points.</li>
-                            </ol>
-                            <p className="mt-4">Ensure that each item is on a new line for clarity.</p>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="block text-white font-bold">
+                                Demo Anchor Points:
+                            </label>
+                            <pre className="border p-3 w-full h-40 bg-white text-text rounded-lg whitespace-pre-wrap" style={{ fontFamily: 'inherit' }}>
+                                {anchorPoints ||
+                                "throne\nred carpet\nchandelier\nstained glass window\nstatue"
+                                }
+                            </pre>
                         </div>
 
-                        <div className="bg-surface rounded-lg p-4 mb-4">
-                            <div className="flex items-center gap-4">
-                                <label className="text-primary font-medium whitespace-nowrap">Room Type:</label>
-                                <select
-                                    value={roomType}
-                                    onChange={(e) => setRoomType(e.target.value)}
-                                    className="flex-1 p-2 border-2 border-primary rounded-lg bg-background text-primary"
-                                    required
-                                >
-                                    <option value="">Select a room type...</option>
-                                    {ROOM_TYPES.map((type) => (
-                                        <option key={type} value={type}>
-                                            {type.charAt(0).toUpperCase() + type.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="block text-primary font-medium">
-                                        Demo Anchor Points:
-                                    </label>
-                                    {/* <textarea
-                                        value={anchorPoints}
-                                        onChange={(e) => setAnchorPoints(e.target.value)}
-                                        placeholder="Example:
-TV
-sofa
-plant
-coffee table
-lamp"
-                                        disabled={isLoading}
-                                        className="w-full h-40 bg-background text-text p-3 rounded-lg border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                                    /> */}
-                                    <pre className="border p-3 w-full h-40 bg-background text-text rounded-lg whitespace-pre-wrap" style={{ fontFamily: 'inherit' }}>
-                                        {anchorPoints ||
-                                        "painting\nsofa\ncoffee table\nwindow\nplant"
-                                        }
-                                    </pre>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="block text-primary font-medium">
-                                        Memorables (one per line):
-                                    </label>
-                                    <textarea
-                                        value={memorables}
-                                        onChange={(e) => setMemorables(e.target.value)}
-                                        placeholder="Example:
+                        <div className="space-y-2">
+                            <label className="block text-white font-bold">
+                                Memorables (one per line):
+                            </label>
+                            <textarea
+                                value={memorables}
+                                onChange={(e) => setMemorables(e.target.value)}
+                                placeholder="Example:
 grocery list
 meeting agenda
 historical dates"
-                                        disabled={isLoading}
-                                        className="w-full h-40 bg-background text-text p-3 rounded-lg border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-primary font-medium">
-                                    Pairing Strategy:
-                                </label>
-                                <select
-                                    value={pairingStrategy}
-                                    onChange={(e) => setPairingStrategy(e.target.value)}
-                                    disabled={isLoading}
-                                    className="w-full bg-background text-text p-3 rounded-lg border border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <option value="sequential">Sequential</option>
-                                    <option value="random">Random</option>
-                                </select>
-                            </div>
-
-                            <div className="space-y-4">
-                                {error && (
-                                    <div className="text-red-500 text-center">{error}</div>
-                                )}
-                                <div className="flex gap-4">
-                                    <button
-                                        type="submit"
-                                        onClick={handleProceedToVisualizer}
-                                        // disabled={!anchorPoints.trim() || !memorables.trim() || !roomType || isLoading}
-                                        className="flex-1 bg-background text-primary border border-primary py-3 px-6 rounded-lg
-                                                 hover:bg-primary hover:text-background transition-colors duration-300
-                                                 disabled:opacity-50 disabled:cursor-not-allowed
-                                                 disabled:hover:bg-background disabled:hover:text-primary"
-                                    >
-                                        {isLoading ? (
-                                            <span className="inline-flex items-center">
-                                                Creating your memory associations
-                                                <span className="ml-1 animate-[ellipsis_1.5s_infinite]">...</span>
-                                            </span>
-                                        ) : (
-                                            'Proceed to Visualizer'
-                                        )}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleClear}
-                                        disabled={isLoading}
-                                        className="px-6 py-3 bg-primary text-background border-2 border-primary rounded-lg
-                                                 hover:bg-background hover:text-primary transition-colors duration-300
-                                                 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Clear Form
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+                                disabled={isLoading}
+                                className="w-full h-40 bg-white text-text p-3 rounded-lg border border-accent1 focus:border-primary focus:ring-1 focus:ring-primary outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
 
-            {images.length > 0 && (
-                <div>
-                    {/* ... existing images grid ... */}
-                </div>
-            )}
+                    <div className="space-y-2">
+                        <label className="block text-white font-bold">
+                            Pairing Strategy:
+                        </label>
+                        <select
+                            value={pairingStrategy}
+                            onChange={(e) => setPairingStrategy(e.target.value)}
+                            disabled={isLoading}
+                            className="w-full bg-white text-text p-3 rounded-lg border border-accent1 focus:border-primary focus:ring-1 focus:ring-primary outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <option value="sequential">Sequential</option>
+                            <option value="random">Random</option>
+                        </select>
+                    </div>
+
+                    <div className="space-y-4">
+                        {error && (
+                            <div className="text-red-500 text-center bg-white p-2 rounded">{error}</div>
+                        )}
+                        <div className="flex gap-4">
+                            <button
+                                type="submit"
+                                onClick={handleProceedToVisualizer}
+                                className="flex-1 btn-mario"
+                            >
+                                {isLoading ? (
+                                    <span className="inline-flex items-center">
+                                        Creating your memory associations
+                                        <span className="ml-1 animate-[ellipsis_1.5s_infinite]">...</span>
+                                    </span>
+                                ) : (
+                                    'PROCEED TO VISUALIZER'
+                                )}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleClear}
+                                disabled={isLoading}
+                                className="px-6 py-3 bg-secondary text-white border-2 border-secondary rounded-lg
+                                         hover:bg-white hover:text-secondary transition-colors duration-300
+                                         disabled:opacity-50 disabled:cursor-not-allowed btn-mario"
+                            >
+                                CLEAR FORM
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
