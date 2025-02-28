@@ -45,13 +45,17 @@ const ROOM_TYPES = [
 //     }
 // ];
 
-const THRONE_ROOM_IMAGE = 'https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-const ANCHOR_POINTS = ["throne", "red carpet", "chandelier", "stained glass window", "statue"];
+const THRONE_ROOM_IMAGE = '/images/throne_room.webp';
+const ANCHOR_POINTS = ["throne", "red carpet", "chandelier", "stained glass window", "statue", "candle stick", "foot stool"];
+const LIVING_ROOM_IMAGE = 'https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+
+// Clear the stored anchor points to ensure our new list is used
+localStorage.removeItem('anchorPoints');
 
 const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     // Initialize state from localStorage or use default values
     const [anchorPoints, setAnchorPoints] = useState(() =>
-        localStorage.getItem('anchorPoints') || ''
+        localStorage.getItem('anchorPoints') || ANCHOR_POINTS.join('\n')
     );
     const [memorables, setMemorables] = useState(() =>
         localStorage.getItem('memorables') || ''
@@ -60,7 +64,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
         localStorage.getItem('pairingStrategy') || 'sequential'
     );
     const [roomType, setRoomType] = useState(() =>
-        localStorage.getItem('roomType') || ''
+        localStorage.getItem('roomType') || 'throne room'
     );
     const [error, setError] = useState(null);
     const [isDemoMode, setIsDemoMode] = useState(false);
@@ -77,6 +81,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
 
     // Add console.log to debug
     console.log('onImagesGenerated prop:', onImagesGenerated);
+    console.log('Current anchorPoints:', anchorPoints);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -131,8 +136,8 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     const handleDemoClick = () => {
         setIsDemoMode(true);
         setImages(THRONE_ROOM_IMAGE);
-        setRoomType('living room');
-        onImagesGenerated(THRONE_ROOM_IMAGE, 'living room');
+        setRoomType('throne room');
+        onImagesGenerated(THRONE_ROOM_IMAGE, 'throne room');
     };
 
     const handleAddMemorable = (index, memorable) => {
@@ -148,13 +153,24 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
 
         console.log('Memorables list:', memorablesList);
 
+        // Create associations with all 7 anchor points
         const associations = ANCHOR_POINTS.map((anchor, index) => ({
             anchor,
-            memorable: memorablesList[index] || ''
+            memorable: memorablesList[index] || `Item ${index + 1}`
         }));
 
         console.log('Created associations:', associations);
+
+        // Save associations to localStorage for persistence
+        localStorage.setItem('associations', JSON.stringify(associations));
+
         onImagesGenerated(associations, roomType);
+    };
+
+    const resetAnchorPoints = () => {
+        const defaultAnchorPoints = ["throne", "red carpet", "chandelier", "stained glass window", "statue", "candle stick", "foot stool"].join('\n');
+        setAnchorPoints(defaultAnchorPoints);
+        localStorage.setItem('anchorPoints', defaultAnchorPoints);
     };
 
     return (
@@ -199,7 +215,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                             </label>
                             <pre className="border p-3 w-full h-40 bg-white text-text rounded-lg whitespace-pre-wrap" style={{ fontFamily: 'inherit' }}>
                                 {anchorPoints ||
-                                "throne\nred carpet\nchandelier\nstained glass window\nstatue"
+                                "throne\nred carpet\nchandelier\nstained glass window\nstatue\ncandle stick\nfoot stool"
                                 }
                             </pre>
                         </div>
@@ -214,7 +230,11 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                                 placeholder="Example:
 grocery list
 meeting agenda
-historical dates"
+historical dates
+phone number
+password
+birthday
+anniversary"
                                 disabled={isLoading}
                                 className="w-full h-40 bg-white text-text p-3 rounded-lg border border-accent1 focus:border-primary focus:ring-1 focus:ring-primary outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                             />
@@ -264,6 +284,13 @@ historical dates"
                                          disabled:opacity-50 disabled:cursor-not-allowed btn-mario"
                             >
                                 CLEAR FORM
+                            </button>
+                            <button
+                                type="button"
+                                onClick={resetAnchorPoints}
+                                className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-white hover:text-secondary transition-colors duration-300"
+                            >
+                                Reset Anchor Points
                             </button>
                         </div>
                     </div>

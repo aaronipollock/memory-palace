@@ -7,23 +7,23 @@ const THRONE_ROOM_IMAGE = "/images/throne_room.webp";
 // Predefined clickable areas for each anchor point
 const ANCHOR_POSITIONS = {
   'throne': { top: '60%', left: '50%', width: '150px', height: '150px' },
-  'stained glass window': { top: '30%', left: '50%', width: '150px', height: '150px' },
-  'chandelier': { top: '15%', left: '50%', width: '150px', height: '100px' },
-  'banner': { top: '40%', left: '20%', width: '100px', height: '200px' },
-  'statue': { top: '60%', left: '80%', width: '100px', height: '200px' },
-  'candle': { top: '50%', left: '30%', width: '80px', height: '150px' },
-  'carpet': { top: '85%', left: '50%', width: '200px', height: '100px' }
+  'red carpet': { top: '85%', left: '55%', width: '200px', height: '100px' },
+  'stained glass window': { top: '40%', left: '60%', width: '150px', height: '150px' },
+  'chandelier': { top: '20%', left: '45%', width: '150px', height: '100px' },
+  'foot stool': { top: '90%', left: '68%', width: '100px', height: '80px' },
+  'statue': { top: '60%', left: '70%', width: '100px', height: '200px' },
+  'candle stick': { top: '60%', left: '35%', width: '80px', height: '150px' }
 };
 
 // Fallback images only if API completely fails
 const FALLBACK_IMAGES = {
   'throne': 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format',
+  'red carpet': 'https://images.unsplash.com/photo-1575414003591-ece8d0416c7a?w=500&auto=format',
   'stained glass window': 'https://images.unsplash.com/photo-1508972036778-cd4cc1c4e71d?w=500&auto=format',
   'chandelier': 'https://images.unsplash.com/photo-1543039625-14cbd3802e7d?w=500&auto=format',
-  'banner': 'https://images.unsplash.com/photo-1551373884-8a0750074df7?w=500&auto=format',
+  'foot stool': 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=500&auto=format',
   'statue': 'https://images.unsplash.com/photo-1543083115-638c4ef3334f?w=500&auto=format',
-  'candle': 'https://images.unsplash.com/photo-1514534925810-c589cdb1d9fa?w=500&auto=format',
-  'carpet': 'https://images.unsplash.com/photo-1575414003591-ece8d0416c7a?w=500&auto=format',
+  'candle stick': 'https://images.unsplash.com/photo-1514534925810-c589cdb1d9fa?w=500&auto=format',
   'default': 'https://images.unsplash.com/photo-1579546929662-711aa81148cf?w=500&auto=format'
 };
 
@@ -55,8 +55,9 @@ const VisualizerPage = ({ associations, roomType }) => {
 
     // For some anchor points, position the popup below instead of above
     if (association.anchor === 'throne' ||
-        association.anchor === 'carpet' ||
-        association.anchor === 'stained glass window') {
+        association.anchor === 'red carpet' ||
+        association.anchor === 'stained glass window' ||
+        association.anchor === 'chandelier') {
       transformValue = 'translate(-50%, 20%)'; // Position below
     }
 
