@@ -31,33 +31,10 @@ const createAssociation = (item, roomFeature) => {
     return `A ${adjective} ${item} ${verb} the ${roomFeature}, creating a memorable and surprising scene, digital art style`;
 };
 
-// Function to pair items with room features
-const pairItemsWithFeatures = (items, features, strategy = 'sequential') => {
-    const pairs = [];
-    const featureCount = features.length;
-
-    switch (strategy) {
-        case 'random':
-            items.forEach(item => {
-                const randomFeature = features[Math.floor(Math.random() * featureCount)];
-                pairs.push({ item, roomFeature: randomFeature });
-            });
-            break;
-        case 'sequential':
-        default:
-            items.forEach((item, index) => {
-                const roomFeature = features[index % featureCount];
-                pairs.push({ item, roomFeature });
-            });
-            break;
-    }
-
-    return pairs;
-}
 
 exports.generateImages = async (req, res) => {
-    const { anchorPoints, memorables, pairingStrategy } = req.body;
-    console.log('Received data:', { anchorPoints, memorables, pairingStrategy });
+    const { anchorPoints, memorables } = req.body;
+    console.log('Received data:', { anchorPoints, memorables});
 
     try {
         // Validate inputs
@@ -69,7 +46,7 @@ exports.generateImages = async (req, res) => {
             return res.status(400).json({ error: 'Both lists must contain at least one item' });
         }
 
-        const pairs = pairItemsWithFeatures(memorables, anchorPoints, pairingStrategy);
+        const pairs = pairItemsWithFeatures(memorables, anchorPoints);
 
         // Create associations and generate images
         const generatedImages = [];

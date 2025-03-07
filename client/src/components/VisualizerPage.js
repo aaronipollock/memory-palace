@@ -1,31 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-// Use the throne room image from public/images
-const THRONE_ROOM_IMAGE = "/images/throne_room.webp";
-
-// Predefined clickable areas for each anchor point
-const ANCHOR_POSITIONS = {
-  'throne': { top: '60%', left: '50%', width: '150px', height: '150px' },
-  'red carpet': { top: '85%', left: '55%', width: '200px', height: '100px' },
-  'stained glass window': { top: '40%', left: '60%', width: '150px', height: '150px' },
-  'chandelier': { top: '20%', left: '45%', width: '150px', height: '100px' },
-  'foot stool': { top: '90%', left: '68%', width: '100px', height: '80px' },
-  'statue': { top: '60%', left: '70%', width: '100px', height: '200px' },
-  'candle stick': { top: '60%', left: '35%', width: '80px', height: '150px' }
+// Room images
+const ROOM_IMAGES = {
+  "throne room": "/images/throne_room.webp",
+  "bedchamber": "/images/bedchamber.webp",
+  "kitchen": "/images/kitchen.webp",
+  "dining room": "/images/dining_room.webp",
+  "dungeon": "/images/dungeon.webp",
+  "bathroom": "/images/bathroom.webp",
+  "study": "/images/study.webp",
+  "game room": "/images/game_room.webp"
 };
 
-// Fallback images only if API completely fails
-const FALLBACK_IMAGES = {
-  'throne': 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format',
-  'red carpet': 'https://images.unsplash.com/photo-1575414003591-ece8d0416c7a?w=500&auto=format',
-  'stained glass window': 'https://images.unsplash.com/photo-1508972036778-cd4cc1c4e71d?w=500&auto=format',
-  'chandelier': 'https://images.unsplash.com/photo-1543039625-14cbd3802e7d?w=500&auto=format',
-  'foot stool': 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=500&auto=format',
-  'statue': 'https://images.unsplash.com/photo-1543083115-638c4ef3334f?w=500&auto=format',
-  'candle stick': 'https://images.unsplash.com/photo-1514534925810-c589cdb1d9fa?w=500&auto=format',
-  'default': 'https://images.unsplash.com/photo-1579546929662-711aa81148cf?w=500&auto=format'
+// Predefined clickable areas for each anchor point by room type
+const ROOM_ANCHOR_POSITIONS = {
+  "throne room": {
+    'throne': { top: '60%', left: '50%', width: '150px', height: '150px' },
+    'red carpet': { top: '85%', left: '55%', width: '200px', height: '100px' },
+    'stained glass window': { top: '40%', left: '60%', width: '150px', height: '150px' },
+    'chandelier': { top: '20%', left: '45%', width: '150px', height: '100px' },
+    'foot stool': { top: '90%', left: '68%', width: '100px', height: '80px' },
+    'statue': { top: '60%', left: '70%', width: '100px', height: '200px' },
+    'candle stick': { top: '60%', left: '35%', width: '80px', height: '150px' }
+  },
+  "bedchamber": {
+    'bed': { top: '65%', left: '50%', width: '200px', height: '150px' },
+    'wardrobe': { top: '65%', left: '75%', width: '80px', height: '80px' },
+    'nightstand': { top: '70%', left: '35%', width: '100px', height: '100px' },
+    'lamp': { top: '55%', left: '68%', width: '80px', height: '120px' },
+    'mirror': { top: '40%', left: '25%', width: '150px', height: '120px' },
+    'dresser': { top: '70%', left: '25%', width: '150px', height: '120px' },
+    'rug': { top: '90%', left: '50%', width: '200px', height: '100px' }
+  },
+  // "kitchen": {
+  //   'stove': { top: '60%', left: '30%', width: '120px', height: '120px' },
+  //   'refrigerator': { top: '60%', left: '15%', width: '100px', height: '200px' },
+  //   'sink': { top: '60%', left: '50%', width: '120px', height: '100px' },
+  //   'counter': { top: '65%', left: '40%', width: '300px', height: '80px' },
+  //   'cabinet': { top: '40%', left: '40%', width: '300px', height: '80px' },
+  //   'table': { top: '70%', left: '75%', width: '150px', height: '150px' },
+  //   'microwave': { top: '50%', left: '65%', width: '100px', height: '80px' }
+  // },
+  // "dining room": {
+  //   'dining table': { top: '70%', left: '50%', width: '250px', height: '150px' },
+  //   'chair': { top: '75%', left: '35%', width: '80px', height: '100px' },
+  //   'chandelier': { top: '30%', left: '50%', width: '150px', height: '100px' },
+  //   'china cabinet': { top: '60%', left: '80%', width: '120px', height: '200px' },
+  //   'window': { top: '40%', left: '20%', width: '150px', height: '120px' },
+  //   'painting': { top: '40%', left: '80%', width: '120px', height: '100px' },
+  //   'rug': { top: '85%', left: '50%', width: '300px', height: '120px' }
+  // },
+  "dungeon": {
+    'gate': { top: '50%', left: '50%', width: '200px', height: '120px' },
+    'table': { top: '70%', left: '30%', width: '100px', height: '120px' },
+    'pillory': { top: '60%', left: '65%', width: '120px', height: '100px' },
+    'grate': { top: '80%', left: '40%', width: '120px', height: '200px' },
+    'barrel': { top: '90%', left: '50%', width: '100px', height: '150px' },
+    'hanging chains': { top: '15%', left: '40%', width: '150px', height: '120px' },
+    'torch': { top: '30%', left: '70%', width: '80px', height: '100px' }
+  },
+  // "bathroom": {
+  //   'toilet': { top: '70%', left: '30%', width: '100px', height: '120px' },
+  //   'sink': { top: '65%', left: '60%', width: '120px', height: '100px' },
+  //   'bathtub': { top: '75%', left: '80%', width: '150px', height: '120px' },
+  //   'shower': { top: '60%', left: '80%', width: '120px', height: '200px' },
+  //   'mirror': { top: '45%', left: '60%', width: '120px', height: '100px' },
+  //   'towel rack': { top: '50%', left: '30%', width: '100px', height: '80px' },
+  //   'cabinet': { top: '40%', left: '60%', width: '120px', height: '80px' }
+  // },
+  // "study": {
+  //   'desk': { top: '70%', left: '40%', width: '180px', height: '120px' },
+  //   'chair': { top: '75%', left: '40%', width: '100px', height: '120px' },
+  //   'bookshelf': { top: '50%', left: '80%', width: '120px', height: '200px' },
+  //   'globe': { top: '60%', left: '65%', width: '80px', height: '100px' },
+  //   'lamp': { top: '55%', left: '30%', width: '80px', height: '120px' },
+  //   'fireplace': { top: '65%', left: '15%', width: '150px', height: '150px' },
+  //   'painting': { top: '40%', left: '15%', width: '120px', height: '100px' }
+  // },
+  // "game room": {
+  //   'pool table': { top: '70%', left: '50%', width: '250px', height: '150px' },
+  //   'arcade machine': { top: '60%', left: '20%', width: '100px', height: '180px' },
+  //   'couch': { top: '75%', left: '80%', width: '180px', height: '120px' },
+  //   'tv': { top: '45%', left: '80%', width: '150px', height: '100px' },
+  //   'foosball table': { top: '70%', left: '30%', width: '150px', height: '100px' },
+  //   'dart board': { top: '40%', left: '20%', width: '100px', height: '100px' },
+  //   'trophy case': { top: '50%', left: '50%', width: '150px', height: '120px' }
+  // }
 };
+
+// Lists for creating memorable prompts
+const ACTION_VERBS = [
+  'on',
+  'next to',
+  'inside',
+  'above',
+  'below',
+  'behind',
+  'in front of',
+  'around'
+];
+
+const DESCRIPTIVE_ADJECTIVES = [
+  'giant', 'tiny', 'glowing', 'colorful',
+  'transparent', 'bright', 'sparkling', 'floating'
+];
+
+const ART_STYLES = [
+  'digital art',
+  'realistic',
+  'detailed illustration',
+  'high quality render'
+];
 
 const VisualizerPage = ({ associations, roomType }) => {
   const [selectedAssociation, setSelectedAssociation] = useState(null);
@@ -33,33 +119,67 @@ const VisualizerPage = ({ associations, roomType }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0, transform: null });
+  const [currentPrompt, setCurrentPrompt] = useState('');
+  const [imageCache, setImageCache] = useState({});
+
+  // Get the current room type from props or localStorage
+  const currentRoomType = roomType || localStorage.getItem('roomType') || 'throne room';
+
+  // Get the appropriate room image
+  const roomImage = ROOM_IMAGES[currentRoomType] || ROOM_IMAGES["throne room"];
+
+  // Get the appropriate anchor positions for this room
+  const anchorPositions = ROOM_ANCHOR_POSITIONS[currentRoomType] || ROOM_ANCHOR_POSITIONS["throne room"];
 
   // Get associations from props or localStorage
   const storedAssociations = associations?.length > 0 ? associations :
       JSON.parse(localStorage.getItem('associations') || '[]');
 
   console.log('Using associations:', storedAssociations);
+  console.log('Current room type:', currentRoomType);
 
   const generatePrompt = (association) => {
-    return `A vivid, surreal image of a ${association.memorable} interacting with a ${association.anchor} in a throne room.
-    The scene should be clear and memorable, with the ${association.memorable} being the main focus as it interacts with the ${association.anchor}.
-    Photorealistic style.`;
+    // Randomly select elements to create variety
+    const verb = ACTION_VERBS[Math.floor(Math.random() * ACTION_VERBS.length)];
+    const adjective = DESCRIPTIVE_ADJECTIVES[Math.floor(Math.random() * DESCRIPTIVE_ADJECTIVES.length)];
+    const artStyle = ART_STYLES[Math.floor(Math.random() * ART_STYLES.length)];
+
+    // Create a very simple but still memorable scenario without throne room context
+    const prompt = `A ${adjective} ${association.memorable} ${verb} a ${association.anchor}, ${artStyle}.`;
+
+    // Save a simplified version of the prompt for display (without art style)
+    const displayPrompt = `A ${adjective} ${association.memorable} ${verb} a ${association.anchor}.`;
+    setCurrentPrompt(displayPrompt);
+
+    return prompt;
   };
 
   const handleClick = async (association, event) => {
     // Calculate popup position based on the clicked button's position
     const rect = event.currentTarget.getBoundingClientRect();
 
-    // Adjust position based on the anchor type
+    // Adjust position based on the anchor type and room
     let transformValue = 'translate(-50%, -120%)'; // Default positioning (above)
 
-    // For some anchor points, position the popup below instead of above
-    if (association.anchor === 'throne' ||
-        association.anchor === 'red carpet' ||
-        association.anchor === 'stained glass window' ||
-        association.anchor === 'chandelier') {
-      transformValue = 'translate(-50%, 20%)'; // Position below
+    // Special positioning for specific anchors in specific rooms
+    if (currentRoomType === "throne room") {
+      if (association.anchor === 'stained glass window' || association.anchor === 'chandelier') {
+        transformValue = 'translate(-50%, 20%)'; // Position below
+      } else if (association.anchor === 'throne') {
+        transformValue = 'translate(-50%, -130%)'; // Position slightly above
+      } else if (association.anchor === 'red carpet') {
+        transformValue = 'translate(-50%, -150%)'; // Position higher above
+      }
+    } else if (currentRoomType === "bedchamber") {
+      if (association.anchor === 'lamp' || association.anchor === 'mirror') {
+        transformValue = 'translate(-50%, 20%)'; // Position below
+      }
+    } else if (currentRoomType === "dungeon") {
+      if (association.anchor === 'hanging chains' || association.anchor === 'torch') {
+        transformValue = 'translate(-50%, 20%)'; // Position below for hanging chains
+      }
     }
+    // Add more room-specific positioning as needed
 
     setPopupPosition({
       x: rect.x + window.scrollX,
@@ -68,9 +188,21 @@ const VisualizerPage = ({ associations, roomType }) => {
     });
 
     setSelectedAssociation(association);
+
+    // Check if we already have a cached image for this association
+    const cacheKey = `${association.anchor}-${association.memorable}`;
+    if (imageCache[cacheKey]) {
+      console.log('Using cached image for:', cacheKey);
+      setGeneratedImage(imageCache[cacheKey].imageUrl);
+      setCurrentPrompt(imageCache[cacheKey].prompt);
+      return; // Exit early, no need to generate a new image
+    }
+
+    // If no cached image, proceed with generation
     setIsLoading(true);
     setError(null);
     setGeneratedImage(null);
+    setCurrentPrompt('');
 
     try {
       // Generate the prompt for Stability AI
@@ -103,6 +235,12 @@ const VisualizerPage = ({ associations, roomType }) => {
 
         console.log('Setting generated image URL:', imageUrl);
         setGeneratedImage(imageUrl);
+
+        // Cache the generated image
+        setImageCache(prevCache => ({
+          ...prevCache,
+          [cacheKey]: { imageUrl, prompt: currentPrompt }
+        }));
       } else {
         console.error('Invalid API response:', response.data);
         throw new Error('No image URL in API response');
@@ -127,10 +265,6 @@ const VisualizerPage = ({ associations, roomType }) => {
         setError(`Error: ${err.message}`);
       }
 
-      // Use a fallback image as last resort
-      const fallbackImage = FALLBACK_IMAGES[association.anchor] || FALLBACK_IMAGES['default'];
-      console.log('Using fallback image:', fallbackImage);
-      setGeneratedImage(fallbackImage);
     } finally {
       setIsLoading(false);
     }
@@ -139,6 +273,7 @@ const VisualizerPage = ({ associations, roomType }) => {
   const handleClosePopup = () => {
     setSelectedAssociation(null);
     setGeneratedImage(null);
+    setCurrentPrompt('');
   };
 
   return (
@@ -147,28 +282,34 @@ const VisualizerPage = ({ associations, roomType }) => {
 
       <div className="relative w-full max-w-6xl mx-auto mario-castle p-4">
         <img
-          src={THRONE_ROOM_IMAGE}
-          alt="Throne Room"
+          src={roomImage}
+          alt={`${currentRoomType}`}
           className="w-full h-auto rounded-lg"
           style={{ maxHeight: '80vh' }}
         />
 
-        {storedAssociations.map((assoc, index) => (
-          <button
-            key={index}
-            className="absolute cursor-pointer question-block"
-            style={{
-              ...ANCHOR_POSITIONS[assoc.anchor],
-              position: 'absolute',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 10,
-              width: '40px',
-              height: '40px',
-            }}
-            onClick={(e) => handleClick(assoc, e)}
-          >
-          </button>
-        ))}
+        {storedAssociations.map((assoc, index) => {
+          // Only show buttons for anchor points that exist in the current room
+          // AND have a memorable item associated with them
+          if (!anchorPositions[assoc.anchor] || !assoc.memorable) return null;
+
+          return (
+            <button
+              key={index}
+              className="absolute cursor-pointer question-block"
+              style={{
+                ...anchorPositions[assoc.anchor],
+                position: 'absolute',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '40px',
+                height: '40px',
+              }}
+              onClick={(e) => handleClick(assoc, e)}
+            >
+            </button>
+          );
+        })}
 
         {/* Popup for generated image */}
         {selectedAssociation && (
@@ -194,10 +335,16 @@ const VisualizerPage = ({ associations, roomType }) => {
               {selectedAssociation.anchor}: {selectedAssociation.memorable}
             </h3>
 
+            {currentPrompt && !isLoading && generatedImage && (
+              <div className="text-xs text-gray-600 italic mb-2 bg-gray-100 p-2 rounded">
+                {currentPrompt}
+              </div>
+            )}
+
             {isLoading && (
               <div className="text-center py-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-2 text-secondary">Loading image from Stability AI...</p>
+                <p className="mt-2 text-secondary">Creating your memorable image...</p>
               </div>
             )}
 
@@ -216,12 +363,6 @@ const VisualizerPage = ({ associations, roomType }) => {
                   onError={(e) => {
                     console.error('Image failed to load:', e);
                     setError('Failed to load the generated image');
-
-                    // Only use fallback if the src is not already a fallback
-                    const isFallback = Object.values(FALLBACK_IMAGES).includes(e.target.src);
-                    if (!isFallback) {
-                      e.target.src = FALLBACK_IMAGES[selectedAssociation.anchor] || FALLBACK_IMAGES['default'];
-                    }
                   }}
                 />
               </div>
