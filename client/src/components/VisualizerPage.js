@@ -33,24 +33,6 @@ const ROOM_ANCHOR_POSITIONS = {
     'dresser': { top: '70%', left: '25%', width: '150px', height: '120px' },
     'rug': { top: '90%', left: '50%', width: '200px', height: '100px' }
   },
-  // "kitchen": {
-  //   'stove': { top: '60%', left: '30%', width: '120px', height: '120px' },
-  //   'refrigerator': { top: '60%', left: '15%', width: '100px', height: '200px' },
-  //   'sink': { top: '60%', left: '50%', width: '120px', height: '100px' },
-  //   'counter': { top: '65%', left: '40%', width: '300px', height: '80px' },
-  //   'cabinet': { top: '40%', left: '40%', width: '300px', height: '80px' },
-  //   'table': { top: '70%', left: '75%', width: '150px', height: '150px' },
-  //   'microwave': { top: '50%', left: '65%', width: '100px', height: '80px' }
-  // },
-  // "dining room": {
-  //   'dining table': { top: '70%', left: '50%', width: '250px', height: '150px' },
-  //   'chair': { top: '75%', left: '35%', width: '80px', height: '100px' },
-  //   'chandelier': { top: '30%', left: '50%', width: '150px', height: '100px' },
-  //   'china cabinet': { top: '60%', left: '80%', width: '120px', height: '200px' },
-  //   'window': { top: '40%', left: '20%', width: '150px', height: '120px' },
-  //   'painting': { top: '40%', left: '80%', width: '120px', height: '100px' },
-  //   'rug': { top: '85%', left: '50%', width: '300px', height: '120px' }
-  // },
   "dungeon": {
     'gate': { top: '50%', left: '50%', width: '200px', height: '120px' },
     'table': { top: '70%', left: '30%', width: '100px', height: '120px' },
@@ -60,33 +42,6 @@ const ROOM_ANCHOR_POSITIONS = {
     'hanging chains': { top: '15%', left: '40%', width: '150px', height: '120px' },
     'torch': { top: '30%', left: '70%', width: '80px', height: '100px' }
   },
-  // "bathroom": {
-  //   'toilet': { top: '70%', left: '30%', width: '100px', height: '120px' },
-  //   'sink': { top: '65%', left: '60%', width: '120px', height: '100px' },
-  //   'bathtub': { top: '75%', left: '80%', width: '150px', height: '120px' },
-  //   'shower': { top: '60%', left: '80%', width: '120px', height: '200px' },
-  //   'mirror': { top: '45%', left: '60%', width: '120px', height: '100px' },
-  //   'towel rack': { top: '50%', left: '30%', width: '100px', height: '80px' },
-  //   'cabinet': { top: '40%', left: '60%', width: '120px', height: '80px' }
-  // },
-  // "study": {
-  //   'desk': { top: '70%', left: '40%', width: '180px', height: '120px' },
-  //   'chair': { top: '75%', left: '40%', width: '100px', height: '120px' },
-  //   'bookshelf': { top: '50%', left: '80%', width: '120px', height: '200px' },
-  //   'globe': { top: '60%', left: '65%', width: '80px', height: '100px' },
-  //   'lamp': { top: '55%', left: '30%', width: '80px', height: '120px' },
-  //   'fireplace': { top: '65%', left: '15%', width: '150px', height: '150px' },
-  //   'painting': { top: '40%', left: '15%', width: '120px', height: '100px' }
-  // },
-  // "game room": {
-  //   'pool table': { top: '70%', left: '50%', width: '250px', height: '150px' },
-  //   'arcade machine': { top: '60%', left: '20%', width: '100px', height: '180px' },
-  //   'couch': { top: '75%', left: '80%', width: '180px', height: '120px' },
-  //   'tv': { top: '45%', left: '80%', width: '150px', height: '100px' },
-  //   'foosball table': { top: '70%', left: '30%', width: '150px', height: '100px' },
-  //   'dart board': { top: '40%', left: '20%', width: '100px', height: '100px' },
-  //   'trophy case': { top: '50%', left: '50%', width: '150px', height: '120px' }
-  // }
 };
 
 // Lists for creating memorable prompts
@@ -113,6 +68,68 @@ const ART_STYLES = [
   'high quality render'
 ];
 
+// Helper function to determine if a term needs figurative representation
+const needsFigurativeRepresentation = (term) => {
+  // Convert to lowercase for processing
+  const lowerTerm = term.toLowerCase();
+
+  // Categories that typically benefit from figurative representation
+
+  // 1. Proper nouns (names, places, etc.)
+  const properNouns = ['washington', 'adams', 'jefferson', 'madison', 'monroe',
+                       'jackson', 'van buren', 'harrison', 'tyler', 'america',
+                       'europe', 'africa', 'asia'];
+
+  // 2. Abstract concepts
+  const abstractConcepts = ['freedom', 'love', 'time', 'money', 'justice', 'peace',
+                           'happiness', 'sadness', 'anger', 'fear', 'courage',
+                           'wisdom', 'knowledge', 'truth', 'beauty', 'democracy'];
+
+  // 3. Complex or technical terms
+  const complexTerms = ['photosynthesis', 'democracy', 'philosophy', 'psychology',
+                       'mathematics', 'algorithm', 'quantum', 'relativity',
+                       'economics', 'infrastructure'];
+
+  // 4. Numbers and dates
+  const isNumberOrDate = /\d+/.test(lowerTerm);
+
+  // 5. Multi-word phrases (likely to be complex concepts)
+  const isMultiWord = term.includes(' ');
+
+  // 6. Long words (often complex and benefit from breakdown)
+  const isLongWord = term.length > 6;
+
+  // Check if the term falls into any of these categories
+  if (properNouns.some(noun => lowerTerm.includes(noun)) ||
+      abstractConcepts.some(concept => lowerTerm.includes(concept)) ||
+      complexTerms.some(term => lowerTerm.includes(term)) ||
+      isNumberOrDate ||
+      isMultiWord ||
+      isLongWord) {
+    return true;
+  }
+
+  // Categories that are typically better with literal representation
+
+  // 1. Common concrete nouns (everyday objects)
+  const concreteNouns = ['apple', 'chair', 'table', 'dog', 'cat', 'house', 'car',
+                         'tree', 'flower', 'book', 'pen', 'phone', 'computer',
+                         'water', 'food', 'shirt', 'shoe'];
+
+  // 2. Simple adjectives
+  const simpleAdjectives = ['red', 'blue', 'green', 'big', 'small', 'hot', 'cold',
+                           'fast', 'slow', 'happy', 'sad', 'good', 'bad'];
+
+  // Check if the term is a concrete noun or simple adjective
+  if (concreteNouns.some(noun => lowerTerm === noun) ||
+      simpleAdjectives.some(adj => lowerTerm === adj)) {
+    return false;
+  }
+
+  // Default to figurative for anything not explicitly categorized
+  return true;
+};
+
 const VisualizerPage = ({ associations, roomType }) => {
   const [selectedAssociation, setSelectedAssociation] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
@@ -138,21 +155,108 @@ const VisualizerPage = ({ associations, roomType }) => {
   console.log('Using associations:', storedAssociations);
   console.log('Current room type:', currentRoomType);
 
+  const generateFigurativeAssociation = (memorable) => {
+    // Convert to lowercase for processing
+    const term = memorable.toLowerCase().trim();
+
+    // Common phonetic patterns - fix exact matching
+    const phonetics = [
+      { pattern: 'washington', replacement: 'a person washing a weight labeled "ton"' },
+      { pattern: 'adams', replacement: 'a man wearing a fig leaf (like Adam)' },
+      { pattern: 'jefferson', replacement: 'a jar of "Jef" peanut butter' },
+      { pattern: 'madison', replacement: 'a mad-looking sun' },
+      { pattern: 'monroe', replacement: 'Marilyn Monroe' },
+      { pattern: 'jackson', replacement: 'jack playing cards' },
+      { pattern: 'van buren', replacement: 'a toy van driving into a small bureau' },
+      { pattern: 'harrison', replacement: 'a hairy baby in a small son' },
+      { pattern: 'tyler', replacement: 'a person laying tiles' },
+
+      // Common word patterns
+      { pattern: 'phone', replacement: 'a foam finger pointing' },
+      { pattern: 'cat', replacement: 'a feline' },
+      { pattern: 'dog', replacement: 'a canine' },
+      { pattern: 'school', replacement: 'a building with a bell and students' },
+      { pattern: 'car', replacement: 'an automobile' },
+      { pattern: 'book', replacement: 'pages bound together' },
+      { pattern: 'key', replacement: 'a metal object that opens locks' },
+
+      // Numbers and dates
+      { pattern: '1776', replacement: 'the number 17 next to the number 76' },
+      { pattern: '2000', replacement: 'the number 2 followed by three zeros' },
+
+      // Abstract concepts
+      { pattern: 'freedom', replacement: 'broken chains' },
+      { pattern: 'love', replacement: 'a heart symbol' },
+      { pattern: 'time', replacement: 'a clock with animated hands' },
+      { pattern: 'money', replacement: 'dollar bills and coins' },
+
+      // Common syllables for creative breakdown
+      { pattern: 'ing', replacement: 'a ring with the letter I inside it' },
+      { pattern: 'er', replacement: 'the letters E and R' },
+      { pattern: 'tion', replacement: 'a weight labeled "ton"' },
+      { pattern: 'pre', replacement: 'the letter P followed by "re"' },
+      { pattern: 'con', replacement: 'a con artist' },
+      { pattern: 'ex', replacement: 'a large X' },
+      { pattern: 'pro', replacement: 'a thumbs up sign' },
+      { pattern: 'un', replacement: 'the letter U next to letter N' },
+    ];
+
+    // Check for exact matches first
+    for (const { pattern, replacement } of phonetics) {
+      if (term === pattern) {
+        console.log(`Exact match found for "${term}": ${replacement}`);
+        return replacement;
+      }
+    }
+
+    // Then check for partial matches
+    for (const { pattern, replacement } of phonetics) {
+      if (term.includes(pattern)) {
+        console.log(`Partial match found for "${term}": ${replacement}`);
+        return replacement;
+      }
+    }
+
+    // If no direct match, try to create a figurative description based on word length
+    if (term.length > 6) {
+      const firstHalf = term.substring(0, Math.ceil(term.length / 2));
+      const secondHalf = term.substring(Math.ceil(term.lenth / 2));
+
+      return `a visual combination of "${firstHalf}" and "${secondHalf}", possibly ${firstHalf} interacting with ${secondHalf}`;
+    }
+
+    // Fallback for words we don't have a specific pattern for
+    return `a creative, visual representation of "${memorable}"`;
+  };
+
   const generatePrompt = (association) => {
     // Randomly select elements to create variety
     const verb = ACTION_VERBS[Math.floor(Math.random() * ACTION_VERBS.length)];
     const adjective = DESCRIPTIVE_ADJECTIVES[Math.floor(Math.random() * DESCRIPTIVE_ADJECTIVES.length)];
     const artStyle = ART_STYLES[Math.floor(Math.random() * ART_STYLES.length)];
 
-    // Create a very simple but still memorable scenario without throne room context
-    const prompt = `A ${adjective} ${association.memorable} ${verb} a ${association.anchor}, ${artStyle}.`;
+    // Determine if we should use figurative or literal approach
+    const shouldUseFigurative = needsFigurativeRepresentation(association.memorable);
 
-    // Save a simplified version of the prompt for display (without art style)
-    const displayPrompt = `A ${adjective} ${association.memorable} ${verb} a ${association.anchor}.`;
+    let description;
+    if (shouldUseFigurative) {
+      // Use figurative approach
+      description = generateFigurativeAssociation(association.memorable);
+    } else {
+      // Use literal approach
+      description = `a ${adjective} ${association.memorable}`;
+    }
+
+    // Create the prompt
+    const prompt = `${description} ${verb} a ${association.anchor}, ${artStyle}.`;
+
+    // Save a simplified version for display (without art style)
+    const displayPrompt = `${description} ${verb} a ${association.anchor}.`;
     setCurrentPrompt(displayPrompt);
 
     return prompt;
   };
+
 
   const handleClick = async (association, event) => {
     // Calculate popup position based on the clicked button's position

@@ -188,14 +188,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                             <textarea
                                 value={memorables}
                                 onChange={(e) => setMemorables(e.target.value)}
-                                placeholder="Example:
-grocery list
-meeting agenda
-historical dates
-phone number
-password
-birthday
-anniversary"
+                                placeholder=""
                                 disabled={isLoading}
                                 className="w-full h-40 bg-white text-text p-3 rounded-lg border border-accent1 focus:border-primary focus:ring-1 focus:ring-primary outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                             />
