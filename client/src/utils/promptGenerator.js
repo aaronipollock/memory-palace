@@ -1,5 +1,6 @@
 import nlp from 'compromise'
 import { checkWordConcreteness } from './dictionaryService';
+import axios from 'axios';
 
 // Constants for prompt generation
 const ACTION_VERBS = [
@@ -157,48 +158,55 @@ const needsFigurativeRepresentation = async (term) => {
   return true;
 };
 
-const generateFigurativeAssociation = (memorable) => {
-    const term = memorable.toLowerCase().trim();
-    const doc = nlp(term);
+const generateFigurativeAssociation = async (term) => {
+  try {
+    // Call the server API for figurative associations
+    const response = await axios.get(`/api/figurative-association/${encodeURIComponent(term)}`);
+    return response.data.association;
+  } catch (error) {
+    console.error('Error getting figurative association from API:', error);
+
+    // Fall back to your existing method
+    const lowerTerm = term.toLowerCase();
 
     // Proper nouns
-    if (doc.people().found) {
-        const person = doc.people().text();
+    if (nlp(lowerTerm).people().found) {
+        const person = nlp(lowerTerm).people().text();
         return `a person respresenting ${person}, with distinctive characteristics`;
     }
 
-    if (doc.places().found) {
-        const place = doc.places().text();
+    if (nlp(lowerTerm).places().found) {
+        const place = nlp(lowerTerm).places().text();
         return `a miniature scene of ${place} with recongnizable landmarks`;
     }
 
     // Mulit-word phrases
-    if (term.includes(' ')) {
-        const nouns = doc.nouns().out('array');
-        const adjectives = doc.adjectives().out('array');
+    if (lowerTerm.includes(' ')) {
+        const nouns = nlp(lowerTerm).nouns().out('array');
+        const adjectives = nlp(lowerTerm).adjectives().out('array');
 
         if (nouns.length > 0 && adjectives.length > 0) {
             return `a ${adjectives.join(' and ')} ${nouns.join(' and ')}`;
         } else {
-            const parts = term.split(' ');
+            const parts = lowerTerm.split(' ');
             return `a scene showing ${parts.join(' and ')}`;
         }
     }
 
     // Numbers and dates
-    if (doc.numbers().found) {
-        const num = doc.numbers().toNumber().out();
+    if (nlp(lowerTerm).numbers().found) {
+        const num = nlp(lowerTerm).numbers().toNumber().out();
         return `the number ${num} visualized creatively`;
     }
 
     // Fix for dates - use match instead of dates()
-    if (doc.match('#Date').found) {
-        return `a calendar or clock showing ${term}`;
+    if (nlp(lowerTerm).match('#Date').found) {
+        return `a calendar or clock showing ${lowerTerm}`;
     }
 
     // For longer single words, use syllable-based approach
-    if (term.length > 6) {
-        const syllables = splitIntoSyllables(term);
+    if (lowerTerm.length > 6) {
+        const syllables = splitIntoSyllables(lowerTerm);
 
         // If we have multiple syllables, create a scene with them
         if (syllables.length > 1) {
@@ -206,8 +214,8 @@ const generateFigurativeAssociation = (memorable) => {
         }
     }
 
-    // Fallback for anything else
     return `a visual representation of "${term}"`;
+  }
 };
 
 const generatePrompt = async (association, setCurrentPrompt) => {
@@ -222,7 +230,7 @@ const generatePrompt = async (association, setCurrentPrompt) => {
     let description;
     if (shouldUseFigurative) {
         // Use figurative approach
-        description = generateFigurativeAssociation(association.memorable);
+        description = await generateFigurativeAssociation(association.memorable);
     } else {
         // Use literal approach
         description = `a ${adjective} ${association.memorable}`;
