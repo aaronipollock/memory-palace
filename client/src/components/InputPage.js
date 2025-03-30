@@ -12,7 +12,7 @@ const ROOM_TYPES = [
 
 // Define anchor points for each room type
 const ROOM_ANCHOR_POINTS = {
-    "throne room": ["throne", "red carpet", "chandelier", "stained glass window", "statue", "candle stick", "foot stool"],
+    "throne room": ["throne", "red carpet", "chandelier", "stained glass window", "statue", "candlestick", "footstool"],
     "bedchamber": ["bed", "wardrobe", "nightstand", "lamp", "mirror", "dresser", "rug"],
     "kitchen": ["stove", "refrigerator", "sink", "counter", "cabinet", "table", "microwave"],
     "dining room": ["dining table", "chair", "chandelier", "china cabinet", "window", "painting", "rug"],
