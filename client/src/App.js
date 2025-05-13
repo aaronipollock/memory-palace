@@ -1,48 +1,63 @@
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+import HomePage from './components/HomePage';
 import InputPage from './components/InputPage';
-import MemoryPalace from './components/MemoryPalace';
+import VisualizerPage from './components/VisualizerPage';
+// import UploadPage from './components/UploadPage'; // Uncomment if you have an upload page
 
 function App() {
-  const [associations, setAssociations] = useState([]);
-  const [currentView, setCurrentView] = useState('input');
-  const [isLoading, setIsLoading] = useState(false);
+    const [associations, setAssociations] = useState(() => {
+        const saved = localStorage.getItem('associations');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [roomType, setRoomType] = useState(() =>
+        localStorage.getItem('roomType') || ''
+    );
 
-  const handleImagesGenerated = (generatedImages) => {
-    setAssociations(generatedImages);
-    setCurrentView('palace');
-    setIsLoading(false);
-  };
+    useEffect(() => {
+        localStorage.setItem('associations', JSON.stringify(associations));
+        localStorage.setItem('roomType', roomType);
+    }, [associations, roomType]);
+
+    const handleImagesGenerated = (newAssociations, newRoomType) => {
+        console.log('Generated associations:', newAssociations);
+        console.log('Room type:', newRoomType);
+
+        if (Array.isArray(newAssociations)) {
+            setAssociations(newAssociations);
+            setRoomType(newRoomType);
+            // Use navigate instead of window.location
+            window.location.href = '/visualizer';
+        } else {
+            console.error('Invalid associations data:', newAssociations);
+        }
+    };
 
   return (
-    <div className="App">
-      <main>
-        {currentView === 'input' ? (
-          <InputPage
-            onImagesGenerated={handleImagesGenerated}
-            setIsLoading={setIsLoading}
-            isLoading={isLoading}
+    <div className="palace-bg min-h-screen">
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/demo"
+            element={<InputPage onImagesGenerated={handleImagesGenerated} />}
           />
-        ) : (
-          <MemoryPalace associations={associations} />
-        )}
-        <nav className="app-navigation">
-          <button
-            className={`nav-button ${currentView === 'input' ? 'active' : ''}`}
-            onClick={() => setCurrentView('input')}
-            disabled={isLoading}
-          >
-            Create Associations
-          </button>
-          <button
-            className={`nav-button ${currentView === 'palace' ? 'active' : ''}`}
-            onClick={() => setCurrentView('palace')}
-            disabled={associations.length === 0 || isLoading}
-          >
-            View Memory Palace
-          </button>
-        </nav>
-      </main>
+          <Route
+            path="/visualizer"
+            element={<VisualizerPage associations={associations} roomType={roomType} />}
+          />
+          {/* <Route path="/upload" element={<UploadPage />} /> */}
+        </Routes>
+        {/* <div>
+          <ul>
+              {associations.map((assoc, index) => (
+                  <li key={index}>
+                      {assoc.anchor}: {assoc.memorable}
+                  </li>
+              ))}
+          </ul>
+        </div> */}
+      </Router>
     </div>
   );
 }
