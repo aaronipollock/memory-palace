@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ROOM_IMAGES, ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
 import ImagePopup from './ImagePopup';
+import SaveRoomModal from './SaveRoomModal';
 import { generateImage } from '../services/imageService';
 import NavBar from './NavBar';
 
@@ -15,11 +16,21 @@ const VisualizerPage = ({ associations, roomType }) => {
     const saved = localStorage.getItem('acceptedImages');
     return saved ? JSON.parse(saved) : {};
   });
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [savedRooms, setSavedRooms] = useState(() => {
+    const saved = localStorage.getItem('savedRooms');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   // Save accepted images to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('acceptedImages', JSON.stringify(acceptedImages));
   }, [acceptedImages]);
+
+  // Save rooms to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('savedRooms', JSON.stringify(savedRooms));
+  }, [savedRooms]);
 
   // Get the current room type from props or localStorage
   const currentRoomType = roomType || localStorage.getItem('roomType') || 'throne room';
@@ -29,6 +40,16 @@ const VisualizerPage = ({ associations, roomType }) => {
 
   // Get the appropriate anchor positions for this room
   const anchorPositions = ROOM_ANCHOR_POSITIONS[currentRoomType] || ROOM_ANCHOR_POSITIONS["throne room"];
+
+  // Check if all images have been accepted
+  const allImagesAccepted = associations.every(assoc =>
+    acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image
+  );
+
+  const handleSaveRoom = (roomData) => {
+    setSavedRooms(prev => [...prev, roomData]);
+    setIsSaveModalOpen(false);
+  };
 
   const handleClick = async (association, event) => {
     // Calculate popup position based on the clicked button's position
@@ -165,7 +186,17 @@ const VisualizerPage = ({ associations, roomType }) => {
             );
           })}
 
-          {/* Use the ImagePopup component */}
+          {/* Save Room Button */}
+          {allImagesAccepted && (
+            <button
+              onClick={() => setIsSaveModalOpen(true)}
+              className="fixed bottom-8 right-8 bg-primary text-white px-6 py-3 rounded-lg shadow-lg hover:bg-primary-dark transition-colors duration-200 z-20"
+            >
+              Save Room
+            </button>
+          )}
+
+          {/* Image Popup */}
           {selectedAssociation && (
             <ImagePopup
               association={selectedAssociation}
@@ -179,6 +210,15 @@ const VisualizerPage = ({ associations, roomType }) => {
               onReject={handleRejectImage}
             />
           )}
+
+          {/* Save Room Modal */}
+          <SaveRoomModal
+            isOpen={isSaveModalOpen}
+            onClose={() => setIsSaveModalOpen(false)}
+            onSave={handleSaveRoom}
+            acceptedImages={acceptedImages}
+            roomType={currentRoomType}
+          />
         </div>
       </div>
     </div>

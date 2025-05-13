@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 import HomePage from './components/HomePage';
 import InputPage from './components/InputPage';
 import VisualizerPage from './components/VisualizerPage';
+import SavedRooms from './components/SavedRooms';
 // import UploadPage from './components/UploadPage'; // Uncomment if you have an upload page
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
             path="/visualizer"
             element={<VisualizerPage associations={associations} roomType={roomType} />}
           />
+          <Route path="/saved-rooms" element={<SavedRooms />} />
           {/* <Route path="/upload" element={<UploadPage />} /> */}
         </Routes>
         {/* <div>
