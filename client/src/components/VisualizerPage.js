@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ROOM_IMAGES, ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
 import ImagePopup from './ImagePopup';
 import { generateImage } from '../services/imageService';
+import NavBar from './NavBar';
 
 const VisualizerPage = ({ associations, roomType }) => {
   const [selectedAssociation, setSelectedAssociation] = useState(null);
@@ -10,6 +11,15 @@ const VisualizerPage = ({ associations, roomType }) => {
   const [error, setError] = useState(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0, transform: null });
   const [currentPrompt, setCurrentPrompt] = useState('');
+  const [acceptedImages, setAcceptedImages] = useState(() => {
+    const saved = localStorage.getItem('acceptedImages');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  // Save accepted images to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('acceptedImages', JSON.stringify(acceptedImages));
+  }, [acceptedImages]);
 
   // Get the current room type from props or localStorage
   const currentRoomType = roomType || localStorage.getItem('roomType') || 'throne room';
@@ -60,15 +70,15 @@ const VisualizerPage = ({ associations, roomType }) => {
     setCurrentPrompt('');
 
     try {
-      // Use the imageService to generate the image
-      const result = await generateImage(association);
-
-      setGeneratedImage(result.imageUrl);
-      setCurrentPrompt(result.prompt);
-
-      // If the result came from cache, we can log that
-      if (result.fromCache) {
-        console.log('Image loaded from cache');
+      // Check if we have an accepted image for this anchor
+      if (acceptedImages[association.anchor]) {
+        setGeneratedImage(acceptedImages[association.anchor].image);
+        setCurrentPrompt(acceptedImages[association.anchor].prompt);
+      } else {
+        // Generate new image if no accepted image exists
+        const result = await generateImage(association, setCurrentPrompt);
+        setGeneratedImage(result.imageUrl);
+        setCurrentPrompt(result.prompt);
       }
     } catch (err) {
       console.error('Image generation error:', err);
@@ -84,53 +94,92 @@ const VisualizerPage = ({ associations, roomType }) => {
     setCurrentPrompt('');
   };
 
+  const handleAcceptImage = () => {
+    if (selectedAssociation && generatedImage) {
+      setAcceptedImages(prev => ({
+        ...prev,
+        [selectedAssociation.anchor]: {
+          image: generatedImage,
+          prompt: currentPrompt,
+          association: selectedAssociation
+        }
+      }));
+      handleClosePopup();
+    }
+  };
+
+  const handleRejectImage = async () => {
+    if (selectedAssociation) {
+      setIsLoading(true);
+      setError(null);
+      setGeneratedImage(null);
+      setCurrentPrompt('');
+
+      try {
+        const result = await generateImage(selectedAssociation, setCurrentPrompt);
+        setGeneratedImage(result.imageUrl);
+        setCurrentPrompt(result.prompt);
+      } catch (err) {
+        console.error('Image generation error:', err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   return (
-    <div className="mario-bg mario-clouds min-h-screen py-12 px-4">
-      <h2 className="mario-header text-2xl mb-8 text-center">YOUR MEMORY CASTLE</h2>
+    <div className="min-h-screen bg-background">
+      <NavBar />
+      <div className="mario-bg mario-clouds py-12 px-4">
+        <h2 className="mario-header text-2xl mb-8 text-center">YOUR MEMORY CASTLE</h2>
 
-      <div className="relative w-full max-w-6xl mx-auto mario-castle p-4">
-        <img
-          src={roomImage}
-          alt={`${currentRoomType}`}
-          className="w-full h-auto rounded-lg"
-          style={{ maxHeight: '80vh' }}
-        />
-
-        {associations.map((assoc, index) => {
-          // Only show buttons for anchor points that exist in the current room
-          // AND have a memorable item associated with them
-          if (!anchorPositions[assoc.anchor] || !assoc.memorable) return null;
-
-          return (
-            <button
-              key={index}
-              className="absolute cursor-pointer question-block"
-              style={{
-                ...anchorPositions[assoc.anchor],
-                position: 'absolute',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 10,
-                width: '40px',
-                height: '40px',
-              }}
-              onClick={(e) => handleClick(assoc, e)}
-            >
-            </button>
-          );
-        })}
-
-        {/* Use the ImagePopup component */}
-        {selectedAssociation && (
-          <ImagePopup
-            association={selectedAssociation}
-            position={popupPosition}
-            image={generatedImage}
-            prompt={currentPrompt}
-            isLoading={isLoading}
-            error={error}
-            onClose={handleClosePopup}
+        <div className="relative w-full max-w-6xl mx-auto mario-castle p-4">
+          <img
+            src={roomImage}
+            alt={`${currentRoomType}`}
+            className="w-full h-auto rounded-lg"
+            style={{ maxHeight: '80vh' }}
           />
-        )}
+
+          {associations.map((assoc, index) => {
+            // Only show buttons for anchor points that exist in the current room
+            // AND have a memorable item associated with them
+            if (!anchorPositions[assoc.anchor] || !assoc.memorable) return null;
+
+            return (
+              <button
+                key={index}
+                className="absolute cursor-pointer question-block"
+                style={{
+                  ...anchorPositions[assoc.anchor],
+                  position: 'absolute',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 10,
+                  width: '40px',
+                  height: '40px',
+                }}
+                onClick={(e) => handleClick(assoc, e)}
+              >
+              </button>
+            );
+          })}
+
+          {/* Use the ImagePopup component */}
+          {selectedAssociation && (
+            <ImagePopup
+              association={selectedAssociation}
+              position={popupPosition}
+              image={generatedImage}
+              prompt={currentPrompt}
+              isLoading={isLoading}
+              error={error}
+              onClose={handleClosePopup}
+              onAccept={handleAcceptImage}
+              onReject={handleRejectImage}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

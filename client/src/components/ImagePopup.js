@@ -7,7 +7,9 @@ const ImagePopup = ({
   prompt,
   isLoading,
   error,
-  onClose
+  onClose,
+  onAccept,
+  onReject
 }) => {
   return (
     <div
@@ -62,6 +64,22 @@ const ImagePopup = ({
               // You could call an onError prop here if needed
             }}
           />
+
+          {/* Accept/Reject buttons */}
+          <div className="flex justify-center space-x-4 mt-4">
+            <button
+              onClick={onReject}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
+            >
+              Reject
+            </button>
+            <button
+              onClick={onAccept}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200"
+            >
+              Accept
+            </button>
+          </div>
         </div>
       )}
     </div>
