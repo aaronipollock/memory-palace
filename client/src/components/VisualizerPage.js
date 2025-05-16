@@ -5,7 +5,7 @@ import SaveRoomModal from './SaveRoomModal';
 import { generateImage } from '../services/imageService';
 import NavBar from './NavBar';
 
-const VisualizerPage = ({ associations, roomType }) => {
+const VisualizerPage = () => {
   const [selectedAssociation, setSelectedAssociation] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +22,10 @@ const VisualizerPage = ({ associations, roomType }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Get the current palace data from localStorage
+  const currentPalace = JSON.parse(localStorage.getItem('currentPalace') || '{}');
+  const { roomType = 'throne room', associations = [] } = currentPalace;
+
   // Save accepted images to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('acceptedImages', JSON.stringify(acceptedImages));
@@ -32,14 +36,11 @@ const VisualizerPage = ({ associations, roomType }) => {
     localStorage.setItem('savedRooms', JSON.stringify(savedRooms));
   }, [savedRooms]);
 
-  // Get the current room type from props or localStorage
-  const currentRoomType = roomType || localStorage.getItem('roomType') || 'throne room';
-
   // Get the appropriate room image
-  const roomImage = ROOM_IMAGES[currentRoomType] || ROOM_IMAGES["throne room"];
+  const roomImage = ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
 
   // Get the appropriate anchor positions for this room
-  const anchorPositions = ROOM_ANCHOR_POSITIONS[currentRoomType] || ROOM_ANCHOR_POSITIONS["throne room"];
+  const anchorPositions = ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS["throne room"];
 
   // Check if all images have been accepted
   const allImagesAccepted = associations.every(assoc =>
@@ -59,7 +60,7 @@ const VisualizerPage = ({ associations, roomType }) => {
     let transformValue = 'translate(-50%, -120%)'; // Default positioning (above)
 
     // Special positioning for specific anchors in specific rooms
-    if (currentRoomType === "throne room") {
+    if (roomType === "throne room") {
       if (association.anchor === 'stained glass window' || association.anchor === 'chandelier') {
         transformValue = 'translate(-50%, 20%)'; // Position below
       } else if (association.anchor === 'throne') {
@@ -67,11 +68,11 @@ const VisualizerPage = ({ associations, roomType }) => {
       } else if (association.anchor === 'red carpet') {
         transformValue = 'translate(-50%, -150%)'; // Position higher above
       }
-    } else if (currentRoomType === "bedchamber") {
+    } else if (roomType === "bedchamber") {
       if (association.anchor === 'lamp' || association.anchor === 'mirror') {
         transformValue = 'translate(-50%, 20%)'; // Position below
       }
-    } else if (currentRoomType === "dungeon") {
+    } else if (roomType === "dungeon") {
       if (association.anchor === 'hanging chains' || association.anchor === 'torch') {
         transformValue = 'translate(-50%, 20%)'; // Position below for hanging chains
       }
@@ -158,7 +159,7 @@ const VisualizerPage = ({ associations, roomType }) => {
         <div className="relative w-full max-w-6xl mx-auto mario-castle p-4">
           <img
             src={roomImage}
-            alt={`${currentRoomType}`}
+            alt={`${roomType}`}
             className="w-full h-auto rounded-lg"
             style={{ maxHeight: '80vh' }}
           />
@@ -217,7 +218,7 @@ const VisualizerPage = ({ associations, roomType }) => {
             onClose={() => setIsSaveModalOpen(false)}
             onSave={handleSaveRoom}
             acceptedImages={acceptedImages}
-            roomType={currentRoomType}
+            roomType={roomType}
           />
         </div>
       </div>

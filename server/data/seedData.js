@@ -26,7 +26,7 @@ const seedData = {
     ]
   },
 
-  // Historical Events Example (American Revolution)
+  // Academic Study Example (Historical Events)
   americanRevolution: {
     roomType: "bedchamber",
     associations: [
@@ -58,24 +58,24 @@ const seedData = {
     roomType: "dungeon",
     associations: [
       {
-        anchor: "hanging chains",
+        anchor: "gate",
         memorable: "Spinal Column",
-        description: "Chains arranged like vertebrae"
+        description: "A gate with vertical bars arranged like vertebrae"
       },
       {
-        anchor: "torch",
+        anchor: "table",
         memorable: "Heart",
-        description: "A glowing heart-shaped torch"
+        description: "A table with a glowing heart-shaped center"
       },
       {
-        anchor: "cell door",
+        anchor: "pillory",
         memorable: "Rib Cage",
-        description: "Bars forming a rib-like pattern"
+        description: "A pillory with bars forming a rib-like pattern"
       },
       {
-        anchor: "stone wall",
+        anchor: "grate",
         memorable: "Skin",
-        description: "Wall with texture like human skin"
+        description: "A grate with texture like human skin"
       }
     ]
   },
@@ -130,6 +130,87 @@ const seedData = {
         anchor: "window",
         memorable: "Rhythm",
         description: "Window with metronome-like patterns"
+      }
+    ]
+  },
+
+  // Professional Development Example
+  businessConcepts: {
+    roomType: "throne room",
+    associations: [
+      {
+        anchor: "throne",
+        memorable: "Leadership",
+        description: "A crown and scepter on the throne representing authority"
+      },
+      {
+        anchor: "stained glass window",
+        memorable: "Market Analysis",
+        description: "Stained glass showing market trends and patterns"
+      },
+      {
+        anchor: "chandelier",
+        memorable: "Innovation",
+        description: "A chandelier with unique, creative light patterns"
+      },
+      {
+        anchor: "red carpet",
+        memorable: "Customer Journey",
+        description: "A path showing different customer touchpoints"
+      }
+    ]
+  },
+
+  // Personal Development Example
+  goalSetting: {
+    roomType: "bedchamber",
+    associations: [
+      {
+        anchor: "bed",
+        memorable: "Long-term Goals",
+        description: "A bed with a telescope pointing to distant stars"
+      },
+      {
+        anchor: "lamp",
+        memorable: "Daily Habits",
+        description: "A lamp with a calendar showing daily routines"
+      },
+      {
+        anchor: "mirror",
+        memorable: "Self-reflection",
+        description: "A mirror showing past achievements and future aspirations"
+      },
+      {
+        anchor: "window",
+        memorable: "Growth Mindset",
+        description: "A window showing a garden in constant bloom"
+      }
+    ]
+  },
+
+  // Creative Writing Example
+  storyElements: {
+    roomType: "dungeon",
+    associations: [
+      {
+        anchor: "gate",
+        memorable: "Plot Tension",
+        description: "A gate with chains creating a web of interconnected events"
+      },
+      {
+        anchor: "table",
+        memorable: "Character Development",
+        description: "A table with shadows that change and evolve"
+      },
+      {
+        anchor: "pillory",
+        memorable: "Story Arc",
+        description: "A pillory showing the journey from beginning to end"
+      },
+      {
+        anchor: "grate",
+        memorable: "Theme",
+        description: "A grate with recurring symbols and motifs"
       }
     ]
   }

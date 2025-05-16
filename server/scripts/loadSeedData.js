@@ -1,5 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const MemoryPalace = require('../models/MemoryPalace');
+const User = require('../models/User');
 const seedData = require('../data/seedData');
 
 // Connect to MongoDB
@@ -25,38 +27,50 @@ const memoryPalaceSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    userId: mongoose.Schema.Types.ObjectId,
+    isSeedData: Boolean
 });
 
 const MemoryPalace = mongoose.model('MemoryPalace', memoryPalaceSchema);
 
 // Function to load seed data
-async function loadSeedData() {
+const loadSeedData = async () => {
     try {
-        // Clear existing data
+        // Clear existing memory palaces
         await MemoryPalace.deleteMany({});
         console.log('Cleared existing memory palaces');
 
-        // Insert new seed data
-        const palaces = Object.entries(seedData).map(([name, data]) => ({
-            name,
-            roomType: data.roomType,
-            associations: data.associations
+        // Get or create demo user
+        let demoUser = await User.findOne({ email: 'demo@example.com' });
+        if (!demoUser) {
+            demoUser = await User.create({
+                email: 'demo@example.com',
+                password: 'demo123456'
+            });
+        }
+
+        // Add userId and isSeedData to each palace
+        const palacesWithUser = seedData.map(palace => ({
+            ...palace,
+            userId: demoUser._id,
+            isSeedData: true
         }));
 
-        await MemoryPalace.insertMany(palaces);
+        // Insert seed data
+        await MemoryPalace.insertMany(palacesWithUser);
         console.log('Successfully loaded seed data');
 
-        // Log the created memory palaces
-        const createdPalaces = await MemoryPalace.find();
+        // Log created memory palaces
+        const createdPalaces = await MemoryPalace.find({ isSeedData: true });
         console.log('Created memory palaces:', createdPalaces.map(p => p.name));
 
     } catch (error) {
         console.error('Error loading seed data:', error);
     } finally {
-        mongoose.connection.close();
+        mongoose.disconnect();
     }
-}
+};
 
 // Run the seed function
 loadSeedData();

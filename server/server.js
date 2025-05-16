@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const mongoose = require('mongoose');
+const memoryPalaceRoutes = require('./routes/memoryPalaceRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -37,6 +38,8 @@ app.use('/api', apiRoutes);
 
 const roomController = require('./controllers/roomController');
 app.post('/api/generate-room', roomController.generateRoom);
+
+app.use('/api/memory-palaces', memoryPalaceRoutes);
 
 // Serve React app in production
 if (process.env.NODE_ENV === 'production') {
