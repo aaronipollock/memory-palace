@@ -8,12 +8,23 @@ const SavedRooms = () => {
     const [palaces, setPalaces] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [userEmail, setUserEmail] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         // Check if user is authenticated
         const token = localStorage.getItem('token');
         if (!token) {
+            navigate('/');
+            return;
+        }
+
+        // Decode token to get user email
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            setUserEmail(payload.email);
+        } catch (err) {
+            console.error('Error decoding token:', err);
             navigate('/');
             return;
         }
@@ -84,27 +95,55 @@ const SavedRooms = () => {
         <div className="min-h-screen bg-background">
             <NavBar onLogout={handleLogout} />
             <div className="container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold mb-6 text-center">Saved Memory Palaces</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {palaces.map((palace) => (
-                        <div
-                            key={palace._id}
-                            onClick={() => handlePalaceClick(palace)}
-                            className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-300"
-                        >
-                            <h2 className="text-xl font-semibold mb-2">{palace.name}</h2>
-                            <p className="text-gray-600 mb-4">Room Type: {palace.roomType}</p>
-                            <div className="space-y-2">
-                                {palace.associations.map((assoc, index) => (
-                                    <div key={index} className="border-t pt-2">
-                                        <p className="font-medium">{assoc.memorableItem}</p>
-                                        <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
-                                    </div>
-                                ))}
+                <h1 className="text-3xl font-bold mb-6 text-center">
+                    {userEmail === 'demo@example.com' ? 'Demo Memory Palaces' : 'Your Memory Palaces'}
+                </h1>
+
+                {palaces.length === 0 ? (
+                    <div className="text-center text-gray-600 mt-8">
+                        <p className="text-lg mb-4">No memory palaces found.</p>
+                        {userEmail !== 'demo@example.com' && (
+                            <button
+                                onClick={() => navigate('/demo')}
+                                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                            >
+                                Create Your First Palace
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {palaces.map((palace) => (
+                            <div
+                                key={palace._id}
+                                onClick={() => handlePalaceClick(palace)}
+                                className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-300"
+                            >
+                                <h2 className="text-xl font-semibold mb-2">{palace.name}</h2>
+                                <p className="text-gray-600 mb-4">Room Type: {palace.roomType}</p>
+                                <div className="space-y-2">
+                                    {palace.associations.map((assoc, index) => (
+                                        <div key={index} className="border-t pt-2">
+                                            <p className="font-medium">{assoc.memorableItem}</p>
+                                            <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
+
+                {userEmail !== 'demo@example.com' && (
+                    <div className="text-center mt-8">
+                        <button
+                            onClick={() => navigate('/demo')}
+                            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                        >
+                            Create New Palace
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

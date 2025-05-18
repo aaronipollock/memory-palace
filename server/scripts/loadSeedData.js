@@ -15,25 +15,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/memory-pa
     process.exit(1);
 });
 
-// Define the Memory Palace Schema
-const memoryPalaceSchema = new mongoose.Schema({
-    name: String,
-    roomType: String,
-    associations: [{
-        anchor: String,
-        memorable: String,
-        description: String
-    }],
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    userId: mongoose.Schema.Types.ObjectId,
-    isSeedData: Boolean
-});
-
-const MemoryPalace = mongoose.model('MemoryPalace', memoryPalaceSchema);
-
 // Function to load seed data
 const loadSeedData = async () => {
     try {
@@ -50,11 +31,18 @@ const loadSeedData = async () => {
             });
         }
 
-        // Add userId and isSeedData to each palace
-        const palacesWithUser = seedData.map(palace => ({
-            ...palace,
+        // Convert seed data object to array of palaces
+        const palacesWithUser = Object.entries(seedData).map(([name, data]) => ({
+            name,
+            roomType: data.roomType,
+            associations: data.associations.map(assoc => ({
+                anchor: assoc.anchor,
+                memorableItem: assoc.memorable,
+                description: assoc.description
+            })),
             userId: demoUser._id,
-            isSeedData: true
+            isSeedData: true,
+            createdAt: new Date()
         }));
 
         // Insert seed data

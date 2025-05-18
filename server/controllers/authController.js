@@ -2,10 +2,17 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 // Generate JWT token
-const generateToken = (userId) => {
-    return jwt.sign({ userId }, process.env.JWT_SECRET, {
-        expiresIn: '7d'
-    });
+const generateToken = (user) => {
+    return jwt.sign(
+        {
+            userId: user._id,
+            email: user.email
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: '7d'
+        }
+    );
 };
 
 // Signup controller
@@ -28,7 +35,7 @@ exports.signup = async (req, res) => {
         await user.save();
 
         // Generate token
-        const token = generateToken(user._id);
+        const token = generateToken(user);
 
         res.status(201).json({
             message: 'User created successfully',
@@ -39,6 +46,7 @@ exports.signup = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Signup error:', error);
         res.status(500).json({ message: 'Error creating user', error: error.message });
     }
 };
@@ -61,7 +69,7 @@ exports.login = async (req, res) => {
         }
 
         // Generate token
-        const token = generateToken(user._id);
+        const token = generateToken(user);
 
         res.json({
             message: 'Login successful',
@@ -72,6 +80,7 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({ message: 'Error logging in', error: error.message });
     }
 };
