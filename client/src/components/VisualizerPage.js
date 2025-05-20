@@ -77,7 +77,6 @@ const VisualizerPage = () => {
         transformValue = 'translate(-50%, 20%)'; // Position below for hanging chains
       }
     }
-    // Add more room-specific positioning as needed
 
     setPopupPosition({
       x: rect.x + window.scrollX,
@@ -85,7 +84,14 @@ const VisualizerPage = () => {
       transform: transformValue
     });
 
-    setSelectedAssociation(association);
+    // Ensure association has the correct structure
+    const processedAssociation = {
+      anchor: association.anchor,
+      memorable: association.memorableItem, // Map memorableItem to memorable for the image service
+      description: association.description
+    };
+
+    setSelectedAssociation(processedAssociation);
     setIsLoading(true);
     setError(null);
     setGeneratedImage(null);
@@ -98,7 +104,7 @@ const VisualizerPage = () => {
         setCurrentPrompt(acceptedImages[association.anchor].prompt);
       } else {
         // Generate new image if no accepted image exists
-        const result = await generateImage(association, setCurrentPrompt);
+        const result = await generateImage(processedAssociation, setCurrentPrompt);
         setGeneratedImage(result.imageUrl);
         setCurrentPrompt(result.prompt);
       }
@@ -167,7 +173,7 @@ const VisualizerPage = () => {
           {associations.map((assoc, index) => {
             // Only show buttons for anchor points that exist in the current room
             // AND have a memorable item associated with them
-            if (!anchorPositions[assoc.anchor] || !assoc.memorable) return null;
+            if (!anchorPositions[assoc.anchor] || !assoc.memorableItem) return null;
 
             return (
               <button

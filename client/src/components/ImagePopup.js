@@ -18,7 +18,7 @@ const ImagePopup = ({
         left: `${position.x}px`,
         top: `${position.y}px`,
         transform: position.transform || 'translate(-50%, -120%)',
-        maxWidth: '300px',
+        maxWidth: '400px',
         backgroundColor: '#fff',
         border: '4px solid #5b8200'
       }}
@@ -30,13 +30,19 @@ const ImagePopup = ({
         ×
       </button>
 
-      <h3 className="mario-header text-sm mb-3 text-primary">
+      <h3 className="mario-header text-lg mb-2 text-primary">
         {association.anchor}: {association.memorable}
       </h3>
 
+      {association.description && (
+        <div className="text-sm text-gray-700 mb-3 bg-gray-50 p-2 rounded border border-gray-200">
+          <span className="font-semibold">Memory Aid:</span> {association.description}
+        </div>
+      )}
+
       {prompt && !isLoading && image && (
         <div className="text-xs text-gray-600 italic mb-2 bg-gray-100 p-2 rounded">
-          {prompt}
+          <span className="font-semibold">AI Prompt:</span> {prompt}
         </div>
       )}
 
@@ -61,7 +67,6 @@ const ImagePopup = ({
             className="rounded-lg shadow-md max-w-full h-auto coin"
             onError={(e) => {
               console.error('Image failed to load:', e);
-              // You could call an onError prop here if needed
             }}
           />
 
