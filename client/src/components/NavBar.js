@@ -1,39 +1,43 @@
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-const NavBar = () => {
+const NavBar = ({ onLoginClick, onSignUpClick }) => {
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        // Clear any stored data
-        localStorage.removeItem('token');
-        localStorage.removeItem('associations');
-        localStorage.removeItem('roomType');
-        localStorage.removeItem('acceptedImages');
-
-        // Navigate to home page
-        navigate('/');
-    };
-
     return (
-        <nav className="bg-primary shadow-md">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16">
+        <nav className="bg-white shadow-md">
+            <div className="container mx-auto px-4">
+                <div className="flex justify-between items-center h-16">
+                    {/* Logo and Brand */}
                     <div className="flex items-center">
-                        <Link to="/demo" className="text-white text-xl font-bold">Memory Palace</Link>
+                        <span
+                            className="text-2xl font-bold text-primary cursor-pointer"
+                            onClick={() => navigate('/')}
+                        >
+                            Memory Palace
+                        </span>
                     </div>
+
+                    {/* Navigation Links */}
+                    <div className="hidden md:flex items-center space-x-8">
+                        <a href="#features" className="text-gray-600 hover:text-primary">Features</a>
+                        <a href="#how-it-works" className="text-gray-600 hover:text-primary">How It Works</a>
+                        <a href="#pricing" className="text-gray-600 hover:text-primary">Pricing</a>
+                    </div>
+
+                    {/* Auth Buttons */}
                     <div className="flex items-center space-x-4">
-                        <Link
-                            to="/saved-rooms"
-                            className="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                        >
-                            Saved Rooms
-                        </Link>
                         <button
-                            onClick={handleLogout}
-                            className="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                            onClick={onLoginClick}
+                            className="px-4 py-2 text-primary hover:text-primary-dark font-medium"
                         >
-                            Logout
+                            Log In
+                        </button>
+                        <button
+                            onClick={onSignUpClick}
+                            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                        >
+                            Sign Up
                         </button>
                     </div>
                 </div>
