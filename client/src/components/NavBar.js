@@ -14,7 +14,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                             className="text-2xl font-bold text-primary cursor-pointer"
                             onClick={() => navigate('/')}
                         >
-                            Memory Palace
+                            Palatial Minds
                         </span>
                     </div>
 

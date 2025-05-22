@@ -106,7 +106,7 @@ const HomePage = () => {
             <div className="container mx-auto px-4 py-16">
                 <div className="text-center mb-16">
                     <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
-                        Welcome to Memory Palace
+                        Welcome to Palatial Minds
                     </h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                         Transform your learning experience with the ancient art of memory palaces.
