@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
+import floatingCastle from '../assets/floating-castle.png';
 
 const API_URL = 'http://localhost:5000'; // Add API URL
 
@@ -104,37 +105,22 @@ const HomePage = () => {
 
             {/* Hero Section */}
             <div className="container mx-auto px-4 py-16">
-                <div className="text-center mb-16">
+                <div className="flex flex-col items-center mb-16">
+                    <img
+                        src={floatingCastle}
+                        alt="Floating castle memory palace"
+                        className="w-64 h-64 md:w-80 md:h-80 object-contain mb-8 drop-shadow-xl"
+                    />
                     <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
-                        Welcome to Palatial Minds
+                        Transform your learning experience<br />with the ancient art of memory palaces.
                     </h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Transform your learning experience with the ancient art of memory palaces.
                         Create vivid mental spaces to remember anything, from languages to complex concepts.
                     </p>
                 </div>
 
-                {/* Features Grid */}
-                <div className="grid md:grid-cols-3 gap-8 mb-16">
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <div className="text-primary text-3xl mb-4">🏰</div>
-                        <h3 className="text-xl font-semibold mb-2">Create Your Palace</h3>
-                        <p className="text-gray-600">Design custom memory palaces with unique rooms and associations.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <div className="text-primary text-3xl mb-4">🎯</div>
-                        <h3 className="text-xl font-semibold mb-2">Visualize & Remember</h3>
-                        <p className="text-gray-600">Use spatial memory techniques to enhance your learning and recall.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-lg shadow-md">
-                        <div className="text-primary text-3xl mb-4">📚</div>
-                        <h3 className="text-xl font-semibold mb-2">Learn Anything</h3>
-                        <p className="text-gray-600">Perfect for languages, academic subjects, professional skills, and more.</p>
-                    </div>
-                </div>
-
                 {/* Demo Button */}
-                <div className="text-center">
+                <div className="text-center mb-16">
                     <button
                         onClick={handleDemoLogin}
                         disabled={isLoading}
@@ -143,6 +129,48 @@ const HomePage = () => {
                         Try Demo Version
                     </button>
                 </div>
+
+                {/* Vertical Features Section */}
+                <section className="space-y-24 max-w-4xl mx-auto">
+                    {/* Feature 1: Learn Anything */}
+                    <div className="flex flex-col md:flex-row items-center md:items-start md:space-x-12">
+                        {/* Illustration */}
+                        <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
+                            <img src="https://undraw.co/api/illustrations/3d2b7b2e-7e2e-4b2e-8e2e-2e6b7b2e7e2e" alt="Learn Anything" className="w-64 h-64 object-contain" />
+                        </div>
+                        {/* Text */}
+                        <div className="w-full md:w-1/2 text-center md:text-left">
+                            <h2 className="text-3xl font-bold text-primary mb-4">Learn Anything</h2>
+                            <p className="text-lg text-gray-700">Perfect for languages, academic subjects, professional skills, and more. Palatial Minds adapts to your learning goals and helps you master any topic.</p>
+                        </div>
+                    </div>
+
+                    {/* Feature 2: Visualize & Remember */}
+                    <div className="flex flex-col md:flex-row-reverse items-center md:items-start md:space-x-reverse md:space-x-12">
+                        {/* Illustration */}
+                        <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
+                            <img src="https://undraw.co/api/illustrations/1c2b7b2e-7e2e-4b2e-8e2e-2e6b7b2e7e2e" alt="Visualize & Remember" className="w-64 h-64 object-contain" />
+                        </div>
+                        {/* Text */}
+                        <div className="w-full md:w-1/2 text-center md:text-left">
+                            <h2 className="text-3xl font-bold text-primary mb-4">Visualize & Remember</h2>
+                            <p className="text-lg text-gray-700">Use spatial memory techniques and AI-powered images to enhance your learning and recall. See your knowledge come to life with every step.</p>
+                        </div>
+                    </div>
+
+                    {/* Feature 3: Create Your Palace */}
+                    <div className="flex flex-col md:flex-row items-center md:items-start md:space-x-12">
+                        {/* Illustration */}
+                        <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
+                            <img src="https://undraw.co/api/illustrations/2e6b7b2e-7e2e-4b2e-8e2e-2e6b7b2e7e2e" alt="Create Palace" className="w-64 h-64 object-contain" />
+                        </div>
+                        {/* Text */}
+                        <div className="w-full md:w-1/2 text-center md:text-left">
+                            <h2 className="text-3xl font-bold text-primary mb-4">Create Your Palace</h2>
+                            <p className="text-lg text-gray-700">Design custom memory palaces with unique rooms and associations. Make learning personal and memorable by mapping your knowledge to vivid locations.</p>
+                        </div>
+                    </div>
+                </section>
             </div>
 
             {/* Auth Modal */}
