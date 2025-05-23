@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
 import floatingCastle from '../assets/floating-castle.png';
+import wizardHat from '../assets/wizard-hat.png';
+import magicWand from '../assets/magic-wand.png';
 
 const API_URL = 'http://localhost:5000'; // Add API URL
 
@@ -109,12 +111,12 @@ const HomePage = () => {
             {/* Hero Section */}
             <div className="container mx-auto px-4 py-16">
                 <div className="flex flex-col items-center mb-16">
-                    <img
+                    {/* <img
                         src={floatingCastle}
                         alt="Floating castle memory palace"
                         className="w-64 h-64 md:w-80 md:h-80 object-contain mb-8 drop-shadow-xl"
                         style={{ background: 'transparent' }}
-                    />
+                    /> */}
                     <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
                         Transform your learning experience<br />with the ancient art of memory palaces.
                     </h1>
@@ -136,16 +138,16 @@ const HomePage = () => {
 
                 {/* Vertical Features Section */}
                 <section className="space-y-24 max-w-4xl mx-auto">
-                    {/* Feature 1: Learn Anything */}
+                    {/* Feature 1: Create Your Palace */}
                     <div className="flex flex-col md:flex-row items-center md:items-start md:space-x-12">
                         {/* Illustration */}
                         <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
-                            <img src="https://undraw.co/api/illustrations/3d2b7b2e-7e2e-4b2e-8e2e-2e6b7b2e7e2e" alt="Learn Anything" className="w-64 h-64 object-contain" />
+                            <img src={floatingCastle} alt="Create Palace" className="w-64 h-64 object-contain" />
                         </div>
                         {/* Text */}
                         <div className="w-full md:w-1/2 text-center md:text-left">
-                            <h2 className="text-3xl font-bold text-primary mb-4">Learn Anything</h2>
-                            <p className="text-lg text-gray-700">Perfect for languages, academic subjects, professional skills, and more. Palatial Minds adapts to your learning goals and helps you master any topic.</p>
+                            <h2 className="text-3xl font-bold text-primary mb-4">Create Your Palace</h2>
+                            <p className="text-lg text-gray-700">Design custom memory palaces with unique rooms and associations. Make learning personal and memorable by mapping your knowledge to vivid locations.</p>
                         </div>
                     </div>
 
@@ -153,7 +155,7 @@ const HomePage = () => {
                     <div className="flex flex-col md:flex-row-reverse items-center md:items-start md:space-x-reverse md:space-x-12">
                         {/* Illustration */}
                         <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
-                            <img src="https://undraw.co/api/illustrations/1c2b7b2e-7e2e-4b2e-8e2e-2e6b7b2e7e2e" alt="Visualize & Remember" className="w-64 h-64 object-contain" />
+                            <img src={magicWand} alt="Visualize & Remember" className="w-64 h-64 object-contain" />
                         </div>
                         {/* Text */}
                         <div className="w-full md:w-1/2 text-center md:text-left">
@@ -162,16 +164,16 @@ const HomePage = () => {
                         </div>
                     </div>
 
-                    {/* Feature 3: Create Your Palace */}
+                    {/* Feature 3: Learn Anything */}
                     <div className="flex flex-col md:flex-row items-center md:items-start md:space-x-12">
                         {/* Illustration */}
                         <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
-                            <img src="https://undraw.co/api/illustrations/2e6b7b2e-7e2e-4b2e-8e2e-2e6b7b2e7e2e" alt="Create Palace" className="w-64 h-64 object-contain" />
+                            <img src={wizardHat} alt="Wizard Hat" className="w-64 h-64 object-contain" />
                         </div>
                         {/* Text */}
                         <div className="w-full md:w-1/2 text-center md:text-left">
-                            <h2 className="text-3xl font-bold text-primary mb-4">Create Your Palace</h2>
-                            <p className="text-lg text-gray-700">Design custom memory palaces with unique rooms and associations. Make learning personal and memorable by mapping your knowledge to vivid locations.</p>
+                            <h2 className="text-3xl font-bold text-primary mb-4">Learn Anything</h2>
+                            <p className="text-lg text-gray-700">Perfect for languages, academic subjects, professional skills, and more. Palatial Minds adapts to your learning goals and helps you master any topic.</p>
                         </div>
                     </div>
                 </section>
