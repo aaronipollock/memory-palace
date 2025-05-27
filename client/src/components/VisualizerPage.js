@@ -61,12 +61,16 @@ const VisualizerPage = () => {
 
     // Special positioning for specific anchors in specific rooms
     if (roomType === "throne room") {
-      if (association.anchor === 'stained glass window' || association.anchor === 'chandelier') {
-        transformValue = 'translate(-50%, 20%)'; // Position below
+      if (association.anchor === 'stained glass window') {
+        transformValue = 'translate(-50%, -60%)'; // Stained glass window popup
+      } else if (association.anchor === 'chandelier') {
+        transformValue = 'translate(-50%, -30%)'; // Chandelier popup a bit lower
+      } else if (association.anchor === 'statue') {
+        transformValue = 'translate(-50%, -80%)'; // Statue popup a bit lower
       } else if (association.anchor === 'throne') {
-        transformValue = 'translate(-50%, -130%)'; // Position slightly above
+        transformValue = 'translate(-50%, -100%)'; // Throne popup a bit down
       } else if (association.anchor === 'red carpet') {
-        transformValue = 'translate(-50%, -150%)'; // Position higher above
+        transformValue = 'translate(-50%, -100%)'; // Position higher above
       }
     } else if (roomType === "bedchamber") {
       if (association.anchor === 'lamp' || association.anchor === 'mirror') {
@@ -84,14 +88,7 @@ const VisualizerPage = () => {
       transform: transformValue
     });
 
-    // Ensure association has the correct structure
-    const processedAssociation = {
-      anchor: association.anchor,
-      memorable: association.memorableItem, // Map memorableItem to memorable for the image service
-      description: association.description
-    };
-
-    setSelectedAssociation(processedAssociation);
+    setSelectedAssociation(association);
     setIsLoading(true);
     setError(null);
     setGeneratedImage(null);
@@ -104,7 +101,7 @@ const VisualizerPage = () => {
         setCurrentPrompt(acceptedImages[association.anchor].prompt);
       } else {
         // Generate new image if no accepted image exists
-        const result = await generateImage(processedAssociation, setCurrentPrompt);
+        const result = await generateImage(association, setCurrentPrompt);
         setGeneratedImage(result.imageUrl);
         setCurrentPrompt(result.prompt);
       }
@@ -219,13 +216,15 @@ const VisualizerPage = () => {
           )}
 
           {/* Save Room Modal */}
-          <SaveRoomModal
-            isOpen={isSaveModalOpen}
-            onClose={() => setIsSaveModalOpen(false)}
-            onSave={handleSaveRoom}
-            acceptedImages={acceptedImages}
-            roomType={roomType}
-          />
+          {isSaveModalOpen && (
+            <SaveRoomModal
+              isOpen={isSaveModalOpen}
+              onClose={() => setIsSaveModalOpen(false)}
+              onSave={handleSaveRoom}
+              acceptedImages={acceptedImages}
+              roomType={roomType}
+            />
+          )}
         </div>
       </div>
     </div>

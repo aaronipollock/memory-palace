@@ -117,7 +117,7 @@ const HomePage = () => {
                         className="w-64 h-64 md:w-80 md:h-80 object-contain mb-8 drop-shadow-xl"
                         style={{ background: 'transparent' }}
                     /> */}
-                    <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
+                    <h1 className="text-5xl font-bold mb-6 text-primary">
                         Transform your learning experience<br />with the ancient art of memory palaces.
                     </h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -181,7 +181,6 @@ const HomePage = () => {
 
             {/* Auth Modal */}
             <AuthModal
-                key={authMode + (authModalOpen ? '-open' : '-closed') + JSON.stringify(formData)}
                 isOpen={authModalOpen}
                 onClose={() => setAuthModalOpen(false)}
                 mode={authMode}

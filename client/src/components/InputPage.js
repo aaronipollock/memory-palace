@@ -93,21 +93,26 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
         console.log('Memorables list:', memorablesList);
 
         // Create associations with anchor points for the current room
-        // Only create associations for memorables that exist
         const associations = currentAnchorPoints.map((anchor, index) => {
-            // Only include a memorable if it exists in the list
-            const memorable = index < memorablesList.length ? memorablesList[index] : '';
-
+            const memorableItem = index < memorablesList.length ? memorablesList[index] : '';
             return {
                 anchor,
-                memorable
+                memorableItem,
+                description: `A memorable representation of ${memorableItem} at the ${anchor}`
             };
         });
 
         console.log('Created associations:', associations);
 
-        // Save associations to localStorage for persistence
-        localStorage.setItem('associations', JSON.stringify(associations));
+        // Save the complete palace data to localStorage
+        const palaceData = {
+            roomType,
+            associations
+        };
+        localStorage.setItem('currentPalace', JSON.stringify(palaceData));
+
+        // Clear any previously accepted images for this new palace
+        localStorage.removeItem('acceptedImages');
 
         onImagesGenerated(associations, roomType);
     };
@@ -116,7 +121,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
         <div className="min-h-screen bg-background">
             <NavBar />
             <div className="container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold mb-6 text-center">Create Your Memory Palace</h1>
+                {/* <h1 className="text-3xl font-bold mb-6 text-center">Create Your Memory Palace</h1> */}
                 <div className="mario-bg mario-clouds min-h-screen py-12 px-4">
                     <div className="max-w-4xl mx-auto mario-castle p-6">
                         <h2 className="mario-header text-2xl mb-8 text-center">CREATE YOUR MEMORY CASTLE</h2>

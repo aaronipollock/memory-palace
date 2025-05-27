@@ -76,6 +76,11 @@ const splitIntoSyllables = (word) => {
 
 // A more algorithmic approach to determine if a term is concrete
 const needsFigurativeRepresentation = async (term) => {
+  if (!term) {
+    console.warn('Term is undefined or empty');
+    return false; // Default to literal representation for undefined terms
+  }
+
   const lowerTerm = term.toLowerCase().trim();
 
   // For multi-word terms, check each word
@@ -225,19 +230,19 @@ const generatePrompt = async (association, setCurrentPrompt) => {
     const artStyle = ART_STYLES[Math.floor(Math.random() * ART_STYLES.length)];
 
     // Determine if we should use figurative or literal approach
-    const shouldUseFigurative = await needsFigurativeRepresentation(association.memorable);
+    const shouldUseFigurative = await needsFigurativeRepresentation(association.memorableItem);
 
     let description;
     if (shouldUseFigurative) {
         // Use figurative approach
-        description = await generateFigurativeAssociation(association.memorable);
+        description = await generateFigurativeAssociation(association.memorableItem);
     } else {
-        // Use literal approach
-        description = `a ${adjective} ${association.memorable}`;
+        // Use literal approach with more emphasis on the memorable item
+        description = `a ${adjective} ${association.memorableItem}, clearly visible and prominent`;
     }
 
-    // Create the prompt
-    const prompt = `${description} ${verb} a ${association.anchor}, ${artStyle}.`;
+    // Create the prompt with more emphasis on the memorable item
+    const prompt = `${description} ${verb} a ${association.anchor}, ${artStyle}, centered composition, clear focus on the ${association.memorableItem}.`;
 
     // Save a simplified version for display (without art style)
     const displayPrompt = `${description} ${verb} a ${association.anchor}.`;

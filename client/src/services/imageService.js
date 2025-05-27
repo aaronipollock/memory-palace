@@ -11,6 +11,11 @@ let imageCache = {};
  */
 export const generateImage = async (association, setCurrentPrompt) => {
   try {
+    // Ensure we have the required data
+    if (!association || !association.memorableItem) {
+      throw new Error('Invalid association data: missing memorable item');
+    }
+
     // Generate the prompt
     const promptResult = await generatePrompt(association, setCurrentPrompt);
 
@@ -18,7 +23,7 @@ export const generateImage = async (association, setCurrentPrompt) => {
     if (!promptResult || !promptResult.fullPrompt) {
       console.error('Failed to generate prompt:', promptResult);
       // Use a fallback prompt
-      const fallbackPrompt = `a ${association.memorable} near a ${association.anchor}, digital art`;
+      const fallbackPrompt = `a ${association.memorableItem} near a ${association.anchor}, digital art`;
       console.log('Using fallback prompt:', fallbackPrompt);
 
       if (setCurrentPrompt) {
