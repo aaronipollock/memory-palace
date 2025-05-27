@@ -19,11 +19,11 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                     </div>
 
                     {/* Navigation Links */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    {/* <div className="hidden md:flex items-center space-x-8">
                         <a href="#features" className="text-gray-600 hover:text-primary">Features</a>
                         <a href="#how-it-works" className="text-gray-600 hover:text-primary">How It Works</a>
                         <a href="#pricing" className="text-gray-600 hover:text-primary">Pricing</a>
-                    </div>
+                    </div> */}
 
                     {/* Auth Buttons */}
                     <div className="flex items-center space-x-4">
