@@ -42,8 +42,11 @@ const VisualizerPage = () => {
   // Get the appropriate anchor positions for this room
   const anchorPositions = ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS["throne room"];
 
-  // Check if all images have been accepted
-  const allImagesAccepted = associations.every(assoc =>
+  // Check if all images have been accepted (only for visible associations)
+  const visibleAssociations = associations.filter(
+    assoc => anchorPositions[assoc.anchor] && assoc.memorableItem
+  );
+  const allImagesAccepted = visibleAssociations.every(assoc =>
     acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image
   );
 
@@ -191,14 +194,19 @@ const VisualizerPage = () => {
           })}
 
           {/* Save Room Button */}
-          {allImagesAccepted && (
-            <button
-              onClick={() => setIsSaveModalOpen(true)}
-              className="fixed bottom-8 right-8 bg-primary text-white px-6 py-3 rounded-lg shadow-lg hover:bg-primary-dark transition-colors duration-200 z-20"
-            >
-              Save Room
-            </button>
-          )}
+          <button
+            onClick={() => {
+              if (allImagesAccepted) {
+                setIsSaveModalOpen(true);
+              } else {
+                alert('You must accept all images before saving the room.');
+              }
+            }}
+            className={`fixed bottom-8 right-8 px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 z-20 ${allImagesAccepted ? 'bg-primary text-white hover:bg-primary-dark' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+            disabled={!allImagesAccepted}
+          >
+            Save Room
+          </button>
 
           {/* Image Popup */}
           {selectedAssociation && (

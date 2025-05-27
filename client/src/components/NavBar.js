@@ -39,6 +39,14 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
 
                     {/* Auth Buttons or Logout Link */}
                     <div className="flex items-center space-x-4">
+                        {isLoggedIn && (
+                            <button
+                                onClick={() => navigate('/saved-rooms')}
+                                className="px-4 py-2 text-primary hover:text-primary-dark font-medium"
+                            >
+                                Saved Rooms
+                            </button>
+                        )}
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}

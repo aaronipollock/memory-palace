@@ -23,6 +23,13 @@ const SavedRooms = () => {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             setUserEmail(payload.email);
+            if (payload.email === 'demo@example.com') {
+                // Load from localStorage for demo user
+                const localPalaces = JSON.parse(localStorage.getItem('savedRooms') || '[]');
+                setPalaces(localPalaces);
+                setLoading(false);
+                return;
+            }
         } catch (err) {
             console.error('Error decoding token:', err);
             navigate('/');
