@@ -2,124 +2,278 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mario Castle theme */
-.mario-bg {
-  background-color: #89CFEF;
-  background-image: linear-gradient(to bottom, #89CFEF 70%, #5b8200);
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Jewel Tone Color Palette */
+  --color-primary: #1B365D;    /* Deep Sapphire */
+  --color-secondary: #B8860B;  /* Gold */
+  --color-accent: #2E8B57;     /* Emerald */
+  --color-background: #F8F9FA; /* Light Gray */
+  --color-text: #1B365D;       /* Deep Sapphire for text */
+  --color-text-light: #4A5568; /* Slate Gray for secondary text */
+  --color-success: #2E8B57;    /* Emerald for success states */
+  --color-error: #DC2626;      /* Red for error states */
+  --color-overlay: rgba(27, 54, 93, 0.1); /* Sapphire overlay */
+}
+
+/* Base Styles */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* Loci Theme */
+.loci-bg {
+  background-color: var(--color-background);
+  background-image: linear-gradient(to bottom, var(--color-background) 70%, var(--color-accent));
   background-attachment: fixed;
 }
 
-.mario-clouds {
+.loci-header {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.loci-container {
+  background-color: white;
+  border: 1px solid var(--color-overlay);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.mario-clouds::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background-image: url('https://www.transparentpng.com/thumb/clouds/mario-clouds-transparent-background-png-8.png');
-  background-repeat: repeat-x;
-  background-size: 200px;
-  opacity: 0.7;
-  animation: cloudMove 60s linear infinite;
-  pointer-events: none;
+.loci-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes cloudMove {
-  from { background-position: 0 20px; }
-  to { background-position: 1000px 20px; }
-}
-
-.mario-castle {
-  background-color: #794044;
-  border: 8px solid #5e2c2f;
-  border-radius: 8px;
-  box-shadow: 0 8px 0 #5e2c2f, 0 12px 20px rgba(0, 0, 0, 0.4);
-  position: relative;
-}
-
-.mario-castle::before {
-  content: '';
-  position: absolute;
-  top: -24px;
-  left: 0;
-  right: 0;
-  height: 24px;
-  background-color: #794044;
-  background-image:
-    linear-gradient(90deg, transparent 0%, transparent 20%, #5e2c2f 20%, #5e2c2f 40%,
-                   transparent 40%, transparent 60%, #5e2c2f 60%, #5e2c2f 80%,
-                   transparent 80%, transparent 100%);
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  border: 8px solid #5e2c2f;
-  border-bottom: none;
-}
-
-.mario-header {
-  font-family: 'Press Start 2P', cursive;
-  color: #e4000f;
-  text-shadow: 2px 2px 0 #000;
-  letter-spacing: 1px;
-}
-
-.btn-mario {
-  background-color: #e4000f;
+/* Button Styles */
+.btn-loci {
+  background-color: var(--color-primary);
   color: white;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 14px;
-  padding: 12px 20px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  padding: 12px 24px;
   border: none;
-  border-radius: 4px;
-  box-shadow: 0 6px 0 #8b0000, 0 8px 10px rgba(0, 0, 0, 0.2);
-  transition: all 0.1s;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
   position: relative;
-  text-shadow: 1px 1px 0 #000;
+  overflow: hidden;
 }
 
-.btn-mario:hover {
-  transform: translateY(2px);
-  box-shadow: 0 4px 0 #8b0000, 0 6px 8px rgba(0, 0, 0, 0.2);
+.btn-loci:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #2B4B7D;
 }
 
-.btn-mario:active {
-  transform: translateY(6px);
-  box-shadow: 0 0 0 #8b0000, 0 0 0 rgba(0, 0, 0, 0.2);
+.btn-loci:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.question-block {
-  background-color: #F6B330;
-  border: 4px solid #fff;
-  box-shadow: inset -4px -4px 0 #8B6914, 0 4px 0 #8B6914;
+.btn-loci::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.btn-loci:hover::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20, 20);
+    opacity: 0;
+  }
+}
+
+.btn-loci-secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Interactive Elements */
+.loci-anchor {
+  background-color: var(--color-secondary);
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
   display: inline-flex;
   justify-content: center;
   align-items: center;
+  transition: all 0.3s ease;
 }
 
-.question-block::before {
+.loci-anchor:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.loci-anchor::before {
   content: '?';
-  font-family: 'Press Start 2P', cursive;
-  color: #fff;
-  font-size: 20px;
-  text-shadow: 1px 1px 0 #8B6914;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--color-primary);
+  font-size: 18px;
+  font-weight: 600;
 }
 
-.coin {
-  animation: spin 0.5s linear;
+/* Modal Styles */
+.loci-modal {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-overlay);
+  animation: modalFadeIn 0.3s ease-out;
 }
 
-@keyframes spin {
-  0% { transform: scale(0) rotateY(0deg); }
-  100% { transform: scale(1) rotateY(360deg); }
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.pipe {
-  background-color: #5b8200;
-  border: 4px solid #3c5500;
-  border-radius: 8px 8px 0 0;
-  box-shadow: inset -4px 0 0 rgba(0,0,0,0.2);
+/* Form Elements */
+.loci-input {
+  border: 1px solid var(--color-overlay);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.loci-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(46, 139, 87, 0.2);
+  outline: none;
+}
+
+/* Navigation */
+.loci-nav {
+  background-color: white;
+  border-bottom: 1px solid var(--color-overlay);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.loci-nav-link {
+  color: var(--color-text);
+  font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.loci-nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--color-accent);
+  transition: width 0.3s ease;
+}
+
+.loci-nav-link:hover::after {
+  width: 100%;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.loci-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Feature Cards */
+.feature-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.feature-card:hover::before {
+  opacity: 0.05;
+}
+
+/* Utility Classes */
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-accent { color: var(--color-accent); }
+.bg-primary { background-color: var(--color-primary); }
+.bg-secondary { background-color: var(--color-secondary); }
+.bg-accent { background-color: var(--color-accent); }
+
+/* Animation Classes */
+.hover-lift {
+  transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+}
+
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .loci-header {
+    font-size: 2.5rem;
+  }
+
+  .feature-card {
+    margin-bottom: 1rem;
+  }
 }

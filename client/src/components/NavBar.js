@@ -17,40 +17,45 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
     };
 
     return (
-        <nav className="bg-white shadow-md">
-            <div className="container mx-auto px-4">
-                <div className="flex justify-between items-center h-16">
+        <nav className="loci-nav">
+            <div className="container mx-auto px-6">
+                <div className="flex justify-between items-center h-20">
                     {/* Logo and Brand */}
                     <div className="flex items-center">
                         <span
-                            className="text-2xl font-bold text-primary cursor-pointer"
+                            className="text-3xl font-bold text-primary cursor-pointer loci-header"
                             onClick={() => navigate('/')}
                         >
-                            Palatial Minds
+                            Loci
                         </span>
                     </div>
 
                     {/* Navigation Links */}
-                    {/* <div className="hidden md:flex items-center space-x-8">
-                        <a href="#features" className="text-gray-600 hover:text-primary">Features</a>
-                        <a href="#how-it-works" className="text-gray-600 hover:text-primary">How It Works</a>
-                        <a href="#pricing" className="text-gray-600 hover:text-primary">Pricing</a>
-                    </div> */}
+                    <div className="hidden md:flex items-center space-x-8">
+                        {isLoggedIn && (
+                            <>
+                                <button
+                                    onClick={() => navigate('/demo')}
+                                    className="loci-nav-link"
+                                >
+                                    Create Palace
+                                </button>
+                                <button
+                                    onClick={() => navigate('/saved-rooms')}
+                                    className="loci-nav-link"
+                                >
+                                    Saved Rooms
+                                </button>
+                            </>
+                        )}
+                    </div>
 
                     {/* Auth Buttons or Logout Link */}
                     <div className="flex items-center space-x-4">
-                        {isLoggedIn && (
-                            <button
-                                onClick={() => navigate('/saved-rooms')}
-                                className="px-4 py-2 text-primary hover:text-primary-dark font-medium"
-                            >
-                                Saved Rooms
-                            </button>
-                        )}
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}
-                                className="px-4 py-2 text-primary hover:text-primary-dark font-medium"
+                                className="btn-loci-secondary"
                             >
                                 Log Out
                             </button>
@@ -58,13 +63,13 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                             <>
                                 <button
                                     onClick={onLoginClick}
-                                    className="px-4 py-2 text-primary hover:text-primary-dark font-medium"
+                                    className="loci-nav-link"
                                 >
                                     Log In
                                 </button>
                                 <button
                                     onClick={onSignUpClick}
-                                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                                    className="btn-loci"
                                 >
                                     Sign Up
                                 </button>

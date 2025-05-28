@@ -124,7 +124,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                 {/* <h1 className="text-3xl font-bold mb-6 text-center">Create Your Memory Palace</h1> */}
                 <div className="mario-bg mario-clouds min-h-screen py-12 px-4">
                     <div className="max-w-4xl mx-auto mario-castle p-6">
-                        <h2 className="mario-header text-2xl mb-8 text-center">CREATE YOUR MEMORY CASTLE</h2>
+                        <h2 className="mario-header text-2xl mb-8 text-center">CREATE YOUR MEMORY PALACE</h2>
 
                         <div className="bg-white rounded-lg p-6 mb-8 text-text">
                             <p className="mb-4">To create your memory palace, follow these steps:</p>
@@ -157,10 +157,13 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="block text-white font-bold">
+                                    <label className="block text-white font-bold mb-2">
                                         Demo Anchor Points:
                                     </label>
-                                    <pre className="border p-3 w-full h-40 bg-white text-text rounded-lg whitespace-pre-wrap" style={{ fontFamily: 'inherit' }}>
+                                    <pre
+                                        className="border p-3 w-full h-40 bg-white text-text rounded-lg whitespace-pre-wrap leading-tight"
+                                        style={{ fontFamily: 'inherit', lineHeight: 1.2, margin: 0 }}
+                                    >
                                         {currentAnchorPoints.join('\n')}
                                     </pre>
                                 </div>
@@ -187,16 +190,10 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                                     <button
                                         type="submit"
                                         onClick={handleProceedToVisualizer}
-                                        className="flex-1 btn-mario"
+                                        className="flex-1 btn-loci text-lg px-8 py-4"
+                                        disabled={isLoading}
                                     >
-                                        {isLoading ? (
-                                            <span className="inline-flex items-center">
-                                                Creating your memory associations
-                                                <span className="ml-1 animate-[ellipsis_1.5s_infinite]">...</span>
-                                            </span>
-                                        ) : (
-                                            'PROCEED TO VISUALIZER'
-                                        )}
+                                        PROCEED TO VISUALIZER
                                     </button>
                                     <button
                                         type="button"

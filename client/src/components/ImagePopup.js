@@ -13,74 +13,72 @@ const ImagePopup = ({
 }) => {
   return (
     <div
-      className="fixed bg-white rounded-lg shadow-xl p-4 z-50 pipe"
+      className="fixed loci-modal p-6 z-50"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         transform: position.transform || 'translate(-50%, -120%)',
         maxWidth: '400px',
-        backgroundColor: '#fff',
-        border: '4px solid #5b8200'
       }}
     >
       <button
         onClick={onClose}
-        className="absolute top-2 right-2 text-white bg-primary hover:bg-red-700 w-8 h-8 flex items-center justify-center rounded-full"
+        className="absolute top-3 right-3 text-primary hover:text-accent w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200"
       >
         ×
       </button>
 
-      <h3 className="mario-header text-lg mb-2 text-primary">
+      <h3 className="loci-header text-xl mb-3 text-primary">
         {association.anchor}: {association.memorable}
       </h3>
 
       {association.description && (
-        <div className="text-sm text-gray-700 mb-3 bg-gray-50 p-2 rounded border border-gray-200">
-          <span className="font-semibold">Memory Aid:</span> {association.description}
+        <div className="text-sm text-text-light mb-4 bg-background p-3 rounded-lg">
+          <span className="font-semibold text-primary">Memory Aid:</span> {association.description}
         </div>
       )}
 
       {prompt && !isLoading && image && (
-        <div className="text-xs text-gray-600 italic mb-2 bg-gray-100 p-2 rounded">
-          <span className="font-semibold">AI Prompt:</span> {prompt}
+        <div className="text-xs text-text-light italic mb-3 bg-background p-3 rounded-lg">
+          <span className="font-semibold text-primary">AI Prompt:</span> {prompt}
         </div>
       )}
 
       {isLoading && (
-        <div className="text-center py-4">
+        <div className="text-center py-6">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-secondary">Creating your memorable image...</p>
+          <p className="mt-3 text-text-light">Creating your memorable image...</p>
         </div>
       )}
 
       {error && (
-        <div className="text-red-500 text-center py-2 bg-white rounded p-1">
+        <div className="text-error text-center py-3 bg-error/10 rounded-lg">
           {error}
         </div>
       )}
 
       {image && (
-        <div className="mt-3">
+        <div className="mt-4">
           <img
             src={image}
             alt={`${association.memorable} with ${association.anchor}`}
-            className="rounded-lg shadow-md max-w-full h-auto coin"
+            className="rounded-lg shadow-md max-w-full h-auto loci-fade-in"
             onError={(e) => {
               console.error('Image failed to load:', e);
             }}
           />
 
           {/* Accept/Reject buttons */}
-          <div className="flex justify-center space-x-4 mt-4">
+          <div className="flex justify-center space-x-4 mt-6">
             <button
               onClick={onReject}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
+              className="btn-loci-secondary"
             >
               Reject
             </button>
             <button
               onClick={onAccept}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200"
+              className="btn-loci"
             >
               Accept
             </button>

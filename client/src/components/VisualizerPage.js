@@ -159,10 +159,10 @@ const VisualizerPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
-      <div className="mario-bg mario-clouds py-12 px-4">
-        <h2 className="mario-header text-2xl mb-8 text-center">YOUR MEMORY CASTLE</h2>
+      <div className="loci-bg py-12 px-4">
+        <h2 className="loci-header text-3xl mb-8 text-center">Your Memory Palace</h2>
 
-        <div className="relative w-full max-w-6xl mx-auto mario-castle p-4">
+        <div className="relative w-full max-w-6xl mx-auto loci-container p-4">
           <img
             src={roomImage}
             alt={`${roomType}`}
@@ -171,14 +171,12 @@ const VisualizerPage = () => {
           />
 
           {associations.map((assoc, index) => {
-            // Only show buttons for anchor points that exist in the current room
-            // AND have a memorable item associated with them
             if (!anchorPositions[assoc.anchor] || !assoc.memorableItem) return null;
 
             return (
               <button
                 key={index}
-                className="absolute cursor-pointer question-block"
+                className="absolute cursor-pointer loci-anchor"
                 style={{
                   ...anchorPositions[assoc.anchor],
                   position: 'absolute',
@@ -202,7 +200,9 @@ const VisualizerPage = () => {
                 alert('You must accept all images before saving the room.');
               }
             }}
-            className={`fixed bottom-8 right-8 px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 z-20 ${allImagesAccepted ? 'bg-primary text-white hover:bg-primary-dark' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+            className={`fixed bottom-8 right-8 px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 z-20 ${
+              allImagesAccepted ? 'btn-loci' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
             disabled={!allImagesAccepted}
           >
             Save Room
