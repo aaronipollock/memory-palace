@@ -1,0 +1,27 @@
+@import url('https://fonts.cdnfonts.com/css/trajan-pro');
+@import url('https://fonts.cdnfonts.com/css/minion-pro');
+
+:root {
+    --font-title: 'Trajan Pro', serif;
+    --font-body: 'Minion Pro', serif;
+}
+
+/* Title styles */
+h1, h2, h3, h4, h5, h6,
+.title,
+.loci-header,
+.mario-header {
+    font-family: var(--font-title);
+    letter-spacing: 0.05em;
+}
+
+/* Body text styles */
+body, p, span, div, button, input, textarea, select {
+    font-family: var(--font-body);
+}
+
+/* Specific title classes */
+.trajan-font {
+    font-family: var(--font-title);
+    letter-spacing: 0.05em;
+}

@@ -162,6 +162,30 @@ const VisualizerPage = () => {
       <div className="loci-bg py-12 px-4">
         <h2 className="loci-header text-3xl mb-8 text-center">Your Memory Palace</h2>
 
+        <div className="max-w-4xl mx-auto mb-8 bg-white rounded-lg p-6 shadow-lg">
+          <h3 className="text-xl font-bold mb-4 text-primary">How to Use Your Memory Palace</h3>
+          <ol className="list-decimal pl-6 space-y-3">
+            <li>
+              <strong>Study the Room:</strong> Take a moment to notice the anchor points (highlighted areas) and their positions in the room. This spatial awareness will help strengthen your memory associations.
+            </li>
+            <li>
+              <strong>Click on Anchor Points:</strong> Click on any highlighted area in the room to generate an image for that location.
+            </li>
+            <li>
+              <strong>Review Generated Images:</strong> Each click will generate a unique image representing your memorable item at that location.
+            </li>
+            <li>
+              <strong>Accept or Reject:</strong> If you like the image, click "Accept". If not, click "Reject" to generate a new one.
+            </li>
+            <li>
+              <strong>Complete All Points:</strong> Continue until you've accepted images for all anchor points in the room.
+            </li>
+            <li>
+              <strong>Save Your Palace:</strong> Once all images are accepted, click "Save Room" to name and save your memory palace.
+            </li>
+          </ol>
+        </div>
+
         <div className="relative w-full max-w-6xl mx-auto loci-container p-4">
           <img
             src={roomImage}
@@ -187,6 +211,9 @@ const VisualizerPage = () => {
                 }}
                 onClick={(e) => handleClick(assoc, e)}
               >
+                <div className="w-full h-full flex items-center justify-center text-white/40 hover:text-white/60 transition-colors duration-200 text-xl font-bold">
+                  {acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image ? '✓' : '?'}
+                </div>
               </button>
             );
           })}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './NavBar.css';  // We'll create this file next
 
 const NavBar = ({ onLoginClick, onSignUpClick }) => {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                     {/* Logo and Brand */}
                     <div className="flex items-center">
                         <span
-                            className="text-3xl font-bold text-primary cursor-pointer loci-header"
+                            className="text-3xl font-bold text-primary cursor-pointer loci-header trajan-font loci-italic"
                             onClick={() => navigate('/')}
                         >
                             Loci
@@ -55,7 +56,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}
-                                className="btn-loci-secondary"
+                                className="px-4 py-2 bg-white text-black border border-gray-400 rounded hover:bg-gray-700 hover:text-white transition-colors duration-200"
                             >
                                 Log Out
                             </button>

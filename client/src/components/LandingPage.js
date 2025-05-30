@@ -57,7 +57,7 @@ const LandingPage = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             <div className="flex-1 text-center md:text-left">
               <h1 className="loci-header text-5xl md:text-6xl mb-6">
-                Where Memories Find Their Place
+                Want to boost your memory? You've come to the right place.
               </h1>
               <p className="text-xl text-text-light mb-8">
                 Transform how you learn and remember with AI-powered memory palaces.
