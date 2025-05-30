@@ -78,7 +78,7 @@ const HomePage = () => {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem('token', data.token);
-                navigate('/demo');
+        navigate('/demo');
             } else {
                 setError(data.message || 'Authentication failed');
             }
@@ -122,18 +122,18 @@ const HomePage = () => {
                     </h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                         Create vivid mental spaces to remember anything, from languages to complex concepts.
-                    </p>
+            </p>
                 </div>
 
                 {/* Demo Button */}
                 <div className="text-center mb-16">
-                    <button
+                <button
                         onClick={handleDemoLogin}
                         disabled={isLoading}
                         className="px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300 disabled:opacity-50 font-medium text-lg"
-                    >
+                >
                         Try Demo Version
-                    </button>
+                </button>
                 </div>
 
                 {/* Vertical Features Section */}

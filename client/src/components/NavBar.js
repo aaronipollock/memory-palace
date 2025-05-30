@@ -24,7 +24,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                     {/* Logo and Brand */}
                     <div className="flex items-center">
                         <span
-                            className="text-3xl font-bold text-primary cursor-pointer loci-header trajan-font loci-italic"
+                            className="text-5xl font-bold text-primary cursor-pointer loci-header trajan-font loci-italic"
                             onClick={() => navigate('/')}
                         >
                             Loci
@@ -64,7 +64,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                             <>
                                 <button
                                     onClick={onLoginClick}
-                                    className="loci-nav-link"
+                                    className="loci-nav-link !text-white"
                                 >
                                     Log In
                                 </button>
