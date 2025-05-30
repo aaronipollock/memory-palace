@@ -1,10 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
+import AuthModal from './AuthModal';
 import './LandingPage.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [showAuthModal, setShowAuthModal] = React.useState(false);
+  const [authMode, setAuthMode] = React.useState('signup'); // or 'login'
+  const [formData, setFormData] = React.useState({ email: '', password: '', confirmPassword: '' });
+  const [authError, setAuthError] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const features = [
     {
@@ -47,11 +53,34 @@ const LandingPage = () => {
     }
   ];
 
+  const handleAuthSubmit = async (data) => {
+    setIsLoading(true);
+    setAuthError('');
+    try {
+      // ...your login/signup API call here...
+      // Suppose you get a token from the response:
+      // const token = response.data.token;
+      // localStorage.setItem('token', token);
+
+      // For demonstration, let's simulate a token:
+      localStorage.setItem('token', 'demo-token');
+      setShowAuthModal(false);
+      // Optionally, force a re-render:
+      window.location.reload(); // or use a state variable to trigger re-render
+    } catch (err) {
+      setAuthError('Login/Signup failed');
+    }
+    setIsLoading(false);
+  };
+
   return (
     <>
       <div className="landing-palace-bg" />
       <div className="min-h-screen relative">
-        <NavBar />
+        <NavBar
+          onLoginClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
+          onSignUpClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
+        />
         {/* Hero Section */}
         <section className="py-20 px-4 mt-64">
           <div className="container mx-auto max-w-6xl">
@@ -61,17 +90,21 @@ const LandingPage = () => {
                   Want to boost your memory? <br /> You've come to the right place.
                 </h1>
                 <p className="text-xl text-text-light text-center text-white mb-8">
-                  Transform how you learn and remember with AI-powered memory palaces.
+                  Transform how you remember with AI-powered memory palaces, <br />aka the method loci (pronounced <em>low·sai</em>).
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
-                    onClick={() => navigate('/demo')}
+                    onClick={() => {
+                      // Simulate demo login
+                      localStorage.setItem('token', 'demo-token');
+                      navigate('/demo'); // Go to InputPage after setting token
+                    }}
                     className="btn-loci text-lg px-8 py-4"
                   >
                     Try Demo
                   </button>
                   <button
-                    onClick={() => navigate('/signup')}
+                    onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
                     className="btn-loci-secondary text-lg px-8 py-4"
                   >
                     Get Started
@@ -82,22 +115,39 @@ const LandingPage = () => {
           </div>
         </section>
         {/* Features Section */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="loci-header text-4xl text-center mb-16">
-              Powerful Features for Better Memory
-            </h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              {features.map((feature, index) => (
-                <div key={index} className="loci-container p-6 text-center feature-card group">
-                  <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                    {feature.icon}
+        <section className="py-20 px-0">
+          <h2 className="loci-header text-4xl text-center mb-16 !text-white">
+            Powerful Features for Better Memory
+          </h2>
+          <div className="flex flex-col gap-0 w-full">
+            {features.map((feature, index) => {
+              const purpleShades = [
+                'bg-purple-200',
+                'bg-purple-300',
+                'bg-purple-400',
+                'bg-purple-300',
+                'bg-purple-200',
+              ];
+              const shade = purpleShades[index % purpleShades.length];
+              const isEven = index % 2 === 0;
+              return (
+                <div
+                  key={index}
+                  className={`w-full py-24 px-4 ${shade} flex`}
+                >
+                  <div
+                    className={`
+                      max-w-md w-full
+                      mx-auto
+                      ${isEven ? 'text-left ml-12' : 'text-right mr-12'}
+                    `}
+                  >
+                    <h3 className="text-2xl font-semibold mb-2 text-purple-900">{feature.title}</h3>
+                    <p className="text-purple-900/90 text-lg">{feature.description}</p>
                   </div>
-                  <h3 className="loci-header text-xl mb-3">{feature.title}</h3>
-                  <p className="text-text-light">{feature.description}</p>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </section>
         {/* Use Cases Section */}
@@ -129,7 +179,7 @@ const LandingPage = () => {
               Join thousands of learners who have transformed their memory with Loci.
             </p> */}
             <button
-              onClick={() => navigate('/signup')}
+              onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
               className="btn-loci text-lg px-8 py-4"
             >
               Create Free Account
@@ -176,6 +226,16 @@ const LandingPage = () => {
             </div>
           </div>
         </footer>
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          mode={authMode}
+          onSubmit={handleAuthSubmit}
+          error={authError}
+          isLoading={isLoading}
+          formData={formData}
+          setFormData={setFormData}
+        />
       </div>
     </>
   );

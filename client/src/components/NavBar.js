@@ -27,7 +27,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                             className="text-5xl font-bold text-primary cursor-pointer loci-header trajan-font loci-italic"
                             onClick={() => navigate('/')}
                         >
-                            Loci
+                            low·sai
                         </span>
                     </div>
 
