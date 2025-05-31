@@ -15,7 +15,7 @@ const LandingPage = () => {
   const features = [
     {
       title: "AI-Powered Memory Creation",
-      description: "Transform any information into vivid, memorable images with our advanced AI technology.",
+      description: "Transform any information into vivid, memorable images with AI technology.",
       icon: "🎨"
     },
     {

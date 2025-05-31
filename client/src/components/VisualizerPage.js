@@ -186,12 +186,12 @@ const VisualizerPage = () => {
           </ol>
         </div>
 
-        <div className="relative w-full max-w-6xl mx-auto loci-container p-4">
+        <div className="relative w-full max-w-4xl mx-auto loci-container p-4">
           <img
             src={roomImage}
             alt={`${roomType}`}
-            className="w-full h-auto rounded-lg"
-            style={{ maxHeight: '80vh' }}
+            className="w-full h-auto rounded-lg aspect-[1/1]"
+            style={{ maxHeight: '95vh' }}
           />
 
           {associations.map((assoc, index) => {
