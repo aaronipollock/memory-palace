@@ -21,6 +21,7 @@ const VisualizerPage = () => {
     const saved = localStorage.getItem('savedRooms');
     return saved ? JSON.parse(saved) : [];
   });
+  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
 
   // Get the current palace data from localStorage
   const currentPalace = JSON.parse(localStorage.getItem('currentPalace') || '{}');
@@ -160,108 +161,125 @@ const VisualizerPage = () => {
     <div className="min-h-screen bg-background">
       <NavBar />
       <div className="loci-bg py-12 px-4">
-        <div className="flex flex-col md:flex-row gap-8 items-start max-w-6xl mx-auto">
-          {/* Directions on the left */}
-          <div className="w-full md:w-1/3 mb-8 md:mb-0 bg-white rounded-lg p-6 shadow-lg">
-            <h3 className="text-xl font-bold mb-4 text-primary">How to Use Your Memory Palace</h3>
-            <ol className="list-decimal pl-6 space-y-3">
-              <li>
-                <strong>Study the Room:</strong> Take a moment to notice the anchor points (highlighted areas) and their positions in the room. This spatial awareness will help strengthen your memory associations.
-              </li>
-              <li>
-                <strong>Click on Anchor Points:</strong> Click on any highlighted area in the room to generate an image for that location.
-              </li>
-              <li>
-                <strong>Review Generated Images:</strong> Each click will generate a unique image representing your memorable item at that location.
-              </li>
-              <li>
-                <strong>Accept or Reject:</strong> If you like the image, click "Accept". If not, click "Reject" to generate a new one.
-              </li>
-              <li>
-                <strong>Complete All Points:</strong> Continue until you've accepted images for all anchor points in the room.
-              </li>
-              <li>
-                <strong>Save Your Palace:</strong> Once all images are accepted, click "Save Room" to name and save your memory palace.
-              </li>
-            </ol>
+        {/* How to Use Button at the top */}
+        <div className="max-w-5xl mx-auto mb-6 flex justify-end">
+          <button
+            className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-primary-dark transition-colors"
+            onClick={() => setShowInstructionsModal(true)}
+          >
+            How to Use
+          </button>
+        </div>
+        {/* Instructions Modal */}
+        {showInstructionsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg p-8 shadow-lg max-w-lg w-full relative">
+              <button
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                onClick={() => setShowInstructionsModal(false)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+              <h3 className="text-xl font-bold mb-4 text-primary">How to Use Your Memory Palace</h3>
+              <ol className="list-decimal pl-6 space-y-3">
+                <li>
+                  <strong>Study the Room:</strong> Take a moment to notice the anchor points (highlighted areas) and their positions in the room. This spatial awareness will help strengthen your memory associations.
+                </li>
+                <li>
+                  <strong>Click on Anchor Points:</strong> Click on any highlighted area in the room to generate an image for that location.
+                </li>
+                <li>
+                  <strong>Review Generated Images:</strong> Each click will generate a unique image representing your memorable item at that location.
+                </li>
+                <li>
+                  <strong>Accept or Reject:</strong> If you like the image, click "Accept". If not, click "Reject" to generate a new one.
+                </li>
+                <li>
+                  <strong>Complete All Points:</strong> Continue until you've accepted images for all anchor points in the room.
+                </li>
+                <li>
+                  <strong>Save Your Palace:</strong> Once all images are accepted, click "Save Room" to name and save your memory palace.
+                </li>
+              </ol>
+            </div>
           </div>
+        )}
+        {/* Image and anchors full width below */}
+        <div className="relative w-full max-w-5xl loci-container p-4 mx-auto">
+          <img
+            src={roomImage}
+            alt={`${roomType}`}
+            className="w-full h-auto rounded-lg aspect-[1/1]"
+            style={{ maxHeight: '95vh' }}
+          />
 
-          {/* Image and anchors on the right */}
-          <div className="relative w-full md:w-2/3 max-w-4xl loci-container p-4">
-            <img
-              src={roomImage}
-              alt={`${roomType}`}
-              className="w-full h-auto rounded-lg aspect-[1/1]"
-              style={{ maxHeight: '95vh' }}
+          {associations.map((assoc, index) => {
+            if (!anchorPositions[assoc.anchor] || !assoc.memorableItem) return null;
+
+            return (
+              <button
+                key={index}
+                className="absolute cursor-pointer loci-anchor"
+                style={{
+                  ...anchorPositions[assoc.anchor],
+                  position: 'absolute',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 10,
+                  width: '40px',
+                  height: '40px',
+                }}
+                onClick={(e) => handleClick(assoc, e)}
+              >
+                <div className="w-full h-full flex items-center justify-center text-white/40 hover:text-white/60 transition-colors duration-200 text-xl font-bold">
+                  {acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image ? '✓' : '?'}
+                </div>
+              </button>
+            );
+          })}
+
+          {/* Save Room Button - bottom right of image container */}
+          <button
+            onClick={() => {
+              if (allImagesAccepted) {
+                setIsSaveModalOpen(true);
+              } else {
+                alert('You must accept all images before saving the room.');
+              }
+            }}
+            className={`absolute bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 z-20 ${
+              allImagesAccepted ? 'btn-loci' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+            disabled={!allImagesAccepted}
+          >
+            Save Room
+          </button>
+
+          {/* Image Popup */}
+          {selectedAssociation && (
+            <ImagePopup
+              association={selectedAssociation}
+              position={popupPosition}
+              image={generatedImage}
+              prompt={currentPrompt}
+              isLoading={isLoading}
+              error={error}
+              onClose={handleClosePopup}
+              onAccept={handleAcceptImage}
+              onReject={handleRejectImage}
             />
+          )}
 
-            {associations.map((assoc, index) => {
-              if (!anchorPositions[assoc.anchor] || !assoc.memorableItem) return null;
-
-              return (
-                <button
-                  key={index}
-                  className="absolute cursor-pointer loci-anchor"
-                  style={{
-                    ...anchorPositions[assoc.anchor],
-                    position: 'absolute',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 10,
-                    width: '40px',
-                    height: '40px',
-                  }}
-                  onClick={(e) => handleClick(assoc, e)}
-                >
-                  <div className="w-full h-full flex items-center justify-center text-white/40 hover:text-white/60 transition-colors duration-200 text-xl font-bold">
-                    {acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image ? '✓' : '?'}
-                  </div>
-                </button>
-              );
-            })}
-
-            {/* Save Room Button */}
-            <button
-              onClick={() => {
-                if (allImagesAccepted) {
-                  setIsSaveModalOpen(true);
-                } else {
-                  alert('You must accept all images before saving the room.');
-                }
-              }}
-              className={`fixed bottom-8 right-8 px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 z-20 ${
-                allImagesAccepted ? 'btn-loci' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-              disabled={!allImagesAccepted}
-            >
-              Save Room
-            </button>
-
-            {/* Image Popup */}
-            {selectedAssociation && (
-              <ImagePopup
-                association={selectedAssociation}
-                position={popupPosition}
-                image={generatedImage}
-                prompt={currentPrompt}
-                isLoading={isLoading}
-                error={error}
-                onClose={handleClosePopup}
-                onAccept={handleAcceptImage}
-                onReject={handleRejectImage}
-              />
-            )}
-
-            {/* Save Room Modal */}
-            {isSaveModalOpen && (
-              <SaveRoomModal
-                isOpen={isSaveModalOpen}
-                onClose={() => setIsSaveModalOpen(false)}
-                onSave={handleSaveRoom}
-                acceptedImages={acceptedImages}
-                roomType={roomType}
-              />
-            )}
-          </div>
+          {/* Save Room Modal */}
+          {isSaveModalOpen && (
+            <SaveRoomModal
+              isOpen={isSaveModalOpen}
+              onClose={() => setIsSaveModalOpen(false)}
+              onSave={handleSaveRoom}
+              acceptedImages={acceptedImages}
+              roomType={roomType}
+            />
+          )}
         </div>
       </div>
     </div>
