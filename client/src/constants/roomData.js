@@ -4,7 +4,7 @@ const ROOM_IMAGES = {
     "bedchamber": "/images/bedchamber_realistic.webp",
     "kitchen": "/images/kitchen.webp",
     "dining room": "/images/dining_room.webp",
-    "dungeon": "/images/dungeon.webp",
+    "dungeon": "/images/dungeon_realistic.webp",
     "bathroom": "/images/bathroom.webp",
     "study": "/images/study.webp",
     "game room": "/images/game_room.webp"
@@ -31,13 +31,13 @@ const ROOM_IMAGES = {
       'rug': { top: '90%', left: '50%', width: '200px', height: '100px' }
     },
     "dungeon": {
-      'gate': { top: '50%', left: '50%', width: '200px', height: '120px' },
-      'table': { top: '70%', left: '30%', width: '100px', height: '120px' },
-      'pillory': { top: '60%', left: '65%', width: '120px', height: '100px' },
-      'grate': { top: '80%', left: '40%', width: '120px', height: '200px' },
-      'barrel': { top: '90%', left: '50%', width: '100px', height: '150px' },
-      'hanging chains': { top: '15%', left: '40%', width: '150px', height: '120px' },
-      'torch': { top: '30%', left: '70%', width: '80px', height: '100px' }
+      'gate': { top: '50%', left: '35%', width: '200px', height: '120px' },
+      'table': { top: '70%', left: '40%', width: '100px', height: '120px' },
+      'pillory': { top: '60%', left: '75%', width: '120px', height: '100px' },
+      'bookshelf': { top: '60%', left: '10%', width: '120px', height: '200px' },
+      'barrel': { top: '80%', left: '90%', width: '100px', height: '150px' },
+      'hanging chains': { top: '35%', left: '72%', width: '150px', height: '120px' },
+      'sconce': { top: '25%', left: '90%', width: '80px', height: '100px' }
     },
   };
 

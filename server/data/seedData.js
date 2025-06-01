@@ -73,9 +73,9 @@ const seedData = {
         description: "A pillory with bars forming a rib-like pattern"
       },
       {
-        anchor: "grate",
+        anchor: "bookshelf",
         memorable: "Skin",
-        description: "A grate with texture like human skin"
+        description: "A bookshelf with texture like human skin"
       }
     ]
   },
@@ -208,9 +208,9 @@ const seedData = {
         description: "A pillory showing the journey from beginning to end"
       },
       {
-        anchor: "grate",
+        anchor: "bookshelf",
         memorable: "Theme",
-        description: "A grate with recurring symbols and motifs"
+        description: "A bookshelf with recurring symbols and motifs"
       }
     ]
   }
