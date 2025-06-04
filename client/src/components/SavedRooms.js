@@ -9,6 +9,8 @@ const SavedRooms = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [userEmail, setUserEmail] = useState(null);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [palaceToDelete, setPalaceToDelete] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -19,24 +21,66 @@ const SavedRooms = () => {
             return;
         }
 
-        // Decode token to get user email
+        // For demo mode, load seed data if no saved rooms exist
+        if (token === 'demo-token') {
+            // Force refresh seed data for demo
+            const seedData = [
+                {
+                    name: "Weekly Grocery List",
+                    roomType: "bedchamber",
+                    associations: [
+                        { anchor: "bed", memorableItem: "Milk", description: "Fresh dairy for the week" },
+                        { anchor: "lamp", memorableItem: "Bread", description: "Fresh loaf for sandwiches" },
+                        { anchor: "mirror", memorableItem: "Eggs", description: "Dozen eggs for breakfast" },
+                        { anchor: "window", memorableItem: "Apples", description: "Fresh fruit for snacks" },
+                        { anchor: "dresser", memorableItem: "Chicken", description: "Protein for meals" },
+                        { anchor: "nightstand", memorableItem: "Coffee", description: "Morning brew essentials" },
+                        { anchor: "wardrobe", memorableItem: "Pasta", description: "Quick dinner option" }
+                    ]
+                },
+                {
+                    name: "Today's To-Do List",
+                    roomType: "throne room",
+                    associations: [
+                        { anchor: "throne", memorableItem: "Call Mom", description: "Check in with family" },
+                        { anchor: "chandelier", memorableItem: "Pay Bills", description: "Handle monthly payments" },
+                        { anchor: "stained glass window", memorableItem: "Gym", description: "Evening workout session" },
+                        { anchor: "statue", memorableItem: "Meeting", description: "Team sync at 2 PM" },
+                        { anchor: "red carpet", memorableItem: "Dinner", description: "Reservation at 7 PM" },
+                        { anchor: "footstool", memorableItem: "Laundry", description: "Wash workout clothes" },
+                        { anchor: "candlestick", memorableItem: "Study", description: "Review for exam" }
+                    ]
+                },
+                {
+                    name: "Weekly Schedule",
+                    roomType: "dungeon",
+                    associations: [
+                        { anchor: "gate", memorableItem: "Coffee Meeting", description: "Monday morning coffee with team" },
+                        { anchor: "table", memorableItem: "Yoga Mat", description: "Tuesday evening yoga class" },
+                        { anchor: "pillory", memorableItem: "Toothbrush", description: "Wednesday dentist appointment" },
+                        { anchor: "bookshelf", memorableItem: "Book Stack", description: "Thursday book club meeting" },
+                        { anchor: "barrel", memorableItem: "Popcorn", description: "Friday movie night" },
+                        { anchor: "hanging chains", memorableItem: "Shopping Cart", description: "Saturday grocery shopping" },
+                        { anchor: "sconce", memorableItem: "Family Photo", description: "Sunday family dinner" }
+                    ]
+                }
+            ];
+            localStorage.setItem('savedRooms', JSON.stringify(seedData));
+            setPalaces(seedData);
+            setLoading(false);
+            return;
+        }
+
+        // For real users, decode token and fetch from API
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             setUserEmail(payload.email);
-            if (payload.email === 'demo@example.com') {
-                // Load from localStorage for demo user
-                const localPalaces = JSON.parse(localStorage.getItem('savedRooms') || '[]');
-                setPalaces(localPalaces);
-                setLoading(false);
-                return;
-            }
+            fetchPalaces();
         } catch (err) {
             console.error('Error decoding token:', err);
             navigate('/');
             return;
         }
-
-        fetchPalaces();
     }, [navigate]);
 
     const fetchPalaces = async () => {
@@ -71,6 +115,45 @@ const SavedRooms = () => {
         navigate('/visualizer');
     };
 
+    const handleDeleteClick = (e, palace) => {
+        e.stopPropagation();
+        setPalaceToDelete(palace);
+        setDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (localStorage.getItem('token') === 'demo-token') {
+            // For demo mode, remove from localStorage
+            const updatedPalaces = palaces.filter(p =>
+                p.name !== palaceToDelete.name || p.roomType !== palaceToDelete.roomType
+            );
+            localStorage.setItem('savedRooms', JSON.stringify(updatedPalaces));
+            setPalaces(updatedPalaces);
+        } else {
+            // For real users, delete from API
+            fetch(`${API_URL}/api/memory-palaces/${palaceToDelete._id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(() => {
+                setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
+            })
+            .catch(err => {
+                setError('Failed to delete memory palace');
+                console.error('Error deleting palace:', err);
+            });
+        }
+        setDeleteModalOpen(false);
+        setPalaceToDelete(null);
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteModalOpen(false);
+        setPalaceToDelete(null);
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         navigate('/');
@@ -99,7 +182,7 @@ const SavedRooms = () => {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-gradient-to-b from-[#7877C6]/40 via-[#7877C6]/20 to-white">
             <NavBar onLogout={handleLogout} />
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold mb-6 text-center">
@@ -122,14 +205,21 @@ const SavedRooms = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {palaces.map((palace) => (
                             <div
-                                key={palace._id}
+                                key={palace._id || palace.name}
                                 onClick={() => handlePalaceClick(palace)}
-                                className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-300"
+                                className="bg-white/90 p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-300 relative"
                             >
+                                <button
+                                    onClick={(e) => handleDeleteClick(e, palace)}
+                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-2"
+                                    title="Delete memory palace"
+                                >
+                                    ×
+                                </button>
                                 <h2 className="text-xl font-semibold mb-2">{palace.name}</h2>
-                                <p className="text-gray-600 mb-4">Room Type: {palace.roomType}</p>
+                                <p className="text-gray-600 mb-4">Room Type: {palace.roomType || 'Throne Room'}</p>
                                 <div className="space-y-2">
-                                    {palace.associations.map((assoc, index) => (
+                                    {palace.associations && palace.associations.map((assoc, index) => (
                                         <div key={index} className="border-t pt-2">
                                             <p className="font-medium">{assoc.memorableItem}</p>
                                             <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
@@ -141,14 +231,29 @@ const SavedRooms = () => {
                     </div>
                 )}
 
-                {userEmail !== 'demo@example.com' && (
-                    <div className="text-center mt-8">
-                        <button
-                            onClick={() => navigate('/demo')}
-                            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
-                        >
-                            Create New Palace
-                        </button>
+                {/* Delete Confirmation Modal */}
+                {deleteModalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                            <h3 className="text-xl font-semibold mb-4">Delete Memory Palace</h3>
+                            <p className="text-gray-600 mb-6">
+                                Are you sure you want to delete "{palaceToDelete?.name}"? This action cannot be undone.
+                            </p>
+                            <div className="flex justify-end space-x-4">
+                                <button
+                                    onClick={handleCancelDelete}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleConfirmDelete}
+                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

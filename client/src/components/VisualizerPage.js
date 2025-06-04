@@ -10,7 +10,6 @@ const VisualizerPage = () => {
   const [generatedImage, setGeneratedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0, transform: null });
   const [currentPrompt, setCurrentPrompt] = useState('');
   const [acceptedImages, setAcceptedImages] = useState(() => {
     const saved = localStorage.getItem('acceptedImages');
@@ -52,18 +51,16 @@ const VisualizerPage = () => {
   );
 
   const handleSaveRoom = (roomData) => {
-    setSavedRooms(prev => [...prev, roomData]);
+    const roomToSave = {
+      ...roomData,
+      roomType: roomType,
+      associations: associations
+    };
+    setSavedRooms(prev => [...prev, roomToSave]);
     setIsSaveModalOpen(false);
   };
 
   const handleClick = async (association, event) => {
-    // Set popup to center of screen
-    setPopupPosition({
-      x: window.innerWidth / 2,
-      y: window.innerHeight / 2,
-      transform: 'translate(-50%, -50%)'
-    });
-
     setSelectedAssociation(association);
     setIsLoading(true);
     setError(null);
@@ -211,27 +208,28 @@ const VisualizerPage = () => {
           })}
 
           {/* Save Room Button - bottom right of image container */}
-          <button
-            onClick={() => {
-              if (allImagesAccepted) {
-                setIsSaveModalOpen(true);
-              } else {
-                alert('You must accept all images before saving the room.');
-              }
-            }}
-            className={`absolute bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 z-20 ${
-              allImagesAccepted ? 'btn-loci' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-            disabled={!allImagesAccepted}
-          >
-            Save Room
-          </button>
+          <div className="absolute bottom-6 right-6 z-20">
+            <button
+              onClick={() => {
+                if (allImagesAccepted) {
+                  setIsSaveModalOpen(true);
+                } else {
+                  alert('You must accept all images before saving the room.');
+                }
+              }}
+              className={`px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 ${
+                allImagesAccepted ? 'btn-loci' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+              disabled={!allImagesAccepted}
+            >
+              Save Room
+            </button>
+          </div>
 
           {/* Image Popup */}
           {selectedAssociation && (
             <ImagePopup
               association={selectedAssociation}
-              position={popupPosition}
               image={generatedImage}
               prompt={currentPrompt}
               isLoading={isLoading}
