@@ -57,16 +57,22 @@ const LandingPage = () => {
     setIsLoading(true);
     setAuthError('');
     try {
-      // ...your login/signup API call here...
-      // Suppose you get a token from the response:
-      // const token = response.data.token;
-      // localStorage.setItem('token', token);
+      const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-      // For demonstration, let's simulate a token:
-      localStorage.setItem('token', 'demo-token');
-      setShowAuthModal(false);
-      // Optionally, force a re-render:
-      window.location.reload(); // or use a state variable to trigger re-render
+      const result = await response.json();
+
+      if (response.ok && result.token) {
+        localStorage.setItem('token', result.token);
+        setShowAuthModal(false);
+        navigate('/demo');
+      } else {
+        setAuthError(result.message || 'Login/Signup failed');
+      }
     } catch (err) {
       setAuthError('Login/Signup failed');
     }
@@ -90,7 +96,7 @@ const LandingPage = () => {
                   Want to boost your memory? <br /> You've come to the right place.
                 </h1>
                 <p className="text-xl text-text-light text-center text-white mb-8">
-                  Transform how you remember with AI-powered memory palaces, <br />aka the method loci (pronounced <em>low·sai</em>).
+                  Transform how you remember with AI-powered memory palaces, <br />aka the method of loci (pronounced <em>low·sai</em>).
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
@@ -115,7 +121,7 @@ const LandingPage = () => {
           </div>
         </section>
         {/* Features Section */}
-        <section className="py-20 px-0">
+        <section className="py-0 px-0">
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
           </h2>
@@ -123,17 +129,60 @@ const LandingPage = () => {
             {features.map((feature, index) => {
               const purpleShades = [
                 'bg-purple-200',
-                'bg-purple-300',
                 'bg-purple-400',
+                'bg-purple-300',
                 'bg-purple-300',
                 'bg-purple-200',
               ];
               const shade = purpleShades[index % purpleShades.length];
               const isEven = index % 2 === 0;
+              // Special layout for 'AI-Powered Memory Creation'
+              if (feature.title === 'AI-Powered Memory Creation') {
+                return (
+                  <div
+                    key={index}
+                    className={`w-full py-24 px-4 ${shade} flex items-center justify-center`}
+                  >
+                    <div
+                      className="max-w-md w-full mx-auto text-right"
+                    >
+                      <h3 className="text-2xl font-semibold mb-2 text-purple-900">{feature.title}</h3>
+                      <p className="text-purple-900/90 text-lg">{feature.description}</p>
+                    </div>
+                    <img
+                      src="/images/memorable.png"
+                      alt="Memorable"
+                      className="w-72 h-72 object-cover rounded-lg shadow-lg ml-12 hidden md:block mr-44"
+                    />
+                  </div>
+                );
+              }
+              // Special layout for 'Interactive Memory Palaces'
+              if (feature.title === 'Interactive Memory Palaces') {
+                return (
+                  <div
+                    key={index}
+                    className={`w-full py-24 px-4 ${shade} flex items-center justify-center`}
+                  >
+                    <img
+                      src="/images/throne_room_realistic.webp"
+                      alt="Throne Room"
+                      className="w-72 h-72 object-cover rounded-lg shadow-lg mr-1 hidden md:block ml-44"
+                    />
+                    <div
+                      className="max-w-md w-full mx-auto text-left"
+                    >
+                      <h3 className="text-2xl font-semibold mb-2 text-purple-900">{feature.title}</h3>
+                      <p className="text-purple-900/90 text-lg">{feature.description}</p>
+                    </div>
+                  </div>
+                );
+              }
+              // Default layout for other features
               return (
                 <div
                   key={index}
-                  className={`w-full py-24 px-4 ${shade} flex`}
+                  className={`w-full py-24 px-4 ${shade} flex items-center`}
                 >
                   <div
                     className={`
