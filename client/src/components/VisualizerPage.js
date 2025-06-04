@@ -57,39 +57,11 @@ const VisualizerPage = () => {
   };
 
   const handleClick = async (association, event) => {
-    // Calculate popup position based on the clicked button's position
-    const rect = event.currentTarget.getBoundingClientRect();
-
-    // Adjust position based on the anchor type and room
-    let transformValue = 'translate(-50%, -120%)'; // Default positioning (above)
-
-    // Special positioning for specific anchors in specific rooms
-    if (roomType === "throne room") {
-      if (association.anchor === 'stained glass window') {
-        transformValue = 'translate(-50%, -60%)'; // Stained glass window popup
-      } else if (association.anchor === 'chandelier') {
-        transformValue = 'translate(-50%, -30%)'; // Chandelier popup a bit lower
-      } else if (association.anchor === 'statue') {
-        transformValue = 'translate(-50%, -80%)'; // Statue popup a bit lower
-      } else if (association.anchor === 'throne') {
-        transformValue = 'translate(-50%, -100%)'; // Throne popup a bit down
-      } else if (association.anchor === 'red carpet') {
-        transformValue = 'translate(-50%, -100%)'; // Position higher above
-      }
-    } else if (roomType === "bedchamber") {
-      if (association.anchor === 'lamp' || association.anchor === 'mirror') {
-        transformValue = 'translate(-50%, 20%)'; // Position below
-      }
-    } else if (roomType === "dungeon") {
-      if (association.anchor === 'hanging chains' || association.anchor === 'sconce') {
-        transformValue = 'translate(-50%, 20%)'; // Position below for hanging chains
-      }
-    }
-
+    // Set popup to center of screen
     setPopupPosition({
-      x: rect.x + window.scrollX,
-      y: rect.y + window.scrollY,
-      transform: transformValue
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+      transform: 'translate(-50%, -50%)'
     });
 
     setSelectedAssociation(association);

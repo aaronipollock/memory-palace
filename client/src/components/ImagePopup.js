@@ -15,10 +15,14 @@ const ImagePopup = ({
     <div
       className="fixed loci-modal p-6 z-50"
       style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: position.transform || 'translate(-50%, -120%)',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
         maxWidth: '400px',
+        position: 'fixed',
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
       }}
     >
       <button
