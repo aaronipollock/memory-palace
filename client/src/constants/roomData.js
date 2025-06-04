@@ -1,6 +1,6 @@
 // Room images
 const ROOM_IMAGES = {
-    "throne room": "/images/throne_room_realistic.webp",
+    "throne room": "/images/throne_room.webp",
     "bedchamber": "/images/bedchamber_realistic.webp",
     "kitchen": "/images/kitchen.webp",
     "dining room": "/images/dining_room.webp",

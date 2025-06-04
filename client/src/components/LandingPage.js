@@ -156,6 +156,27 @@ const LandingPage = () => {
                   </div>
                 );
               }
+              // Special layout for 'Personalized Learning'
+              if (feature.title === 'Personalized Learning') {
+                return (
+                  <div
+                    key={index}
+                    className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center justify-center`}
+                  >
+                    <div
+                      className="max-w-md w-full mx-auto text-right"
+                    >
+                      <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
+                      <p className="text-text-light text-lg">{feature.description}</p>
+                    </div>
+                    <img
+                      src="/images/saved_rooms.png"
+                      alt="Saved Rooms"
+                      className="w-full max-w-2xl h-72 object-contain mx-auto ml-12 hidden md:block mr-24 rounded-2xl"
+                    />
+                  </div>
+                );
+              }
               // Special layout for 'Interactive Memory Palaces'
               if (feature.title === 'Interactive Memory Palaces') {
                 return (
@@ -164,7 +185,7 @@ const LandingPage = () => {
                     className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center justify-center`}
                   >
                     <img
-                      src="/images/throne_room_realistic.webp"
+                      src="/images/throne_room.webp"
                       alt="Throne Room"
                       className="w-72 h-72 object-cover rounded-lg shadow-lg mr-1 hidden md:block ml-44"
                     />
