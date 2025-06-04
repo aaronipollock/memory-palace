@@ -15,6 +15,16 @@
   --color-success: #2E8B57;    /* Emerald for success states */
   --color-error: #DC2626;      /* Red for error states */
   --color-overlay: rgba(27, 54, 93, 0.1); /* Sapphire overlay */
+
+  /* Gradient Colors */
+  --gradient-purple-start: #e9d5ff;
+  --gradient-purple-end: #c4b5fd;
+  --gradient-purple-dark-start: #d8b4fe;
+  --gradient-purple-dark-end: #a78bfa;
+  --gradient-purple-darker-start: #c084fc;
+  --gradient-purple-darker-end: #8b5cf6;
+  --gradient-use-cases-start: var(--color-background);
+  --gradient-use-cases-end: #e2e8f0;
 }
 
 /* Base Styles */
@@ -36,6 +46,22 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--color-background);
   background-image: linear-gradient(to bottom, var(--color-background) 70%, var(--color-accent));
   background-attachment: fixed;
+}
+
+.loci-bg[data-gradient="purple"] {
+  background-image: linear-gradient(to bottom, var(--gradient-purple-start) 70%, var(--gradient-purple-end));
+}
+
+.loci-bg[data-gradient="purple-dark"] {
+  background-image: linear-gradient(to bottom, var(--gradient-purple-dark-start) 70%, var(--gradient-purple-dark-end));
+}
+
+.loci-bg[data-gradient="purple-darker"] {
+  background-image: linear-gradient(to bottom, var(--gradient-purple-darker-start) 70%, var(--gradient-purple-darker-end));
+}
+
+.loci-bg[data-gradient="use-cases"] {
+  background-image: linear-gradient(to bottom, var(--gradient-use-cases-start) 70%, var(--gradient-use-cases-end));
 }
 
 .loci-header {
@@ -275,4 +301,25 @@ h1, h2, h3, h4, h5, h6 {
   .feature-card {
     margin-bottom: 1rem;
   }
+}
+
+/* Gradient Backgrounds */
+.gradient-purple-200 {
+  background-image: linear-gradient(to bottom, #e9d5ff 70%, #c4b5fd);
+  background-attachment: fixed;
+}
+
+.gradient-purple-300 {
+  background-image: linear-gradient(to bottom, #d8b4fe 70%, #a78bfa);
+  background-attachment: fixed;
+}
+
+.gradient-purple-400 {
+  background-image: linear-gradient(to bottom, #c084fc 70%, #8b5cf6);
+  background-attachment: fixed;
+}
+
+.gradient-use-cases {
+  background-image: linear-gradient(to bottom, var(--color-background) 70%, #e2e8f0);
+  background-attachment: fixed;
 }

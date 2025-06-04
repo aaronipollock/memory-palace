@@ -52,7 +52,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                     </div>
 
                     {/* Auth Buttons or Logout Link */}
-                    <div className="flex items-center space-x-4">
+                    {/* <div className="flex items-center space-x-4">
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}
@@ -76,7 +76,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                                 </button>
                             </>
                         )}
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </nav>

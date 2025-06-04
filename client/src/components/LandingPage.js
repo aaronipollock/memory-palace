@@ -109,12 +109,12 @@ const LandingPage = () => {
                   >
                     Try Demo
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
                     className="btn-loci-secondary text-lg px-8 py-4"
                   >
                     Get Started
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
@@ -141,7 +141,7 @@ const LandingPage = () => {
                 return (
                   <div
                     key={index}
-                    className={`w-full py-24 px-4 ${shade} flex items-center justify-center`}
+                    className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center justify-center`}
                   >
                     <div
                       className="max-w-md w-full mx-auto text-right"
@@ -162,7 +162,7 @@ const LandingPage = () => {
                 return (
                   <div
                     key={index}
-                    className={`w-full py-24 px-4 ${shade} flex items-center justify-center`}
+                    className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center justify-center`}
                   >
                     <img
                       src="/images/throne_room_realistic.webp"
@@ -182,7 +182,7 @@ const LandingPage = () => {
               return (
                 <div
                   key={index}
-                  className={`w-full py-24 px-4 ${shade} flex items-center`}
+                  className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center`}
                 >
                   <div
                     className={`
@@ -200,7 +200,7 @@ const LandingPage = () => {
           </div>
         </section>
         {/* Use Cases Section */}
-        <section className="py-20 px-4 bg-background">
+        {/* <section className="py-20 px-4 bg-background gradient-use-cases">
           <div className="container mx-auto max-w-6xl">
             <h2 className="loci-header text-4xl text-center mb-16">
               Perfect For
@@ -217,7 +217,7 @@ const LandingPage = () => {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
         {/* CTA Section */}
         <section className="py-20 px-4 loci-bg">
           <div className="container mx-auto max-w-4xl text-center">
@@ -227,12 +227,12 @@ const LandingPage = () => {
             {/* <p className="text-xl text-text-light mb-8">
               Join thousands of learners who have transformed their memory with Loci.
             </p> */}
-            <button
+            {/* <button
               onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
               className="btn-loci text-lg px-8 py-4"
             >
               Create Free Account
-            </button>
+            </button> */}
           </div>
         </section>
         {/* Footer */}
