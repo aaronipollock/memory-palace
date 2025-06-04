@@ -44,7 +44,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Loci Theme */
 .loci-bg {
   background-color: var(--color-background);
-  background-image: linear-gradient(to bottom, var(--color-background) 70%, var(--color-accent));
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #3b82f6);
   background-attachment: fixed;
 }
 
@@ -304,22 +304,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Gradient Backgrounds */
-.gradient-purple-200 {
-  background-image: linear-gradient(to bottom, #e9d5ff 70%, #c4b5fd);
+.gradient-blue-200 {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #bfdbfe);
   background-attachment: fixed;
 }
 
-.gradient-purple-300 {
-  background-image: linear-gradient(to bottom, #d8b4fe 70%, #a78bfa);
+.gradient-blue-300 {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #93c5fd);
   background-attachment: fixed;
 }
 
-.gradient-purple-400 {
-  background-image: linear-gradient(to bottom, #c084fc 70%, #8b5cf6);
+.gradient-blue-400 {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #60a5fa);
   background-attachment: fixed;
 }
 
 .gradient-use-cases {
-  background-image: linear-gradient(to bottom, var(--color-background) 70%, #e2e8f0);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #e2e8f0);
   background-attachment: fixed;
 }

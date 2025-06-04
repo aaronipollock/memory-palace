@@ -85,7 +85,6 @@ const LandingPage = () => {
       <div className="min-h-screen relative">
         <NavBar
           onLoginClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
-          onSignUpClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
         />
         {/* Hero Section */}
         <section className="py-20 px-4 mt-64">
@@ -96,7 +95,7 @@ const LandingPage = () => {
                   Want to boost your memory? <br /> You've come to the right place.
                 </h1>
                 <p className="text-xl text-text-light text-center text-white mb-8">
-                  Transform how you remember with AI-powered memory palaces, <br />aka the method of loci (pronounced <em>low·sai</em>).
+                  Transform how you remember with AI-powered memory palaces, <br />also known as the ancient method of loci (pronounced <em>low·sai</em>).
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
@@ -121,20 +120,20 @@ const LandingPage = () => {
           </div>
         </section>
         {/* Features Section */}
-        <section className="py-0 px-0">
+        <section className="py-0 px-0 section-overlay">
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
           </h2>
           <div className="flex flex-col gap-0 w-full">
             {features.map((feature, index) => {
-              const purpleShades = [
-                'bg-purple-200',
-                'bg-purple-400',
-                'bg-purple-300',
-                'bg-purple-300',
-                'bg-purple-200',
+              const blueShades = [
+                'bg-blue-200',
+                'bg-blue-400',
+                'bg-blue-300',
+                'bg-blue-300',
+                'bg-blue-200',
               ];
-              const shade = purpleShades[index % purpleShades.length];
+              const shade = blueShades[index % blueShades.length];
               const isEven = index % 2 === 0;
               // Special layout for 'AI-Powered Memory Creation'
               if (feature.title === 'AI-Powered Memory Creation') {
@@ -146,8 +145,8 @@ const LandingPage = () => {
                     <div
                       className="max-w-md w-full mx-auto text-right"
                     >
-                      <h3 className="text-2xl font-semibold mb-2 text-purple-900">{feature.title}</h3>
-                      <p className="text-purple-900/90 text-lg">{feature.description}</p>
+                      <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
+                      <p className="text-text-light text-lg">{feature.description}</p>
                     </div>
                     <img
                       src="/images/memorable.png"
@@ -172,8 +171,8 @@ const LandingPage = () => {
                     <div
                       className="max-w-md w-full mx-auto text-left"
                     >
-                      <h3 className="text-2xl font-semibold mb-2 text-purple-900">{feature.title}</h3>
-                      <p className="text-purple-900/90 text-lg">{feature.description}</p>
+                      <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
+                      <p className="text-text-light text-lg">{feature.description}</p>
                     </div>
                   </div>
                 );
@@ -191,8 +190,8 @@ const LandingPage = () => {
                       ${isEven ? 'text-left ml-12' : 'text-right mr-12'}
                     `}
                   >
-                    <h3 className="text-2xl font-semibold mb-2 text-purple-900">{feature.title}</h3>
-                    <p className="text-purple-900/90 text-lg">{feature.description}</p>
+                    <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
+                    <p className="text-text-light text-lg">{feature.description}</p>
                   </div>
                 </div>
               );
@@ -219,7 +218,7 @@ const LandingPage = () => {
           </div>
         </section> */}
         {/* CTA Section */}
-        <section className="py-20 px-4 loci-bg">
+        <section className="py-20 px-4 loci-bg section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
             <h2 className="loci-header text-4xl mb-6">
               Start Building Your Memory Palace Today

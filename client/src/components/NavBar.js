@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NavBar.css';  // We'll create this file next
 
-const NavBar = ({ onLoginClick, onSignUpClick }) => {
+const NavBar = ({ onLoginClick }) => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -52,7 +52,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                     </div>
 
                     {/* Auth Buttons or Logout Link */}
-                    {/* <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4">
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}
@@ -62,7 +62,7 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                             </button>
                         ) : (
                             <>
-                                <button
+                                {/* <button
                                     onClick={onLoginClick}
                                     className="loci-nav-link !text-white"
                                 >
@@ -73,10 +73,10 @@ const NavBar = ({ onLoginClick, onSignUpClick }) => {
                                     className="btn-loci"
                                 >
                                     Sign Up
-                                </button>
+                                </button> */}
                             </>
                         )}
-                    </div> */}
+                    </div>
                 </div>
             </div>
         </nav>
