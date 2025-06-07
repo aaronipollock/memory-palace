@@ -134,88 +134,41 @@ const LandingPage = () => {
                 'bg-blue-200',
               ];
               const shade = blueShades[index % blueShades.length];
-              const isEven = index % 2 === 0;
-              // Special layout for 'AI-Powered Memory Creation'
-              if (feature.title === 'AI-Powered Memory Creation') {
+              // Unified layout for the three main features
+              if (
+                feature.title === 'AI-Powered Memory Creation' ||
+                feature.title === 'Interactive Memory Palaces' ||
+                feature.title === 'Personalized Learning'
+              ) {
+                let imageSrc = '';
+                let imageAlt = '';
+                if (feature.title === 'AI-Powered Memory Creation') {
+                  imageSrc = '/images/memorable.png';
+                  imageAlt = 'Memorable';
+                } else if (feature.title === 'Interactive Memory Palaces') {
+                  imageSrc = '/images/throne_room.webp';
+                  imageAlt = 'Throne Room';
+                } else if (feature.title === 'Personalized Learning') {
+                  imageSrc = '/images/saved_rooms.png';
+                  imageAlt = 'Saved Rooms';
+                }
                 return (
                   <div
                     key={index}
                     className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center justify-center`}
                   >
-                    <div
-                      className="max-w-md w-full mx-auto text-right"
-                    >
+                    <div className="max-w-md w-full mx-auto text-right">
                       <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
                       <p className="text-text-light text-lg">{feature.description}</p>
                     </div>
                     <img
-                      src="/images/memorable.png"
-                      alt="Memorable"
-                      className="w-72 h-72 object-cover rounded-lg shadow-lg ml-12 hidden md:block mr-44"
-                    />
-                  </div>
-                );
-              }
-              // Special layout for 'Personalized Learning'
-              if (feature.title === 'Personalized Learning') {
-                return (
-                  <div
-                    key={index}
-                    className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center justify-center`}
-                  >
-                    <div
-                      className="max-w-md w-full mx-auto text-right"
-                    >
-                      <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
-                      <p className="text-text-light text-lg">{feature.description}</p>
-                    </div>
-                    <img
-                      src="/images/saved_rooms.png"
-                      alt="Saved Rooms"
+                      src={imageSrc}
+                      alt={imageAlt}
                       className="w-full max-w-2xl h-72 object-contain mx-auto ml-12 hidden md:block mr-24 rounded-2xl"
                     />
                   </div>
                 );
               }
-              // Special layout for 'Interactive Memory Palaces'
-              if (feature.title === 'Interactive Memory Palaces') {
-                return (
-                  <div
-                    key={index}
-                    className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center justify-center`}
-                  >
-                    <img
-                      src="/images/throne_room.webp"
-                      alt="Throne Room"
-                      className="w-72 h-72 object-cover rounded-lg shadow-lg mr-1 hidden md:block ml-44"
-                    />
-                    <div
-                      className="max-w-md w-full mx-auto text-left"
-                    >
-                      <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
-                      <p className="text-text-light text-lg">{feature.description}</p>
-                    </div>
-                  </div>
-                );
-              }
-              // Default layout for other features
-              return (
-                <div
-                  key={index}
-                  className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center`}
-                >
-                  <div
-                    className={`
-                      max-w-md w-full
-                      mx-auto
-                      ${isEven ? 'text-left ml-12' : 'text-right mr-12'}
-                    `}
-                  >
-                    <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
-                    <p className="text-text-light text-lg">{feature.description}</p>
-                  </div>
-                </div>
-              );
             })}
           </div>
         </section>

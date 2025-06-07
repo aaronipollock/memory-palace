@@ -12,6 +12,16 @@ const ROOM_TYPES = [
     // "kitchen",
 ];
 
+const ART_STYLES = [
+    "Random",
+    "Digital Art",
+    "Cartoon",
+    "3D Render",
+    "Watercolor",
+    "Pop Art",
+    "Photorealistic"
+];
+
 // Clear the stored anchor points to ensure our new list is used
 localStorage.removeItem('anchorPoints');
 
@@ -23,6 +33,9 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     const [memorables, setMemorables] = useState(() =>
         localStorage.getItem('memorables') || ''
     );
+    const [artStyle, setArtStyle] = useState(() =>
+        localStorage.getItem('artStyle') || 'Random'
+    );
     const [error, setError] = useState(null);
 
     // Get the anchor points for the current room type
@@ -32,7 +45,8 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     useEffect(() => {
         localStorage.setItem('memorables', memorables);
         localStorage.setItem('roomType', roomType);
-    }, [memorables, roomType]);
+        localStorage.setItem('artStyle', artStyle);
+    }, [memorables, roomType, artStyle]);
 
     // Add console.log to debug
     console.log('onImagesGenerated prop:', onImagesGenerated);
@@ -49,20 +63,22 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
             console.log('Sending request with:', {
                 anchorPoints: currentAnchorPoints,
                 memorables: memorables.split('\n').map(item => item.trim()).filter(Boolean),
-                roomType
+                roomType,
+                artStyle
             });
 
             const response = await axios.post('http://localhost:5000/api/generate-images', {
                 anchorPoints: currentAnchorPoints,
                 memorables: memorables.split('\n').map(item => item.trim()).filter(Boolean),
-                roomType: roomType
+                roomType: roomType,
+                artStyle: artStyle
             });
 
             console.log('Received response:', response.data);
 
             if (response.data && response.data.images) {
-                console.log('Calling onImagesGenerated with:', response.data.images, roomType);
-                onImagesGenerated(response.data.images, roomType);
+                console.log('Calling onImagesGenerated with:', response.data.images, roomType, artStyle);
+                onImagesGenerated(response.data.images, roomType, artStyle);
             } else {
                 throw new Error('No images in response');
             }
@@ -81,6 +97,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     const handleClear = () => {
         setMemorables('');
         setRoomType('throne room');
+        setArtStyle('Random');
         localStorage.clear();
         setError(null);
     };
@@ -107,14 +124,15 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
         // Save the complete palace data to localStorage
         const palaceData = {
             roomType,
-            associations
+            associations,
+            artStyle
         };
         localStorage.setItem('currentPalace', JSON.stringify(palaceData));
 
         // Clear any previously accepted images for this new palace
         localStorage.removeItem('acceptedImages');
 
-        onImagesGenerated(associations, roomType);
+        onImagesGenerated(associations, roomType, artStyle);
     };
 
     return (
@@ -128,6 +146,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                         <p className="mb-4">To create your memory palace, follow these steps:</p>
                         <ol className="list-decimal pl-6 space-y-2">
                             <li><strong className="text-primary">Room Type:</strong> Choose the type of room for your memory palace.</li>
+                            <li><strong className="text-primary">Art Style:</strong> Select your preferred art style for the generated images.</li>
                             <li><strong className="text-primary">Anchor Points:</strong> In Demo Mode, we've chosen these features for you.</li>
                             <li><strong className="text-primary">Memorables:</strong> List the items or concepts you want to remember.</li>
                         </ol>
@@ -152,7 +171,29 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                         </div>
                     </div>
 
+                    <div className="bg-white rounded-lg p-4 mb-4">
+                        <div className="flex items-center gap-4">
+                            <label className="text-primary font-bold whitespace-nowrap">Art Style:</label>
+                            <select
+                                value={artStyle}
+                                onChange={(e) => setArtStyle(e.target.value)}
+                                className="flex-1 p-2 border-2 border-accent1 rounded-lg bg-white text-text"
+                                required
+                            >
+                                {ART_STYLES.map((style) => (
+                                    <option key={style} value={style}>{style}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Tip Box */}
+                        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-2 rounded">
+                            <strong>Tip:</strong> For best results, use concrete, visual words (like "apple," "car," or "envelope").<br />
+                            Avoid abstract terms (like "freedom" or "justice") and proper nouns (like "John" or "Paris").<br />
+                            For abstract ideas, try describing them with a concrete image (e.g., "hourglass" for "time").
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="block text-white font-bold mb-2">
@@ -165,7 +206,6 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                                     {currentAnchorPoints.join('\n')}
                                 </pre>
                             </div>
-
                             <div className="space-y-2">
                                 <label className="block text-white font-bold">
                                     Memorables (one per line):

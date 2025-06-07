@@ -1,7 +1,20 @@
 const axios = require('axios');
 
-// Helper function to create memorable associations
-const createAssociation = (item, roomFeature) => {
+// List of available art styles
+const ART_STYLES = [
+    'digital art',
+    'cartoon',
+    '3D render',
+    'watercolor',
+    'pop art',
+    'photorealistic'
+];
+
+// Helper function to pick a random art style
+const getRandomArtStyle = () => ART_STYLES[Math.floor(Math.random() * ART_STYLES.length)];
+
+// Helper function to create memorable associations with art style
+const createAssociation = (item, roomFeature, artStyle) => {
     // List of action verbs to make scenes more dynamic
     const actionVerbs = [
         'dramatically interacts with',
@@ -28,13 +41,13 @@ const createAssociation = (item, roomFeature) => {
     const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
 
     // Create a dramatic/humorous scenario
-    return `A ${adjective} ${item} ${verb} the ${roomFeature}, creating a memorable and surprising scene, digital art style`;
+    return `A ${adjective} ${item} ${verb} the ${roomFeature}, creating a memorable and surprising scene, ${artStyle} style`;
 };
 
 
 exports.generateImages = async (req, res) => {
-    const { anchorPoints, memorables } = req.body;
-    console.log('Received data:', { anchorPoints, memorables});
+    const { anchorPoints, memorables, artStyle = 'digital art' } = req.body;
+    console.log('Received data:', { anchorPoints, memorables, artStyle });
 
     try {
         // Validate inputs
@@ -51,7 +64,12 @@ exports.generateImages = async (req, res) => {
         // Create associations and generate images
         const generatedImages = [];
         for (const pair of pairs) {
-            const prompt = createAssociation(pair.item, pair.roomFeature);
+            // Determine the art style for this image
+            let style = artStyle;
+            if (artStyle.toLowerCase() === 'random') {
+                style = getRandomArtStyle();
+            }
+            const prompt = createAssociation(pair.item, pair.roomFeature, style);
 
             const response = await axios.post('https://api.openai.com/v1/images/generations', {
                 prompt: prompt,
@@ -68,6 +86,7 @@ exports.generateImages = async (req, res) => {
                 item: pair.item,
                 roomFeature: pair.roomFeature,
                 prompt: prompt,
+                artStyle: style,
                 url: response.data.data[0].url
             });
         }

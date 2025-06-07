@@ -127,9 +127,9 @@ const VisualizerPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#4E8DED]/60 via-[#4E8DED]/30 to-white">
       <NavBar />
-      <div className="loci-bg py-12 px-4">
+      <div className="py-12 px-4">
         {/* How to Use Button at the top */}
         <div className="max-w-5xl mx-auto mb-6 flex justify-end">
           <button
