@@ -87,7 +87,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Button Styles */
 .btn-loci {
-  background-color: var(--color-secondary);
+  background-color: var(--color-primary);
   color: white;
   font-family: 'Inter', sans-serif;
   font-weight: 500;
@@ -101,9 +101,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-loci:hover {
+  background-color: var(--color-secondary);
+  color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background-color: #2B4B7D;
 }
 
 .btn-loci:active {

@@ -56,7 +56,8 @@ const NavBar = ({ onLoginClick }) => {
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}
-                                className="px-4 py-2 bg-secondary text-white rounded hover:bg-secondary/80 transition-colors duration-200"
+                                className="px-4 py-2 bg-secondary text-white rounded hover:bg-primary hover:text-white transition-colors duration-200"
+                                style={{ backgroundColor: 'var(--color-secondary)' }}
                             >
                                 Log Out
                             </button>
