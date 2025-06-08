@@ -196,7 +196,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="block text-white font-bold mb-2">
+                                <label className="block text-gray-800 font-bold mb-2">
                                     Demo Anchor Points:
                                 </label>
                                 <pre
@@ -207,7 +207,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                                 </pre>
                             </div>
                             <div className="space-y-2">
-                                <label className="block text-white font-bold">
+                                <label className="block text-gray-800 font-bold">
                                     Memorables (one per line):
                                 </label>
                                 <textarea

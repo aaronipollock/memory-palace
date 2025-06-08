@@ -15,6 +15,7 @@ function App() {
     const [roomType, setRoomType] = useState(() =>
         localStorage.getItem('roomType') || ''
     );
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         localStorage.setItem('associations', JSON.stringify(associations));
@@ -43,7 +44,13 @@ function App() {
           <Route path="/login" element={<HomePage />} />
           <Route
             path="/demo"
-            element={<InputPage onImagesGenerated={handleImagesGenerated} />}
+            element={
+              <InputPage
+                onImagesGenerated={handleImagesGenerated}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
+              />
+            }
           />
           <Route
             path="/visualizer"
