@@ -210,26 +210,26 @@ const LandingPage = () => {
         </section>
         {/* Footer */}
         <footer className="py-12 px-4 bg-primary text-white">
+          <p className="text-gray-300 text-center">
+            Where memories find their place.
+          </p>
           <div className="container mx-auto max-w-6xl">
             <div className="grid md:grid-cols-4 gap-8">
               <div>
-                <h3 className="text-2xl font-bold mb-4">Loci</h3>
-                <p className="text-gray-300">
-                  Where memories find their place.
-                </p>
+                <h3 className="text-2xl font-bold mb-4">low·sAI</h3>
               </div>
               <div>
                 <h4 className="font-semibold mb-4">Product</h4>
                 <ul className="space-y-2">
                   <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Features</a></li>
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Pricing</a></li>
+                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Pricing</a></li> */}
                   <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Demo</a></li>
                 </ul>
               </div>
               <div>
                 <h4 className="font-semibold mb-4">Resources</h4>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Blog</a></li>
+                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Blog</a></li> */}
                   <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Tutorials</a></li>
                   <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Support</a></li>
                 </ul>
@@ -239,12 +239,12 @@ const LandingPage = () => {
                 <ul className="space-y-2">
                   <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">About</a></li>
                   <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Contact</a></li>
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy</a></li>
+                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy</a></li> */}
                 </ul>
               </div>
             </div>
             <div className="mt-12 pt-8 border-t border-gray-700 text-center text-gray-300">
-              <p>&copy; {new Date().getFullYear()} Loci. All rights reserved.</p>
+              {/* <p>&copy; {new Date().getFullYear()} low·sAI. All rights reserved.</p> */}
             </div>
           </div>
         </footer>

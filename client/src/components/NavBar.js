@@ -20,15 +20,21 @@ const NavBar = ({ onLoginClick }) => {
     return (
         <nav className="loci-nav">
             <div className="container mx-auto px-6">
-                <div className="flex justify-between items-center h-20">
+                <div className="flex justify-between items-center py-4">
                     {/* Logo and Brand */}
-                    <div className="flex items-center">
+                    <div className="flex flex-col items-start">
                         <span
                             className="text-5xl font-bold text-primary cursor-pointer loci-header trajan-font loci-italic"
                             onClick={() => navigate('/')}
                         >
                             low·sAI
                         </span>
+                        <img
+                            src="/images/banner.webp"
+                            alt="Banner"
+                            className="-mt-2 -ml-3 w-48 h-auto"
+                            style={{ borderRadius: '8px' }}
+                        />
                     </div>
 
                     {/* Navigation Links */}
