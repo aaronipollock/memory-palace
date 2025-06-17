@@ -57,8 +57,8 @@ const SavedRooms = () => {
                     associations: [
                         { anchor: "gate", memorableItem: "Coffee Meeting", description: "Monday morning coffee with team" },
                         { anchor: "table", memorableItem: "Yoga Mat", description: "Tuesday evening yoga class" },
-                        { anchor: "pillory", memorableItem: "Toothbrush", description: "Wednesday dentist appointment" },
-                        { anchor: "bookshelf", memorableItem: "Book Stack", description: "Thursday book club meeting" },
+                        { anchor: "pillory", memorableItem: "Book Stack", description: "Wednesday book club" },
+                        { anchor: "bookshelf", memorableItem: "Toothbrush", description: "Thursday dentist appointment" },
                         { anchor: "barrel", memorableItem: "Popcorn", description: "Friday movie night" },
                         { anchor: "hanging chains", memorableItem: "Shopping Cart", description: "Saturday grocery shopping" },
                         { anchor: "sconce", memorableItem: "Family Photo", description: "Sunday family dinner" }
