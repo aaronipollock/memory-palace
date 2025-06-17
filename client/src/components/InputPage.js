@@ -237,8 +237,8 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                                     type="button"
                                     onClick={handleClear}
                                     disabled={isLoading}
-                                    className="px-6 py-3 bg-secondary text-white border-2 border-secondary rounded-lg
-                                             hover:bg-white hover:text-secondary transition-colors duration-300
+                                    className="px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
+                                             hover:bg-[#B8860B] hover:text-white transition-colors duration-300
                                              disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     CLEAR FORM
