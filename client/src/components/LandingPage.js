@@ -87,7 +87,13 @@ const LandingPage = () => {
           onLoginClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
         />
         {/* Hero Section */}
-        <section className="py-20 px-4 mt-64">
+        <img
+          src="/images/banner_clean.png"
+          alt="Banner"
+          className="w-48 h-auto mx-auto md:mx-16"
+          style={{ borderRadius: '8px' }}
+        />
+        <section className="py-20 px-4 mt-24">
           <div className="container mx-auto max-w-6xl">
             <div className="flex flex-col md:flex-row items-center justify-between gap-12">
               <div className="flex-1 text-center md:text-left">

@@ -29,12 +29,6 @@ const NavBar = ({ onLoginClick }) => {
                         >
                             low·sAI
                         </span>
-                        <img
-                            src="/images/banner.webp"
-                            alt="Banner"
-                            className="-mt-2 -ml-3 w-48 h-auto"
-                            style={{ borderRadius: '8px' }}
-                        />
                     </div>
 
                     {/* Navigation Links */}
