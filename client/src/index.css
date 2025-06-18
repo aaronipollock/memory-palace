@@ -27,6 +27,20 @@
   --gradient-use-cases-end: #e2e8f0;
 }
 
+/* Custom Spinner Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* Base Styles */
 body {
   font-family: 'Inter', sans-serif;

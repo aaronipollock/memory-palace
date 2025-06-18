@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
+import LoadingSpinner from './LoadingSpinner';
 
 const API_URL = 'http://localhost:5000';
 
@@ -164,7 +165,9 @@ const SavedRooms = () => {
             <div className="min-h-screen bg-background">
                 <NavBar onLogout={handleLogout} />
                 <div className="container mx-auto px-4 py-8">
-                    <div className="text-center">Loading...</div>
+                    <div className="flex items-center justify-center min-h-[400px]">
+                        <LoadingSpinner size="lg" text="Loading your memory palaces..." />
+                    </div>
                 </div>
             </div>
         );
@@ -182,7 +185,7 @@ const SavedRooms = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#EFBF04]/80 via-[#EFBF04]/20 to-white">
+        <div className="min-h-screen bg-gradient-to-b from-[#DAA520]/60 via-[#FFD700]/40 to-white">
             <NavBar onLogout={handleLogout} />
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold mb-6 text-center">

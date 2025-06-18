@@ -1,4 +1,5 @@
 import React from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
 const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData, setFormData }) => {
     const handleInputChange = (e) => {
@@ -51,6 +52,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             required
                             autoComplete="off"
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -67,6 +69,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             required
                             autoComplete="new-password"
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -83,6 +86,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                                 onChange={handleInputChange}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                 required
+                                disabled={isLoading}
                             />
                         </div>
                     )}
@@ -90,9 +94,16 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300 disabled:opacity-50 font-medium"
+                        className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300 disabled:opacity-50 font-medium flex items-center justify-center"
                     >
-                        {isLoading ? 'Processing...' : (mode === 'login' ? 'Login' : 'Sign Up')}
+                        {isLoading ? (
+                            <>
+                                <LoadingSpinner size="sm" text="" className="mr-2" />
+                                Processing...
+                            </>
+                        ) : (
+                            mode === 'login' ? 'Login' : 'Sign Up'
+                        )}
                     </button>
                 </form>
             </div>

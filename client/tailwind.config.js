@@ -28,10 +28,15 @@ module.exports = {
           '33%': { content: '..' },
           '66%': { content: '...' },
           '100%': { content: '.' },
+        },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         }
       },
       animation: {
-        ellipsis: 'ellipsis 1.5s infinite'
+        ellipsis: 'ellipsis 1.5s infinite',
+        spin: 'spin 1s linear infinite'
       }
     },
   },

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
+import LoadingSpinner from './LoadingSpinner';
 import floatingCastle from '../assets/floating-castle.png';
 import wizardHat from '../assets/wizard-hat.png';
 import magicWand from '../assets/magic-wand.png';
@@ -130,9 +131,16 @@ const HomePage = () => {
                 <button
                         onClick={handleDemoLogin}
                         disabled={isLoading}
-                        className="px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300 disabled:opacity-50 font-medium text-lg"
+                        className="px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300 disabled:opacity-50 font-medium text-lg flex items-center justify-center mx-auto"
                 >
-                        Try Demo Version
+                        {isLoading ? (
+                            <>
+                                <LoadingSpinner size="sm" text="" className="mr-2" />
+                                Loading Demo...
+                            </>
+                        ) : (
+                            'Try Demo Version'
+                        )}
                 </button>
                 </div>
 

@@ -4,6 +4,7 @@ import ImagePopup from './ImagePopup';
 import SaveRoomModal from './SaveRoomModal';
 import { generateImage } from '../services/imageService';
 import NavBar from './NavBar';
+import LoadingSpinner from './LoadingSpinner';
 
 const VisualizerPage = () => {
   const [selectedAssociation, setSelectedAssociation] = useState(null);
@@ -199,9 +200,14 @@ const VisualizerPage = () => {
                   height: '40px',
                 }}
                 onClick={(e) => handleClick(assoc, e)}
+                disabled={isLoading}
               >
-                <div className="w-full h-full flex items-center justify-center text-white/40 hover:text-white/60 transition-colors duration-200 text-xl font-bold">
-                  {acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image ? '✓' : '?'}
+                <div className="w-full h-full bg-primary bg-opacity-75 rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-opacity-100 transition-all duration-200">
+                  {isLoading && selectedAssociation?.anchor === assoc.anchor ? (
+                    <LoadingSpinner size="sm" text="" />
+                  ) : (
+                    index + 1
+                  )}
                 </div>
               </button>
             );

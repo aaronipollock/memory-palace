@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
+import LoadingSpinner from './LoadingSpinner';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -176,6 +177,42 @@ const LandingPage = () => {
                 );
               }
             })}
+          </div>
+        </section>
+        {/* Coming Soon Section */}
+        <section className="py-20 px-4 bg-gradient-to-b from-white to-[#2B4C7E]/10">
+          <div className="container mx-auto max-w-6xl">
+            <h2 className="loci-header text-4xl text-center mb-12 !text-primary">
+              Coming Soon
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="bg-white/80 p-6 rounded-lg shadow-lg">
+                <div className="text-4xl mb-4">🔐</div>
+                <h3 className="text-xl font-semibold mb-2 text-primary">User Accounts</h3>
+                <p className="text-text-light">Save and manage multiple memory palaces with your personal account.</p>
+              </div>
+              <div className="bg-white/80 p-6 rounded-lg shadow-lg">
+                <div className="text-4xl mb-4">🎨</div>
+                <h3 className="text-xl font-semibold mb-2 text-primary">More Room Types</h3>
+                <p className="text-text-light">New room types including Great Hall, Chapel, and Kitchen coming soon.</p>
+              </div>
+              <div className="bg-white/80 p-6 rounded-lg shadow-lg">
+                <div className="text-4xl mb-4">📱</div>
+                <h3 className="text-xl font-semibold mb-2 text-primary">Mobile App</h3>
+                <p className="text-text-light">Access your memory palaces on the go with our upcoming mobile app.</p>
+              </div>
+              <div className="bg-white/80 p-6 rounded-lg shadow-lg">
+                <div className="text-4xl mb-4">🧠</div>
+                <h3 className="text-xl font-semibold mb-2 text-primary">Enhanced Memory Creation</h3>
+                <p className="text-text-light">Two-stage AI process: LLM generates creative associations, followed by AI image generation for more memorable visual anchors.</p>
+              </div>
+              <div className="hidden lg:block"></div>
+              <div className="bg-white/80 p-6 rounded-lg shadow-lg">
+                <div className="text-4xl mb-4">🏠</div>
+                <h3 className="text-xl font-semibold mb-2 text-primary">Custom Room Creation</h3>
+                <p className="text-text-light">Create personalized memory palaces using AI to generate rooms that match your familiar spaces, making memory associations even stronger.</p>
+              </div>
+            </div>
           </div>
         </section>
         {/* Use Cases Section */}

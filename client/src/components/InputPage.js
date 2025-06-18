@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
 import NavBar from './NavBar';
+import LoadingSpinner from './LoadingSpinner';
 
 const ROOM_TYPES = [
     "throne room",
@@ -102,7 +103,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
         setError(null);
     };
 
-    const handleProceedToVisualizer = () => {
+    const handleProceedToVisualizer = async () => {
         const memorablesList = memorables.split('\n')
             .map(item => item.trim())
             .filter(Boolean);
@@ -228,10 +229,17 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                                 <button
                                     type="submit"
                                     onClick={handleProceedToVisualizer}
-                                    className="flex-1 btn-loci text-lg px-8 py-4"
                                     disabled={isLoading}
+                                    className="flex-1 btn-loci text-lg px-8 py-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                 >
-                                    PROCEED TO VISUALIZER
+                                    {isLoading ? (
+                                        <>
+                                            <LoadingSpinner size="sm" text="" className="mr-2" />
+                                            GENERATING IMAGES...
+                                        </>
+                                    ) : (
+                                        'PROCEED TO VISUALIZER'
+                                    )}
                                 </button>
                                 <button
                                     type="button"
