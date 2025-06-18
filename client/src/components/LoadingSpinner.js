@@ -10,8 +10,8 @@ const LoadingSpinner = ({ size = 'md', text = 'Loading...', className = '' }) =>
 
   const spinnerStyle = {
     animation: 'spin 1s linear infinite',
-    border: '4px solid #e5e7eb',
-    borderTop: '4px solid #1B365D',
+    border: '4px solid #1B365D',
+    borderTop: '4px solid #B8860B',
     borderRadius: '50%',
     width: size === 'sm' ? '16px' : size === 'md' ? '32px' : size === 'lg' ? '48px' : '64px',
     height: size === 'sm' ? '16px' : size === 'md' ? '32px' : size === 'lg' ? '48px' : '64px',
