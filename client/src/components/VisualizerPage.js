@@ -187,6 +187,9 @@ const VisualizerPage = () => {
           {associations.map((assoc, index) => {
             if (!anchorPositions[assoc.anchor] || !assoc.memorableItem) return null;
 
+            // Check if this anchor has an accepted image
+            const hasAcceptedImage = acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image;
+
             return (
               <button
                 key={index}
@@ -202,11 +205,13 @@ const VisualizerPage = () => {
                 onClick={(e) => handleClick(assoc, e)}
                 disabled={isLoading}
               >
-                <div className="w-full h-full bg-primary bg-opacity-75 rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-opacity-100 transition-all duration-200">
+                <div className="w-full h-full bg-secondary bg-opacity-75 flex items-center justify-center text-white text-xs font-bold hover:bg-opacity-100 transition-all duration-200">
                   {isLoading && selectedAssociation?.anchor === assoc.anchor ? (
                     <LoadingSpinner size="sm" text="" />
+                  ) : hasAcceptedImage ? (
+                    '✓'
                   ) : (
-                    index + 1
+                    '?'
                   )}
                 </div>
               </button>
