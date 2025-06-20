@@ -171,7 +171,7 @@ const LandingPage = () => {
                     <img
                       src={imageSrc}
                       alt={imageAlt}
-                      className="w-full max-w-2xl h-72 object-contain mx-auto ml-12 hidden md:block mr-24 rounded-2xl"
+                      className="w-full max-w-sm h-56 object-cover mx-auto ml-12 hidden md:block mr-24 rounded-xl"
                     />
                   </div>
                 );
