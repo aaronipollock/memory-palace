@@ -1,5 +1,6 @@
 import React from 'react';
 import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 import './ImagePopup.css';
 
 const ImagePopup = ({
@@ -10,7 +11,8 @@ const ImagePopup = ({
   error,
   onClose,
   onAccept,
-  onReject
+  onReject,
+  onRetry
 }) => {
   return (
     <div className="popup-overlay" onClick={onClose}>
@@ -48,8 +50,12 @@ const ImagePopup = ({
         )}
 
         {error && (
-          <div className="text-error text-center py-3 bg-error/10 rounded-lg">
-            {error}
+          <div className="mb-4">
+            <ErrorMessage
+              error={error}
+              context="image-generation"
+              onRetry={onRetry}
+            />
           </div>
         )}
 

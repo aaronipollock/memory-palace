@@ -1,5 +1,6 @@
 import React from 'react';
 import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 
 const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData, setFormData }) => {
     const handleInputChange = (e) => {
@@ -33,8 +34,11 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                 </div>
 
                 {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                        {error}
+                    <div className="mb-4">
+                        <ErrorMessage
+                            error={error}
+                            context="authentication"
+                        />
                     </div>
                 )}
 

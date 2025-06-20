@@ -5,6 +5,7 @@ import SaveRoomModal from './SaveRoomModal';
 import { generateImage } from '../services/imageService';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 
 const VisualizerPage = () => {
   const [selectedAssociation, setSelectedAssociation] = useState(null);
@@ -81,7 +82,7 @@ const VisualizerPage = () => {
       }
     } catch (err) {
       console.error('Image generation error:', err);
-      setError(err.message);
+      setError(err);
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +121,27 @@ const VisualizerPage = () => {
         setCurrentPrompt(result.prompt);
       } catch (err) {
         console.error('Image generation error:', err);
-        setError(err.message);
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleRetryImageGeneration = async () => {
+    if (selectedAssociation) {
+      setIsLoading(true);
+      setError(null);
+      setGeneratedImage(null);
+      setCurrentPrompt('');
+
+      try {
+        const result = await generateImage(selectedAssociation, setCurrentPrompt);
+        setGeneratedImage(result.imageUrl);
+        setCurrentPrompt(result.prompt);
+      } catch (err) {
+        console.error('Image generation error:', err);
+        setError(err);
       } finally {
         setIsLoading(false);
       }
@@ -205,7 +226,7 @@ const VisualizerPage = () => {
                 onClick={(e) => handleClick(assoc, e)}
                 disabled={isLoading}
               >
-                <div className="w-full h-full bg-secondary bg-opacity-75 flex items-center justify-center text-white text-xs font-bold hover:bg-opacity-100 transition-all duration-200">
+                <div className="w-full h-full bg-secondary bg-opacity-75 flex items-center justify-center text-white text-lg font-bold hover:bg-opacity-100 transition-all duration-200">
                   {isLoading && selectedAssociation?.anchor === assoc.anchor ? (
                     <LoadingSpinner size="sm" text="" />
                   ) : hasAcceptedImage ? (
@@ -248,6 +269,7 @@ const VisualizerPage = () => {
               onClose={handleClosePopup}
               onAccept={handleAcceptImage}
               onReject={handleRejectImage}
+              onRetry={handleRetryImageGeneration}
             />
           )}
 

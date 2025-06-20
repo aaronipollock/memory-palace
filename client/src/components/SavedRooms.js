@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 
 const API_URL = 'http://localhost:5000';
 
@@ -79,8 +80,10 @@ const SavedRooms = () => {
             fetchPalaces();
         } catch (err) {
             console.error('Error decoding token:', err);
-            navigate('/');
-            return;
+            const tokenError = new Error('Invalid authentication token');
+            tokenError.response = { status: 401 };
+            setError(tokenError);
+            setLoading(false);
         }
     }, [navigate]);
 
@@ -98,13 +101,16 @@ const SavedRooms = () => {
                     navigate('/');
                     return;
                 }
-                throw new Error('Failed to fetch memory palaces');
+                const data = await response.json();
+                const errorObj = new Error(data.message || 'Failed to fetch memory palaces');
+                errorObj.response = { data, status: response.status };
+                throw errorObj;
             }
 
             const data = await response.json();
             setPalaces(data);
         } catch (err) {
-            setError(err.message);
+            setError(err);
         } finally {
             setLoading(false);
         }
@@ -122,7 +128,7 @@ const SavedRooms = () => {
         setDeleteModalOpen(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (localStorage.getItem('token') === 'demo-token') {
             // For demo mode, remove from localStorage
             const updatedPalaces = palaces.filter(p =>
@@ -132,19 +138,25 @@ const SavedRooms = () => {
             setPalaces(updatedPalaces);
         } else {
             // For real users, delete from API
-            fetch(`${API_URL}/api/memory-palaces/${palaceToDelete._id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+            try {
+                const response = await fetch(`${API_URL}/api/memory-palaces/${palaceToDelete._id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    const errorObj = new Error(data.message || 'Failed to delete memory palace');
+                    errorObj.response = { data, status: response.status };
+                    throw errorObj;
                 }
-            })
-            .then(() => {
+
                 setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
-            })
-            .catch(err => {
-                setError('Failed to delete memory palace');
-                console.error('Error deleting palace:', err);
-            });
+            } catch (err) {
+                setError(err);
+            }
         }
         setDeleteModalOpen(false);
         setPalaceToDelete(null);
@@ -160,6 +172,12 @@ const SavedRooms = () => {
         navigate('/');
     };
 
+    const handleRetryLoad = () => {
+        setError(null);
+        setLoading(true);
+        fetchPalaces();
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-background">
@@ -173,17 +191,6 @@ const SavedRooms = () => {
         );
     }
 
-    if (error) {
-        return (
-            <div className="min-h-screen bg-background">
-                <NavBar onLogout={handleLogout} />
-                <div className="container mx-auto px-4 py-8">
-                    <div className="text-red-500 text-center">{error}</div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#DAA520]/60 via-[#FFD700]/40 to-white">
             <NavBar onLogout={handleLogout} />
@@ -191,6 +198,16 @@ const SavedRooms = () => {
                 <h1 className="text-3xl font-bold mb-6 text-center">
                     {userEmail === 'demo@example.com' ? 'Demo Memory Palaces' : 'Your Memory Palaces'}
                 </h1>
+
+                {error && (
+                    <div className="mb-6">
+                        <ErrorMessage
+                            error={error}
+                            context="palace-load"
+                            onRetry={handleRetryLoad}
+                        />
+                    </div>
+                )}
 
                 {palaces.length === 0 ? (
                     <div className="text-center text-gray-600 mt-8">

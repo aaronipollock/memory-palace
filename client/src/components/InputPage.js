@@ -3,6 +3,8 @@ import axios from 'axios';
 import { ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
+import { getContextualErrorMessage } from '../utils/errorHandler';
 
 const ROOM_TYPES = [
     "throne room",
@@ -89,7 +91,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                 responseData: err.response?.data,
                 status: err.response?.status
             });
-            setError(err.response?.data?.error || 'Failed to generate images. Please try again.');
+            setError(err);
             setIsLoading(false);
         }
     };
@@ -134,6 +136,11 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
         localStorage.removeItem('acceptedImages');
 
         onImagesGenerated(associations, roomType, artStyle);
+    };
+
+    const handleRetry = () => {
+        setError(null);
+        handleProceedToVisualizer();
     };
 
     return (
@@ -223,7 +230,12 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
 
                         <div className="space-y-4">
                             {error && (
-                                <div className="text-red-500 text-center bg-white p-2 rounded">{error}</div>
+                                <ErrorMessage
+                                    error={error}
+                                    context="image-generation"
+                                    onRetry={handleRetry}
+                                    className="mb-4"
+                                />
                             )}
                             <div className="flex gap-4">
                                 <button

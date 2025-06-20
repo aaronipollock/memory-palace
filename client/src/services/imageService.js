@@ -13,7 +13,9 @@ export const generateImage = async (association, setCurrentPrompt) => {
   try {
     // Ensure we have the required data
     if (!association || !association.memorableItem) {
-      throw new Error('Invalid association data: missing memorable item');
+      const error = new Error('Invalid association data: missing memorable item');
+      error.response = { status: 400 };
+      throw error;
     }
 
     // Generate the prompt
@@ -50,7 +52,13 @@ export const generateImage = async (association, setCurrentPrompt) => {
     return response.data;
   } catch (error) {
     console.error('Image generation error:', error);
-    throw new Error(`API error (${error.response?.status || 'unknown'}): ${error.response?.data?.error || error.message}`);
+
+    // Enhance the error with context if it doesn't have response data
+    if (!error.response) {
+      error.context = 'image-generation';
+    }
+
+    throw error;
   }
 };
 

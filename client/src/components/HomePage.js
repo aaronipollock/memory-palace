@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
 import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
+import { getContextualErrorMessage } from '../utils/errorHandler';
 import floatingCastle from '../assets/floating-castle.png';
 import wizardHat from '../assets/wizard-hat.png';
 import magicWand from '../assets/magic-wand.png';
@@ -13,13 +15,13 @@ const HomePage = () => {
     const navigate = useNavigate();
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [authMode, setAuthMode] = useState('login');
-    const [error, setError] = useState('');
+    const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
 
     const handleDemoLogin = async () => {
         setIsLoading(true);
-        setError('');
+        setError(null);
         try {
             const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
@@ -37,28 +39,34 @@ const HomePage = () => {
                 localStorage.setItem('token', data.token);
                 navigate('/demo');
             } else {
-                setError(data.message || 'Failed to login');
+                const errorObj = new Error(data.message || 'Failed to login');
+                errorObj.response = { data, status: response.status };
+                setError(errorObj);
             }
         } catch (err) {
-            setError('Failed to connect to the server. Please make sure the server is running.');
+            setError(err);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleAuthSubmit = async (formData) => {
-        setError('');
+        setError(null);
         setIsLoading(true);
 
         // Basic validation
         if (!formData.email || !formData.password) {
-            setError('Please fill in all fields');
+            const validationError = new Error('Please fill in all fields');
+            validationError.response = { status: 400 };
+            setError(validationError);
             setIsLoading(false);
             return;
         }
 
         if (authMode === 'signup' && formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            const validationError = new Error('Passwords do not match');
+            validationError.response = { status: 400 };
+            setError(validationError);
             setIsLoading(false);
             return;
         }
@@ -79,12 +87,14 @@ const HomePage = () => {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem('token', data.token);
-        navigate('/demo');
+                navigate('/demo');
             } else {
-                setError(data.message || 'Authentication failed');
+                const errorObj = new Error(data.message || 'Authentication failed');
+                errorObj.response = { data, status: response.status };
+                setError(errorObj);
             }
         } catch (err) {
-            setError('Failed to connect to the server. Please make sure the server is running.');
+            setError(err);
         } finally {
             setIsLoading(false);
         }
@@ -100,6 +110,11 @@ const HomePage = () => {
         setAuthMode('signup');
         setFormData({ email: '', password: '', confirmPassword: '' });
         setAuthModalOpen(true);
+    };
+
+    const handleRetryDemo = () => {
+        setError(null);
+        handleDemoLogin();
     };
 
     return (
@@ -123,16 +138,25 @@ const HomePage = () => {
                     </h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                         Create vivid mental spaces to remember anything, from languages to complex concepts.
-            </p>
+                    </p>
                 </div>
 
                 {/* Demo Button */}
                 <div className="text-center mb-16">
-                <button
+                    {error && (
+                        <div className="mb-6">
+                            <ErrorMessage
+                                error={error}
+                                context="authentication"
+                                onRetry={handleRetryDemo}
+                            />
+                        </div>
+                    )}
+                    <button
                         onClick={handleDemoLogin}
                         disabled={isLoading}
                         className="px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300 disabled:opacity-50 font-medium text-lg flex items-center justify-center mx-auto"
-                >
+                    >
                         {isLoading ? (
                             <>
                                 <LoadingSpinner size="sm" text="" className="mr-2" />
@@ -141,7 +165,7 @@ const HomePage = () => {
                         ) : (
                             'Try Demo Version'
                         )}
-                </button>
+                    </button>
                 </div>
 
                 {/* Vertical Features Section */}
