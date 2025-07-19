@@ -1,0 +1,87 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './NavBar.css';  // We'll create this file next
+
+const NavBar = ({ onLoginClick }) => {
+    const navigate = useNavigate();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        setIsLoggedIn(!!token);
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+        navigate('/');
+    };
+
+    return (
+        <nav className="loci-nav" role="navigation" aria-label="Main Navigation">
+            <div className="container mx-auto px-6">
+                <div className="flex justify-between items-center py-4">
+                    {/* Logo and Brand */}
+                    <div className="flex flex-col items-start">
+                        <button
+                            className="text-5xl font-bold text-primary cursor-pointer loci-header trajan-font loci-italic focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                            onClick={() => navigate('/')}
+                            aria-label="Go to homepage"
+                        >
+                            Low·sAI
+                        </button>
+                    </div>
+
+                    {/* Navigation Links */}
+                    <div className="hidden md:flex items-center space-x-8">
+                        {isLoggedIn && (
+                            <>
+                                <button
+                                    onClick={() => navigate('/demo')}
+                                    className="loci-nav-link"
+                                >
+                                    Create Palace
+                                </button>
+                                <button
+                                    onClick={() => navigate('/saved-rooms')}
+                                    className="loci-nav-link"
+                                >
+                                    Saved Rooms
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Auth Buttons or Logout Link */}
+                    <div className="flex items-center space-x-4">
+                        {isLoggedIn ? (
+                            <button
+                                onClick={handleLogout}
+                                className="px-4 py-2 bg-primary text-white rounded hover:bg-[#B8860B] transition-colors duration-200"
+                            >
+                                Log Out
+                            </button>
+                        ) : (
+                            <>
+                                {/* <button
+                                    onClick={onLoginClick}
+                                    className="loci-nav-link !text-white"
+                                >
+                                    Log In
+                                </button>
+                                <button
+                                    onClick={onSignUpClick}
+                                    className="btn-loci"
+                                >
+                                    Sign Up
+                                </button> */}
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+};
+
+export default NavBar;

@@ -1,0 +1,356 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Jewel Tone Color Palette */
+  --color-primary: #1B365D;    /* Deep Sapphire */
+  --color-secondary: #B8860B;  /* Gold */
+  --color-accent: #2E8B57;     /* Emerald */
+  --color-background: #F8F9FA; /* Light Gray */
+  --color-text: #1B365D;       /* Deep Sapphire for text */
+  --color-text-light: #4A5568; /* Slate Gray for secondary text */
+  --color-success: #2E8B57;    /* Emerald for success states */
+  --color-error: #DC2626;      /* Red for error states */
+  --color-overlay: rgba(27, 54, 93, 0.1); /* Sapphire overlay */
+
+  /* Gradient Colors */
+  --gradient-purple-start: #e9d5ff;
+  --gradient-purple-end: #c4b5fd;
+  --gradient-purple-dark-start: #d8b4fe;
+  --gradient-purple-dark-end: #a78bfa;
+  --gradient-purple-darker-start: #c084fc;
+  --gradient-purple-darker-end: #8b5cf6;
+  --gradient-use-cases-start: var(--color-background);
+  --gradient-use-cases-end: #e2e8f0;
+}
+
+/* Custom Spinner Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Toast Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Base Styles */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* Loci Theme */
+.loci-bg {
+  background-color: var(--color-background);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #3b82f6);
+  background-attachment: fixed;
+}
+
+.loci-bg[data-gradient="purple"] {
+  background-image: linear-gradient(to bottom, var(--gradient-purple-start) 70%, var(--gradient-purple-end));
+}
+
+.loci-bg[data-gradient="purple-dark"] {
+  background-image: linear-gradient(to bottom, var(--gradient-purple-dark-start) 70%, var(--gradient-purple-dark-end));
+}
+
+.loci-bg[data-gradient="purple-darker"] {
+  background-image: linear-gradient(to bottom, var(--gradient-purple-darker-start) 70%, var(--gradient-purple-darker-end));
+}
+
+.loci-bg[data-gradient="use-cases"] {
+  background-image: linear-gradient(to bottom, var(--gradient-use-cases-start) 70%, var(--gradient-use-cases-end));
+}
+
+.loci-header {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.loci-container {
+  background-color: white;
+  border: 1px solid var(--color-overlay);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.loci-container:hover {
+  /* transform: translateY(-2px); */
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Styles */
+.btn-loci {
+  background-color: var(--color-primary);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-loci:hover {
+  background-color: var(--color-secondary);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-loci:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-loci::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.btn-loci:hover::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20, 20);
+    opacity: 0;
+  }
+}
+
+.btn-loci-secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Interactive Elements */
+.loci-anchor {
+  background-color: var(--color-secondary);
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.loci-anchor:hover {
+  /* transform: scale(1.05); */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.loci-anchor::before {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--color-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Modal Styles */
+.loci-modal {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-overlay);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Elements */
+.loci-input {
+  border: 1px solid var(--color-overlay);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.loci-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(46, 139, 87, 0.2);
+  outline: none;
+}
+
+/* Navigation */
+.loci-nav {
+  background-color: white;
+  border-bottom: 1px solid var(--color-overlay);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.loci-nav-link {
+  color: var(--color-text);
+  font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.loci-nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--color-secondary);
+  transition: width 0.3s ease;
+}
+
+.loci-nav-link:hover::after {
+  width: 100%;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.loci-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Feature Cards */
+.feature-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.feature-card:hover::before {
+  opacity: 0.05;
+}
+
+/* Utility Classes */
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-accent { color: var(--color-accent); }
+.bg-primary { background-color: var(--color-primary); }
+.bg-secondary { background-color: var(--color-secondary); }
+.bg-accent { background-color: var(--color-accent); }
+
+/* Animation Classes */
+.hover-lift {
+  transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+}
+
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .loci-header {
+    font-size: 2.5rem;
+  }
+
+  .feature-card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Gradient Backgrounds */
+.gradient-blue-200 {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #bfdbfe);
+  background-attachment: fixed;
+}
+
+.gradient-blue-300 {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #93c5fd);
+  background-attachment: fixed;
+}
+
+.gradient-blue-400 {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #60a5fa);
+  background-attachment: fixed;
+}
+
+.gradient-use-cases {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #e2e8f0);
+  background-attachment: fixed;
+}
