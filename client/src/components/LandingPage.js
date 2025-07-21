@@ -209,6 +209,30 @@ const LandingPage = () => {
             })}
           </div>
         </section>
+        {/* Upcoming Features Section */}
+        <section className="py-10 px-4 bg-blue-50 border-t border-b border-blue-100">
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-2xl font-semibold text-blue-900 mb-6 text-center">Upcoming Features</h3>
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                <span className="text-3xl mb-2 text-blue-400">🧠</span>
+                <div className="font-medium mb-1 text-blue-900">Smarter, More Memorable Images</div>
+                <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                <span className="text-3xl mb-2 text-blue-400">🏠</span>
+                <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
+                <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                <span className="text-3xl mb-2 text-blue-400">📷</span>
+                <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
+                <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
+              </div>
+            </div>
+            <p className="text-xs text-blue-600 mt-6 text-center">Features in development—your feedback shapes what comes next.</p>
+          </div>
+        </section>
         {/* Use Cases Section */}
         {/* <section className="py-20 px-4 bg-background gradient-use-cases">
           <div className="container mx-auto max-w-6xl">
