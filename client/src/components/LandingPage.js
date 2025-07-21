@@ -159,17 +159,9 @@ const LandingPage = () => {
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
           </h2>
-          <div className="flex flex-col gap-0 w-full">
+          <div className="flex flex-col gap-12 w-full">
             {features.map((feature, index) => {
-              const blueShades = [
-                'bg-blue-200',
-                'bg-blue-400',
-                'bg-blue-300',
-                'bg-blue-300',
-                'bg-blue-200',
-              ];
-              const shade = blueShades[index % blueShades.length];
-              // Unified layout for the three main features
+              // Only show the three main features
               if (
                 feature.title === 'AI-Powered Memory Creation' ||
                 feature.title === 'Interactive Memory Palaces' ||
@@ -190,25 +182,25 @@ const LandingPage = () => {
                 return (
                   <div
                     key={index}
-                    className={`w-full py-24 px-4 ${shade} gradient-${shade.replace('bg-', '')} flex items-center justify-center`}
+                    className="relative w-full max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] flex items-center justify-center ring-4 ring-white/40"
                   >
-                    <div className="max-w-6xl w-full flex items-center justify-center gap-64">
-                      <div className="flex-1 text-right">
-                        <h3 className="text-2xl font-semibold mb-2 text-primary">{feature.title}</h3>
-                        <p className="text-text-light text-lg">{feature.description}</p>
-                      </div>
-                      <img
-                        src={imageSrc}
-                        alt={imageAlt}
-                        className="w-full max-w-sm h-56 object-cover rounded-xl hidden md:block"
-                      />
+                    <img
+                      src={imageSrc}
+                      alt={imageAlt}
+                      className="absolute inset-0 w-full h-full object-cover z-0"
+                    />
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
+                      <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">{feature.title}</h3>
+                      <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">{feature.description}</p>
                     </div>
                   </div>
                 );
               }
+              return null;
             })}
           </div>
         </section>
+        <div className="mb-16" />
         {/* Upcoming Features Section */}
         <section className="py-10 px-4 bg-blue-50 border-t border-b border-blue-100">
           <div className="max-w-4xl mx-auto">
