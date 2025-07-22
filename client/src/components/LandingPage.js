@@ -159,50 +159,53 @@ const LandingPage = () => {
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
           </h2>
-          <div className="flex flex-col gap-12 w-full">
-            {features.map((feature, index) => {
-              // Only show the three main features
-              if (
-                feature.title === 'AI-Powered Memory Creation' ||
-                feature.title === 'Interactive Memory Palaces' ||
-                feature.title === 'Personalized Learning'
-              ) {
-                let imageSrc = '';
-                let imageAlt = '';
-                if (feature.title === 'AI-Powered Memory Creation') {
-                  imageSrc = '/images/memorable.png';
-                  imageAlt = 'Memorable';
-                } else if (feature.title === 'Interactive Memory Palaces') {
-                  imageSrc = '/images/throne_room.webp';
-                  imageAlt = 'Throne Room';
-                } else if (feature.title === 'Personalized Learning') {
-                  imageSrc = '/images/saved_rooms.png';
-                  imageAlt = 'Saved Rooms';
-                }
-                return (
-                  <div
-                    key={index}
-                    className="relative w-full max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] flex items-center justify-center ring-4 ring-white/40"
-                  >
-                    <img
-                      src={imageSrc}
-                      alt={imageAlt}
-                      className="absolute inset-0 w-full h-full object-cover z-0"
-                    />
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
-                      <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">{feature.title}</h3>
-                      <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">{feature.description}</p>
-                    </div>
-                  </div>
-                );
-              }
-              return null;
-            })}
+          <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-8 w-full pl-4 pr-4 md:pl-8 md:pr-8">
+            {/* Left: Memorable (4:3) - Bigger */}
+            <div className="flex items-center md:items-start justify-start md:pr-4 mt-16">
+              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
+                <img
+                  src="/images/memorable.png"
+                  alt="Memorable"
+                  className="absolute inset-0 w-full h-full object-cover z-0 scale-105"
+                />
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
+                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
+                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
+                </div>
+              </div>
+            </div>
+            {/* Right: Stacked 16:9 cards */}
+            <div className="flex flex-col gap-8 items-start">
+              {/* Throne Room */}
+              <div className="relative w-full aspect-[16/9] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
+                <img
+                  src="/images/throne_clicks.png"
+                  alt="Throne Room"
+                  className="absolute inset-0 w-full h-full object-cover z-0"
+                />
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
+                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Interactive Memory Palaces</h3>
+                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
+                </div>
+              </div>
+              {/* Saved Rooms */}
+              <div className="relative w-full aspect-[16/9] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
+                <img
+                  src="/images/saved_rooms.png"
+                  alt="Saved Rooms"
+                  className="absolute inset-0 w-full h-full object-cover z-0"
+                />
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
+                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Personalized Learning</h3>
+                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save, organize, and review your memory palaces at your own pace.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
         <div className="mb-16" />
         {/* Upcoming Features Section */}
-        <section className="py-10 px-4 bg-blue-50 border-t border-b border-blue-100">
+        <section className="py-10 px-4">
           <div className="max-w-4xl mx-auto">
             <h3 className="text-2xl font-semibold text-blue-900 mb-6 text-center">Upcoming Features</h3>
             <div className="grid gap-6 md:grid-cols-3">
