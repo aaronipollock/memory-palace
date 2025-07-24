@@ -161,8 +161,8 @@ const LandingPage = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-8 w-full pl-4 pr-4 md:pl-8 md:pr-8">
             {/* Left: Memorable (4:3) - Bigger */}
-            <div className="flex items-center md:items-start justify-start md:pr-4 mt-16">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
+            <div className="flex items-center md:items-start justify-start md:pr-4 mt-0">
+              <div className="relative w-full aspect-[4/3.7] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
                 <img
                   src="/images/memorable.png"
                   alt="Memorable"
@@ -207,25 +207,21 @@ const LandingPage = () => {
         {/* Upcoming Features Section */}
         <section className="py-10 px-4">
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-semibold text-blue-900 mb-6 text-center">Upcoming Features</h3>
+            <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
             <div className="grid gap-6 md:grid-cols-3">
-              <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <span className="text-3xl mb-2 text-blue-400">🧠</span>
-                <div className="font-medium mb-1 text-blue-900">Smarter, More Memorable Images</div>
-                <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
-              </div>
-              <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <span className="text-3xl mb-2 text-blue-400">🏠</span>
-                <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
-                <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
-              </div>
-              <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <span className="text-3xl mb-2 text-blue-400">📷</span>
-                <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
-                <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
-              </div>
+                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                  <div className="font-medium mb-1 text-blue-900">Smarter Images</div>
+                  <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                  <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
+                  <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                  <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
+                  <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
+                </div>
             </div>
-            <p className="text-xs text-blue-600 mt-6 text-center">Features in development—your feedback shapes what comes next.</p>
           </div>
         </section>
         {/* Use Cases Section */}
@@ -248,9 +244,9 @@ const LandingPage = () => {
           </div>
         </section> */}
         {/* CTA Section */}
-        <section className="py-20 px-4 loci-bg section-overlay">
+        <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
-            <h2 className="loci-header text-4xl mb-6">
+            <h2 className="loci-header text-4xl mb-6 !text-white">
               Start Building Your Memory Palace Today
             </h2>
             {/* <p className="text-xl text-text-light mb-8">

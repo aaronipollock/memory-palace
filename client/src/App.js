@@ -5,6 +5,7 @@ import InputPage from './components/InputPage';
 import VisualizerPage from './components/VisualizerPage';
 import SavedRooms from './components/SavedRooms';
 import LandingPage from './components/LandingPage';
+import FeedbackButton from './components/FeedbackButton';
 import { ToastProvider } from './context/ToastContext';
 // import UploadPage from './components/UploadPage'; // Uncomment if you have an upload page
 
@@ -61,6 +62,7 @@ function App() {
           <Route path="/saved-rooms" element={<SavedRooms />} />
           {/* <Route path="/upload" element={<UploadPage />} /> */}
         </Routes>
+        <FeedbackButton />
       </Router>
     </div>
     </ToastProvider>

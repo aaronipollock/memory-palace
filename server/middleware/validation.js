@@ -155,6 +155,43 @@ const imageGenerationValidation = {
   ]
 };
 
+// Feedback validation rules (MVP-friendly)
+const feedbackValidation = {
+  submit: [
+    body('rating')
+      .isInt({ min: 1, max: 5 })
+      .withMessage('Rating must be between 1 and 5'),
+
+    body('feedback')
+      .optional()
+      .trim()
+      .isLength({ max: 2000 })
+      .withMessage('Feedback must be less than 2000 characters'),
+
+    body('email')
+      .optional()
+      .isEmail()
+      .normalizeEmail()
+      .withMessage('Please provide a valid email address'),
+
+    body('timestamp')
+      .isISO8601()
+      .withMessage('Invalid timestamp format'),
+
+    body('userAgent')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('User agent is too long'),
+
+    body('url')
+      .optional()
+      .isURL()
+      .withMessage('Invalid URL format'),
+
+    handleValidationErrors
+  ]
+};
+
 // Sanitization middleware
 const sanitizeInput = (req, res, next) => {
   // Sanitize all string inputs
@@ -215,6 +252,7 @@ module.exports = {
   authValidation,
   memoryPalaceValidation,
   imageGenerationValidation,
+  feedbackValidation,
   sanitizeInput,
   xssProtection,
   handleValidationErrors

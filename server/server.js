@@ -66,6 +66,10 @@ app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, roomController.g
 const memoryPalaceRoutes = require('./routes/memoryPalaceRoutes');
 app.use('/api/memory-palaces', ...routeSecurity.memoryPalaceRoutes, memoryPalaceRoutes);
 
+// Feedback routes (no CSRF protection needed for public feedback)
+const feedbackRoutes = require('./routes/feedback');
+app.use('/api/feedback', feedbackRoutes);
+
 // Serve React app in production with security headers
 if (process.env.NODE_ENV === 'production') {
   // Serve static files from the React app
