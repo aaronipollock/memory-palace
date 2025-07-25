@@ -30,8 +30,20 @@ const submitFeedback = async (req, res) => {
   try {
     const { rating, feedback, email, timestamp, userAgent, url } = req.body;
 
+    // Debug logging
+    console.log('Feedback submission received:', {
+      rating,
+      feedback: feedback ? feedback.substring(0, 50) + '...' : 'none',
+      email: email || 'none',
+      timestamp,
+      userAgent: userAgent ? userAgent.substring(0, 50) + '...' : 'none',
+      url,
+      bodyKeys: Object.keys(req.body)
+    });
+
     // Validate required fields
     if (!rating || rating < 1 || rating > 5) {
+      console.log('Rating validation failed:', { rating, type: typeof rating });
       return res.status(400).json({
         error: 'Rating is required and must be between 1 and 5',
       });

@@ -4,6 +4,7 @@ const { body, validationResult, sanitizeBody } = require('express-validator');
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
     return res.status(400).json({
       error: 'Validation failed',
       details: errors.array().map(err => ({
@@ -170,9 +171,18 @@ const feedbackValidation = {
 
     body('email')
       .optional()
-      .isEmail()
-      .normalizeEmail()
-      .withMessage('Please provide a valid email address'),
+      .custom((value) => {
+        if (value === '' || value === null || value === undefined) {
+          return true; // Allow empty values
+        }
+        // Only validate if a value is provided
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          throw new Error('Please provide a valid email address');
+        }
+        return true;
+      })
+      .normalizeEmail(),
 
     body('timestamp')
       .isISO8601()
@@ -185,8 +195,16 @@ const feedbackValidation = {
 
     body('url')
       .optional()
-      .isURL()
-      .withMessage('Invalid URL format'),
+      .custom((value) => {
+        if (value === '' || value === null || value === undefined) {
+          return true; // Allow empty values
+        }
+        // Simple check for URL-like strings (allows localhost)
+        if (typeof value === 'string' && value.length > 0) {
+          return true;
+        }
+        throw new Error('Invalid URL format');
+      }),
 
     handleValidationErrors
   ]

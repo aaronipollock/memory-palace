@@ -1,4 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SecureAPIClient } from '../utils/security';
+
+const API_URL = 'http://localhost:5001';
+const apiClient = new SecureAPIClient(API_URL);
 
 const FeedbackButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,19 +53,13 @@ const FeedbackButton = () => {
     setSubmitStatus(null);
 
     try {
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          rating,
-          feedback,
-          email,
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-        }),
+      const response = await apiClient.post('/api/feedback', {
+        rating,
+        feedback,
+        email,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
       });
 
       if (response.ok) {
