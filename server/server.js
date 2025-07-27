@@ -57,18 +57,19 @@ app.use('/api/auth', ...routeSecurity.authRoutes, authRoutes);
 const feedbackRoutes = require('./routes/feedback');
 app.use('/api/feedback', feedbackRoutes);
 
-// Apply CSRF protection to all other API routes (after auth and feedback routes)
-app.use('/api', csrfProtection);
-
-// Routes with security middleware
+// Image generation routes (no CSRF protection needed for core functionality)
 const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
-const roomController = require('./controllers/roomController');
-app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, roomController.generateRoom);
-
+// Memory palace routes (no CSRF protection needed for core functionality)
 const memoryPalaceRoutes = require('./routes/memoryPalaceRoutes');
 app.use('/api/memory-palaces', ...routeSecurity.memoryPalaceRoutes, memoryPalaceRoutes);
+
+// Apply CSRF protection to all other API routes (after auth, feedback, image, and memory palace routes)
+app.use('/api', csrfProtection);
+
+const roomController = require('./controllers/roomController');
+app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, roomController.generateRoom);
 
 // Serve React app in production with security headers
 if (process.env.NODE_ENV === 'production') {

@@ -27,61 +27,7 @@ const SavedRooms = () => {
             return;
         }
 
-        // For demo mode, load seed data if no saved rooms exist
-        if (token === 'demo-token') {
-            // Force refresh seed data for demo
-            const seedData = [
-                {
-                    name: "Weekly Grocery List",
-                    roomType: "bedchamber",
-                    associations: [
-                        { anchor: "bed", memorableItem: "Milk", description: "Fresh dairy for the week" },
-                        { anchor: "lamp", memorableItem: "Bread", description: "Fresh loaf for sandwiches" },
-                        { anchor: "mirror", memorableItem: "Eggs", description: "Dozen eggs for breakfast" },
-                        { anchor: "window", memorableItem: "Apples", description: "Fresh fruit for snacks" },
-                        { anchor: "dresser", memorableItem: "Chicken", description: "Protein for meals" },
-                        { anchor: "nightstand", memorableItem: "Coffee", description: "Morning brew essentials" },
-                        { anchor: "wardrobe", memorableItem: "Pasta", description: "Quick dinner option" }
-                    ]
-                },
-                {
-                    name: "Today's To-Do List",
-                    roomType: "throne room",
-                    associations: [
-                        { anchor: "throne", memorableItem: "Call Mom", description: "Check in with family" },
-                        { anchor: "chandelier", memorableItem: "Pay Bills", description: "Handle monthly payments" },
-                        { anchor: "stained glass window", memorableItem: "Gym", description: "Evening workout session" },
-                        { anchor: "statue", memorableItem: "Meeting", description: "Team sync at 2 PM" },
-                        { anchor: "red carpet", memorableItem: "Dinner", description: "Reservation at 7 PM" },
-                        { anchor: "footstool", memorableItem: "Laundry", description: "Wash workout clothes" },
-                        { anchor: "candlestick", memorableItem: "Study", description: "Review for exam" },
-                        { anchor: "banner", memorableItem: "Email", description: "Check work emails" },
-                        { anchor: "dais", memorableItem: "Shopping", description: "Buy groceries" },
-                        { anchor: "column", memorableItem: "Exercise", description: "Evening walk" }
-                    ]
-                },
-                {
-                    name: "Weekly Schedule",
-                    roomType: "dungeon",
-                    associations: [
-                        { anchor: "gate", memorableItem: "Coffee Meeting", description: "Monday morning coffee with team" },
-                        { anchor: "table", memorableItem: "Yoga Mat", description: "Tuesday evening yoga class" },
-                        { anchor: "pillory", memorableItem: "Book Stack", description: "Wednesday book club" },
-                        { anchor: "bookshelf", memorableItem: "Toothbrush", description: "Thursday dentist appointment" },
-                        { anchor: "barrel", memorableItem: "Popcorn", description: "Friday movie night" },
-                        { anchor: "hanging chains", memorableItem: "Shopping Cart", description: "Saturday grocery shopping" },
-                        { anchor: "sconce", memorableItem: "Family Photo", description: "Sunday family dinner" }
-                    ]
-                }
-            ];
-
-            localStorage.setItem('savedRooms', JSON.stringify(seedData));
-            setPalaces(seedData);
-            setLoading(false);
-            return;
-        }
-
-        // For real users, decode token and fetch from API
+        // For all users (including demo), decode token and fetch from API
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             setUserEmail(payload.email);
@@ -134,32 +80,21 @@ const SavedRooms = () => {
     };
 
     const handleConfirmDelete = async () => {
-        if (localStorage.getItem('token') === 'demo-token') {
-            // For demo mode, remove from localStorage
-            const updatedPalaces = palaces.filter(p =>
-                p.name !== palaceToDelete.name || p.roomType !== palaceToDelete.roomType
-            );
-            localStorage.setItem('savedRooms', JSON.stringify(updatedPalaces));
-            setPalaces(updatedPalaces);
-            showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
-        } else {
-            // For real users, delete from API
-            try {
-                const response = await apiClient.delete(`/api/memory-palaces/${palaceToDelete._id}`);
+        try {
+            const response = await apiClient.delete(`/api/memory-palaces/${palaceToDelete._id}`);
 
-                if (!response.ok) {
-                    const data = await response.json();
-                    const errorObj = new Error(data.message || 'Failed to delete memory palace');
-                    errorObj.response = { data, status: response.status };
-                    throw errorObj;
-                }
-
-                setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
-                showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
-            } catch (err) {
-                setError(err);
-                showError('Failed to delete memory palace. Please try again.');
+            if (!response.ok) {
+                const data = await response.json();
+                const errorObj = new Error(data.message || 'Failed to delete memory palace');
+                errorObj.response = { data, status: response.status };
+                throw errorObj;
             }
+
+            setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
+            showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
+        } catch (err) {
+            setError(err);
+            showError('Failed to delete memory palace. Please try again.');
         }
         setDeleteModalOpen(false);
         setPalaceToDelete(null);
@@ -170,9 +105,28 @@ const SavedRooms = () => {
         setPalaceToDelete(null);
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/');
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Call the backend logout API to trigger demo palace reset
+                await fetch('http://localhost:5001/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+            }
+        } catch (error) {
+            console.error('Logout API call failed:', error);
+            // Continue with logout even if API call fails
+        } finally {
+            // Always clear local storage and navigate
+            localStorage.removeItem('token');
+            navigate('/');
+        }
     };
 
     const handleRetryLoad = () => {
@@ -188,7 +142,7 @@ const SavedRooms = () => {
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-center min-h-[400px]">
                         <LoadingSpinner size="lg" text="Loading your memory palaces..." />
-            </div>
+                    </div>
                 </div>
             </div>
         );

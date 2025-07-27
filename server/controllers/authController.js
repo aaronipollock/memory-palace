@@ -141,3 +141,42 @@ exports.login = async (req, res) => {
         }
     }
 };
+
+// Logout controller
+exports.logout = async (req, res) => {
+    try {
+        const { email } = req.user; // Get user from JWT token
+
+        // Clear cookies
+        res.clearCookie('refreshToken', {
+            path: '/api/auth/refresh',
+            domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : 'localhost'
+        });
+        res.clearCookie('csrfToken', {
+            path: '/',
+            domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : 'localhost'
+        });
+
+        // If this is the demo user, reset demo palaces
+        if (email === 'demo@example.com') {
+            try {
+                const { resetDemoPalaces } = require('../scripts/resetDemoPalaces');
+                await resetDemoPalaces();
+                console.log('Demo palaces reset on logout');
+            } catch (resetError) {
+                console.error('Error resetting demo palaces:', resetError);
+                // Don't fail the logout if reset fails
+            }
+        }
+
+        res.json({
+            message: 'Logout successful'
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({
+            error: 'Error during logout',
+            code: 'LOGOUT_ERROR'
+        });
+    }
+};

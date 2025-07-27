@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
-import HomePage from './components/HomePage';
 import InputPage from './components/InputPage';
 import VisualizerPage from './components/VisualizerPage';
 import SavedRooms from './components/SavedRooms';
@@ -44,7 +43,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<HomePage />} />
+          <Route path="/login" element={<LandingPage />} />
           <Route
             path="/demo"
             element={

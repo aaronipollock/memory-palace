@@ -3,15 +3,15 @@
 // Token management
 class TokenManager {
   static getAccessToken() {
-    return localStorage.getItem('accessToken');
+    return localStorage.getItem('token');
   }
 
   static setAccessToken(token) {
-    localStorage.setItem('accessToken', token);
+    localStorage.setItem('token', token);
   }
 
   static removeAccessToken() {
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem('token');
   }
 
   static isTokenExpired(token) {

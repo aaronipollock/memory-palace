@@ -7,6 +7,10 @@ import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 import { useToast } from '../context/ToastContext';
+import { SecureAPIClient } from '../utils/security';
+
+const API_URL = 'http://localhost:5001';
+const apiClient = new SecureAPIClient(API_URL);
 
 const VisualizerPage = () => {
   const [selectedAssociation, setSelectedAssociation] = useState(null);
@@ -19,10 +23,6 @@ const VisualizerPage = () => {
     return saved ? JSON.parse(saved) : {};
   });
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [savedRooms, setSavedRooms] = useState(() => {
-    const saved = localStorage.getItem('savedRooms');
-    return saved ? JSON.parse(saved) : [];
-  });
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
   const { showSuccess, showError, showInfo } = useToast();
 
@@ -34,11 +34,6 @@ const VisualizerPage = () => {
   useEffect(() => {
     localStorage.setItem('acceptedImages', JSON.stringify(acceptedImages));
   }, [acceptedImages]);
-
-  // Save rooms to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('savedRooms', JSON.stringify(savedRooms));
-  }, [savedRooms]);
 
   // Get the appropriate room image
   const roomImage = ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
@@ -54,15 +49,39 @@ const VisualizerPage = () => {
     acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image
   );
 
-  const handleSaveRoom = (roomData) => {
-    const roomToSave = {
-      ...roomData,
-      roomType: roomType,
-      associations: associations
-    };
-    setSavedRooms(prev => [...prev, roomToSave]);
-    setIsSaveModalOpen(false);
-    showSuccess(`Memory palace "${roomData.name}" saved successfully!`);
+  const handleSaveRoom = async (roomData) => {
+    try {
+      // Create the palace data for the API
+      const palaceData = {
+        name: roomData.name,
+        roomType: roomType,
+        associations: associations.map(assoc => ({
+          anchor: assoc.anchor,
+          memorableItem: assoc.memorableItem,
+          description: assoc.description
+        }))
+      };
+
+      // Save to backend API
+      const response = await apiClient.post('/api/memory-palaces', palaceData);
+
+      if (!response.ok) {
+        const data = await response.json();
+        const errorObj = new Error(data.message || 'Failed to save memory palace');
+        errorObj.response = { data, status: response.status };
+        throw errorObj;
+      }
+
+      setIsSaveModalOpen(false);
+      showSuccess(`Memory palace "${roomData.name}" saved successfully!`);
+
+      // Clear accepted images after successful save
+      setAcceptedImages({});
+      localStorage.removeItem('acceptedImages');
+    } catch (err) {
+      console.error('Error saving palace:', err);
+      showError('Failed to save memory palace. Please try again.');
+    }
   };
 
   const handleClick = async (association, event) => {

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { authValidation, sanitizeInput, xssProtection } = require('../middleware/validation');
-const { authRateLimit, securityHeaders } = require('../middleware/auth');
+const { authRateLimit, securityHeaders, authenticateToken } = require('../middleware/auth');
 const { generateAccessToken, generateRefreshToken, jwtConfig, blacklistToken } = require('../config/jwt');
 
 // Apply security headers to all auth routes
@@ -56,26 +56,11 @@ router.post('/refresh', (req, res) => {
   }
 });
 
-// Logout route
-router.post('/logout', (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (token) {
-    blacklistToken(token);
-  }
-
-  // Clear cookies
-  res.clearCookie('refreshToken', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/api/auth/refresh'
-  });
-
-  res.json({
-    message: 'Logged out successfully'
-  });
-});
+// Logout route with authentication required
+router.post('/logout',
+  authenticateToken,
+  authController.logout
+);
 
 // Logout all sessions route
 router.post('/logout-all', (req, res) => {

@@ -11,10 +11,29 @@ const NavBar = ({ onLoginClick }) => {
         setIsLoggedIn(!!token);
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        setIsLoggedIn(false);
-        navigate('/');
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Call the backend logout API to trigger demo palace reset
+                await fetch('http://localhost:5001/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+            }
+        } catch (error) {
+            console.error('Logout API call failed:', error);
+            // Continue with logout even if API call fails
+        } finally {
+            // Always clear local storage and navigate
+            localStorage.removeItem('token');
+            setIsLoggedIn(false);
+            navigate('/');
+        }
     };
 
     return (

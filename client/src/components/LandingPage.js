@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
 import LoadingSpinner from './LoadingSpinner';
-import { SecureAPIClient, CSRFManager } from '../utils/security';
+import { SecureAPIClient, CSRFManager, TokenManager } from '../utils/security';
 import './LandingPage.css';
 
 const API_URL = 'http://localhost:5001';
@@ -112,31 +112,33 @@ const LandingPage = () => {
                   <button
                     onClick={async () => {
                       try {
-                        // Use proper demo login flow to get CSRF token
-                        const response = await apiClient.post('/api/auth/login', {
-                          email: 'demo@example.com',
-                          password: 'demo123456'
+                        const response = await fetch('http://localhost:5001/api/auth/login', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            email: 'demo@example.com',
+                            password: 'demo123456'
+                          }),
+                          credentials: 'include'
                         });
 
                         const result = await response.json();
+
                         if (response.ok) {
-                          // Store tokens properly
-                          localStorage.setItem('token', result.accessToken);
+                          TokenManager.setAccessToken(result.accessToken);
                           if (result.csrfToken) {
                             CSRFManager.setCSRFToken(result.csrfToken);
                           }
                           navigate('/demo');
                         } else {
                           console.error('Demo login failed:', result.message);
-                          // Fallback to demo token if login fails
-                          localStorage.setItem('token', 'demo-token');
-                          navigate('/demo');
+                          showError('Demo login failed. Please try again.');
                         }
                       } catch (err) {
                         console.error('Demo login error:', err);
-                        // Fallback to demo token if login fails
-                        localStorage.setItem('token', 'demo-token');
-                        navigate('/demo');
+                        showError('Demo login failed. Please try again.');
                       }
                     }}
                     className="btn-loci text-lg px-8 py-4"

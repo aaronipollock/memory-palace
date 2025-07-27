@@ -84,6 +84,11 @@ const memoryPalaceValidation = {
       .isLength({ min: 1, max: 100 })
       .withMessage('Memorable item must be between 1 and 100 characters'),
 
+    body('associations.*.description')
+      .trim()
+      .isLength({ min: 1, max: 500 })
+      .withMessage('Description must be between 1 and 500 characters'),
+
     handleValidationErrors
   ],
 
