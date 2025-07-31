@@ -83,18 +83,18 @@ const SavedRooms = () => {
         try {
             const response = await apiClient.delete(`/api/memory-palaces/${palaceToDelete._id}`);
 
-            if (!response.ok) {
-                const data = await response.json();
-                const errorObj = new Error(data.message || 'Failed to delete memory palace');
-                errorObj.response = { data, status: response.status };
-                throw errorObj;
-            }
+                if (!response.ok) {
+                    const data = await response.json();
+                    const errorObj = new Error(data.message || 'Failed to delete memory palace');
+                    errorObj.response = { data, status: response.status };
+                    throw errorObj;
+                }
 
-            setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
-            showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
-        } catch (err) {
-            setError(err);
-            showError('Failed to delete memory palace. Please try again.');
+                setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
+                showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
+            } catch (err) {
+                setError(err);
+                showError('Failed to delete memory palace. Please try again.');
         }
         setDeleteModalOpen(false);
         setPalaceToDelete(null);
@@ -124,8 +124,8 @@ const SavedRooms = () => {
             // Continue with logout even if API call fails
         } finally {
             // Always clear local storage and navigate
-            localStorage.removeItem('token');
-            navigate('/');
+        localStorage.removeItem('token');
+        navigate('/');
         }
     };
 
@@ -142,7 +142,7 @@ const SavedRooms = () => {
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-center min-h-[400px]">
                         <LoadingSpinner size="lg" text="Loading your memory palaces..." />
-                    </div>
+            </div>
                 </div>
             </div>
         );
@@ -195,11 +195,53 @@ const SavedRooms = () => {
                                 </button>
                                 <h2 className="text-xl font-semibold mb-2">{palace.name}</h2>
                                 <p className="text-gray-600 mb-4">Room Type: {palace.roomType || 'Throne Room'}</p>
+
+                                {/* Completion Status */}
+                                {palace.completionStatus && (
+                                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="text-sm font-medium text-gray-700">Progress</span>
+                                      <span className="text-sm text-gray-500">
+                                        {palace.completionStatus.acceptedImages}/{palace.completionStatus.totalAnchors}
+                                      </span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                      <div
+                                        className={`h-2 rounded-full transition-all duration-300 ${
+                                          palace.completionStatus.isComplete
+                                            ? 'bg-green-500'
+                                            : 'bg-blue-500'
+                                        }`}
+                                        style={{ width: `${palace.completionStatus.progressPercentage}%` }}
+                                      ></div>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-1">
+                                      <span className="text-xs text-gray-500">
+                                        {palace.completionStatus.isComplete ? 'Complete' : 'In Progress'}
+                                      </span>
+                                      <span className="text-xs text-gray-500">
+                                        {palace.completionStatus.progressPercentage}%
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+
                                 <div className="space-y-2">
                                     {palace.associations && palace.associations.map((assoc, index) => (
                                         <div key={index} className="border-t pt-2">
-                                            <p className="font-medium">{assoc.memorableItem}</p>
-                                            <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex-1">
+                                                    <p className="font-medium">{assoc.memorableItem}</p>
+                                                    <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
+                                                </div>
+                                                {assoc.hasAcceptedImage && (
+                                                    <div className="ml-2">
+                                                        <span className="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full text-xs">
+                                                            ✓
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

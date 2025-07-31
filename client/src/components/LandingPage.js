@@ -134,11 +134,11 @@ const LandingPage = () => {
                           navigate('/demo');
                         } else {
                           console.error('Demo login failed:', result.message);
-                          showError('Demo login failed. Please try again.');
+                          // showError('Demo login failed. Please try again.');
                         }
                       } catch (err) {
                         console.error('Demo login error:', err);
-                        showError('Demo login failed. Please try again.');
+                        // showError('Demo login failed. Please try again.');
                       }
                     }}
                     className="btn-loci text-lg px-8 py-4"
@@ -173,7 +173,7 @@ const LandingPage = () => {
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
                   <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
                   <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
-                </div>
+          </div>
               </div>
             </div>
             {/* Right: Stacked 16:9 cards */}
@@ -218,11 +218,11 @@ const LandingPage = () => {
                 <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
                   <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
                   <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
-                </div>
+              </div>
                 <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
                   <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
                   <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
-                </div>
+              </div>
             </div>
           </div>
         </section>

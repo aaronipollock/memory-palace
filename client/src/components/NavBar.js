@@ -30,9 +30,9 @@ const NavBar = ({ onLoginClick }) => {
             // Continue with logout even if API call fails
         } finally {
             // Always clear local storage and navigate
-            localStorage.removeItem('token');
-            setIsLoggedIn(false);
-            navigate('/');
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+        navigate('/');
         }
     };
 

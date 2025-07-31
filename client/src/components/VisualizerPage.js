@@ -49,6 +49,13 @@ const VisualizerPage = () => {
     acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image
   );
 
+  // Calculate progress for save button
+  const acceptedCount = visibleAssociations.filter(assoc =>
+    acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image
+  ).length;
+  const totalCount = visibleAssociations.length;
+  const progressPercentage = totalCount > 0 ? Math.round((acceptedCount / totalCount) * 100) : 0;
+
   const handleSaveRoom = async (roomData) => {
     try {
       // Create the palace data for the API
@@ -58,8 +65,15 @@ const VisualizerPage = () => {
         associations: associations.map(assoc => ({
           anchor: assoc.anchor,
           memorableItem: assoc.memorableItem,
-          description: assoc.description
-        }))
+          description: assoc.description,
+          hasAcceptedImage: !!(acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image)
+        })),
+        completionStatus: {
+          totalAnchors: totalCount,
+          acceptedImages: acceptedCount,
+          isComplete: allImagesAccepted,
+          progressPercentage: progressPercentage
+        }
       };
 
       // Save to backend API
@@ -73,11 +87,14 @@ const VisualizerPage = () => {
       }
 
       setIsSaveModalOpen(false);
-      showSuccess(`Memory palace "${roomData.name}" saved successfully!`);
+      const saveMessage = allImagesAccepted
+        ? `Memory palace "${roomData.name}" saved successfully!`
+        : `Memory palace "${roomData.name}" saved with ${acceptedCount}/${totalCount} images accepted.`;
+      showSuccess(saveMessage);
 
-      // Clear accepted images after successful save
-      setAcceptedImages({});
-      localStorage.removeItem('acceptedImages');
+      // Don't clear accepted images after save - let user continue working
+      // setAcceptedImages({});
+      // localStorage.removeItem('acceptedImages');
     } catch (err) {
       console.error('Error saving palace:', err);
       showError('Failed to save memory palace. Please try again.');
@@ -223,7 +240,7 @@ const VisualizerPage = () => {
                   <strong>Complete All Points:</strong> Continue until you've accepted images for all anchor points in the room.
                 </li>
                 <li>
-                  <strong>Save Your Palace:</strong> Once all images are accepted, click "Save Room" to name and save your memory palace.
+                  <strong>Save Your Palace:</strong> Click "Save Progress" at any time to save your work, or "Save Complete Palace" when all images are accepted.
                 </li>
               </ol>
             </div>
@@ -240,7 +257,10 @@ const VisualizerPage = () => {
 
           {/* Status announcement for screen readers */}
           <div aria-live="polite" className="sr-only">
-            {allImagesAccepted ? 'All images have been accepted. You can now save your memory palace.' : `${Object.keys(acceptedImages).length} of ${visibleAssociations.length} images accepted.`}
+            {allImagesAccepted
+              ? 'All images have been accepted. You can save your complete memory palace.'
+              : `${acceptedCount} of ${totalCount} images accepted. You can save your progress at any time.`
+            }
           </div>
 
           {associations.map((assoc, index) => {
@@ -292,25 +312,25 @@ const VisualizerPage = () => {
           {/* Save Room Button - bottom right of image container */}
           <div className="absolute bottom-6 right-6 z-20">
             <button
-              onClick={() => {
-                if (allImagesAccepted) {
-                  setIsSaveModalOpen(true);
-                } else {
-                  alert('You must accept all images before saving the room.');
-                }
-              }}
+              onClick={() => setIsSaveModalOpen(true)}
               className={`px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 ${
-                allImagesAccepted ? 'btn-loci' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                allImagesAccepted ? 'btn-loci' : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
-              disabled={!allImagesAccepted}
               aria-describedby="save-room-help"
             >
-              Save Room
+              <div className="flex items-center space-x-2">
+                <span>{allImagesAccepted ? 'Save Complete Palace' : 'Save Progress'}</span>
+                {!allImagesAccepted && (
+                  <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">
+                    {acceptedCount}/{totalCount}
+                  </span>
+                )}
+              </div>
             </button>
             <div id="save-room-help" className="sr-only">
               {allImagesAccepted
                 ? 'Click to save your completed memory palace with a name.'
-                : 'You must accept all images before you can save the room.'
+                : `Click to save your memory palace progress. ${acceptedCount} of ${totalCount} images accepted.`
               }
             </div>
           </div>
