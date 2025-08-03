@@ -240,7 +240,7 @@ const VisualizerPage = () => {
                   <strong>Complete All Points:</strong> Continue until you've accepted images for all anchor points in the room.
                 </li>
                 <li>
-                  <strong>Save Your Palace:</strong> Click "Save Progress" at any time to save your work, or "Save Complete Palace" when all images are accepted.
+                  <strong>Save Your Palace:</strong> Click "Save Progress" at any time to save your work, or "Save Room" when all images are accepted.
                 </li>
               </ol>
             </div>
@@ -313,20 +313,40 @@ const VisualizerPage = () => {
           <div className="absolute bottom-6 right-6 z-20">
             <button
               onClick={() => setIsSaveModalOpen(true)}
-              className={`px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 ${
-                allImagesAccepted ? 'btn-loci' : 'bg-blue-600 hover:bg-blue-700 text-white'
+              className={`group relative px-6 py-3 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 ${
+                allImagesAccepted
+                  ? 'bg-primary hover:bg-primary-dark text-white'
+                  : 'bg-secondary hover:bg-secondary-dark text-white'
               }`}
               aria-describedby="save-room-help"
             >
               <div className="flex items-center space-x-2">
-                <span>{allImagesAccepted ? 'Save Complete Palace' : 'Save Progress'}</span>
+                {/* Icon */}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {allImagesAccepted ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  )}
+                </svg>
+
+                {/* Text */}
+                <span className="font-semibold">
+                  {allImagesAccepted ? 'Save Room' : 'Save Progress'}
+                </span>
+
+                {/* Pulse animation for incomplete palaces */}
                 {!allImagesAccepted && (
-                  <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">
-                    {acceptedCount}/{totalCount}
-                  </span>
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                 )}
               </div>
+
+              {/* Hover effect */}
+              <div className={`absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                allImagesAccepted ? 'bg-primary/20' : 'bg-secondary/20'
+              }`}></div>
             </button>
+
             <div id="save-room-help" className="sr-only">
               {allImagesAccepted
                 ? 'Click to save your completed memory palace with a name.'

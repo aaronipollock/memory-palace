@@ -231,8 +231,8 @@ const SavedRooms = () => {
                                         <div key={index} className="border-t pt-2">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
-                                                    <p className="font-medium">{assoc.memorableItem}</p>
-                                                    <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
+                                            <p className="font-medium">{assoc.memorableItem}</p>
+                                            <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
                                                 </div>
                                                 {assoc.hasAcceptedImage && (
                                                     <div className="ml-2">
