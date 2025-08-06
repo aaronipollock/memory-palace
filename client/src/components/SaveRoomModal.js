@@ -76,7 +76,7 @@ const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType }) =>
                 aria-describedby="save-room-modal-desc"
                 ref={modalRef}
             >
-                <h2 className="text-2xl font-bold mb-4 text-primary" id="save-room-modal-title">Save Your Memory Room</h2>
+                <h2 className="text-2xl font-bold mb-4 text-primary" id="save-room-modal-title">Save Your Room</h2>
                 <div id="save-room-modal-desc" className="sr-only">
                     Enter a name for your memory room to save it for later use.
                 </div>

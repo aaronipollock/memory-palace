@@ -37,9 +37,7 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
     const [roomType, setRoomType] = useState(() =>
         localStorage.getItem('roomType') || 'throne room'
     );
-    const [memorables, setMemorables] = useState(() =>
-        localStorage.getItem('memorables') || ''
-    );
+    const [memorables, setMemorables] = useState('');
     const [artStyle, setArtStyle] = useState(() =>
         localStorage.getItem('artStyle') || 'Random'
     );
@@ -51,10 +49,9 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
 
     // Save to localStorage whenever values change
     useEffect(() => {
-        localStorage.setItem('memorables', memorables);
         localStorage.setItem('roomType', roomType);
         localStorage.setItem('artStyle', artStyle);
-    }, [memorables, roomType, artStyle]);
+    }, [roomType, artStyle]);
 
     // Add console.log to debug
     console.log('onImagesGenerated prop:', onImagesGenerated);
@@ -222,8 +219,8 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                         {/* Tip Box */}
                         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-2 rounded" role="alert" aria-live="polite">
                             <strong>Tip:</strong> For best results, use concrete, visual words (like "apple," "car," or "envelope").<br />
-                            Avoid abstract terms (like "freedom" or "justice") and proper nouns (like "John" or "Paris").<br />
-                            For abstract ideas, try describing them with a concrete image (e.g., "hourglass" for "time").
+                            For abstract ideas or proper nouns, use a concrete image followed by the original term in parentheses.<br />
+                            Examples: "hourglass (time)", "two-dollar bill (Thomas Jefferson)", "eagle (freedom)", "scales (justice)"
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">

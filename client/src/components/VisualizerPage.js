@@ -18,10 +18,20 @@ const VisualizerPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPrompt, setCurrentPrompt] = useState('');
-  const [acceptedImages, setAcceptedImages] = useState(() => {
-    const saved = localStorage.getItem('acceptedImages');
+  // Store accepted images in memory only (no localStorage to avoid quota issues)
+  const [acceptedImages, setAcceptedImages] = useState({});
+
+  // Store image metadata in localStorage (prompts, associations, etc. - no base64 data)
+  const [imageMetadata, setImageMetadata] = useState(() => {
+    const saved = localStorage.getItem('imageMetadata');
     return saved ? JSON.parse(saved) : {};
   });
+
+  // Clean up old localStorage data on component mount
+  useEffect(() => {
+    // Remove old acceptedImages data to free up space
+    localStorage.removeItem('acceptedImages');
+  }, []);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
   const { showSuccess, showError, showInfo } = useToast();
@@ -30,10 +40,10 @@ const VisualizerPage = () => {
   const currentPalace = JSON.parse(localStorage.getItem('currentPalace') || '{}');
   const { roomType = 'throne room', associations = [] } = currentPalace;
 
-  // Save accepted images to localStorage whenever they change
+  // Save image metadata to localStorage whenever it changes (no base64 data)
   useEffect(() => {
-    localStorage.setItem('acceptedImages', JSON.stringify(acceptedImages));
-  }, [acceptedImages]);
+    localStorage.setItem('imageMetadata', JSON.stringify(imageMetadata));
+  }, [imageMetadata]);
 
   // Get the appropriate room image
   const roomImage = ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
@@ -45,14 +55,17 @@ const VisualizerPage = () => {
   const visibleAssociations = associations.filter(
     assoc => anchorPositions[assoc.anchor] && assoc.memorableItem
   );
-  const allImagesAccepted = visibleAssociations.every(assoc =>
-    acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image
-  );
+
+  // Helper function to check if an image is accepted (either in memory or metadata)
+  const isImageAccepted = (assoc) => {
+    return (acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image) ||
+           imageMetadata[assoc.anchor];
+  };
+
+  const allImagesAccepted = visibleAssociations.every(isImageAccepted);
 
   // Calculate progress for save button
-  const acceptedCount = visibleAssociations.filter(assoc =>
-    acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image
-  ).length;
+  const acceptedCount = visibleAssociations.filter(isImageAccepted).length;
   const totalCount = visibleAssociations.length;
   const progressPercentage = totalCount > 0 ? Math.round((acceptedCount / totalCount) * 100) : 0;
 
@@ -66,7 +79,7 @@ const VisualizerPage = () => {
           anchor: assoc.anchor,
           memorableItem: assoc.memorableItem,
           description: assoc.description,
-          hasAcceptedImage: !!(acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image)
+          hasAcceptedImage: isImageAccepted(assoc)
         })),
         completionStatus: {
           totalAnchors: totalCount,
@@ -109,14 +122,30 @@ const VisualizerPage = () => {
     setCurrentPrompt('');
 
     try {
-      // Check if we have an accepted image for this anchor
+      // Check if we have an accepted image in memory for this anchor
       if (acceptedImages[association.anchor]) {
         setGeneratedImage(acceptedImages[association.anchor].image);
         setCurrentPrompt(acceptedImages[association.anchor].prompt);
+      } else if (imageMetadata[association.anchor]) {
+        // We have metadata but no image in memory (page was refreshed)
+        // Regenerate the image using the stored prompt
+        showInfo('Regenerating image from saved prompt...');
+        const result = await generateImage(association, setCurrentPrompt);
+        if (result.imageData) {
+          setGeneratedImage(`data:image/png;base64,${result.imageData}`);
+        } else {
+          setGeneratedImage(result.optimizedUrl || result.imageUrl);
+        }
+        setCurrentPrompt(result.prompt);
       } else {
         // Generate new image if no accepted image exists
         const result = await generateImage(association, setCurrentPrompt);
-        setGeneratedImage(result.optimizedUrl || result.imageUrl);
+        // Handle base64 image data
+        if (result.imageData) {
+          setGeneratedImage(`data:image/png;base64,${result.imageData}`);
+        } else {
+          setGeneratedImage(result.optimizedUrl || result.imageUrl);
+        }
         setCurrentPrompt(result.prompt);
       }
     } catch (err) {
@@ -135,6 +164,7 @@ const VisualizerPage = () => {
 
   const handleAcceptImage = () => {
     if (selectedAssociation && generatedImage) {
+      // Store the full image data in memory (including base64)
       setAcceptedImages(prev => ({
         ...prev,
         [selectedAssociation.anchor]: {
@@ -143,6 +173,18 @@ const VisualizerPage = () => {
           association: selectedAssociation
         }
       }));
+
+      // Store only metadata in localStorage (no base64 data)
+      setImageMetadata(prev => ({
+        ...prev,
+        [selectedAssociation.anchor]: {
+          prompt: currentPrompt,
+          association: selectedAssociation,
+          memorableItem: selectedAssociation.memorableItem,
+          anchor: selectedAssociation.anchor
+        }
+      }));
+
       showSuccess(`Image accepted for ${selectedAssociation.anchor}!`);
       handleClosePopup();
     }
@@ -158,7 +200,12 @@ const VisualizerPage = () => {
 
       try {
         const result = await generateImage(selectedAssociation, setCurrentPrompt);
-        setGeneratedImage(result.optimizedUrl || result.imageUrl);
+        // Handle base64 image data
+        if (result.imageData) {
+          setGeneratedImage(`data:image/png;base64,${result.imageData}`);
+        } else {
+          setGeneratedImage(result.optimizedUrl || result.imageUrl);
+        }
         setCurrentPrompt(result.prompt);
         showSuccess('New image generated!');
       } catch (err) {
@@ -180,7 +227,12 @@ const VisualizerPage = () => {
 
       try {
         const result = await generateImage(selectedAssociation, setCurrentPrompt);
-        setGeneratedImage(result.optimizedUrl || result.imageUrl);
+        // Handle base64 image data
+        if (result.imageData) {
+          setGeneratedImage(`data:image/png;base64,${result.imageData}`);
+        } else {
+          setGeneratedImage(result.optimizedUrl || result.imageUrl);
+        }
         setCurrentPrompt(result.prompt);
       } catch (err) {
         console.error('Image generation error:', err);
@@ -266,8 +318,8 @@ const VisualizerPage = () => {
           {associations.map((assoc, index) => {
             if (!anchorPositions[assoc.anchor] || !assoc.memorableItem) return null;
 
-            // Check if this anchor has an accepted image
-            const hasAcceptedImage = acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image;
+            // Check if this anchor has an accepted image (either in memory or metadata)
+            const hasAcceptedImage = isImageAccepted(assoc);
 
             return (
               <button

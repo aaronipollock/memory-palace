@@ -93,53 +93,53 @@ const createDemoPalaces = async () => {
             associations: [
                 {
                     anchor: 'bed',
-                    memorableItem: 'Declaration of Independence',
+                    memorableItem: 'quill pen writing independence (Declaration of Independence)',
                     description: 'A quill pen writing on a scroll on the bed'
                 },
                 {
                     anchor: 'lamp',
-                    memorableItem: 'Boston Tea Party',
-                    description: 'Tea leaves floating in a lamp\'s light'
+                    memorableItem: 'tea cup (Boston Tea Party)',
+                    description: 'Tea cup floating in a lamp\'s light'
                 },
                 {
                     anchor: 'mirror',
-                    memorableItem: 'George Washington',
-                    description: 'A reflection of Washington crossing the Delaware'
+                    memorableItem: 'cherry tree (George Washington)',
+                    description: 'A cherry tree reflecting in the mirror'
                 },
                 {
                     anchor: 'dresser',
-                    memorableItem: 'Constitutional Convention',
-                    description: 'A dresser with documents and quills'
+                    memorableItem: 'constitution document (Constitutional Convention)',
+                    description: 'A dresser with a large constitution document and quills'
                 },
                 {
                     anchor: 'armchair',
-                    memorableItem: 'Thomas Jefferson',
-                    description: 'An armchair with drafting papers'
+                    memorableItem: 'two-dollar bill (Thomas Jefferson)',
+                    description: 'An armchair with scattered two-dollar bills'
                 },
                 {
                     anchor: 'nightstand',
-                    memorableItem: 'Bill of Rights',
-                    description: 'A nightstand with ten scrolls'
+                    memorableItem: 'ten articles (Bill of Rights)',
+                    description: 'A nightstand with ten articles arranged neatly'
                 },
                 {
                     anchor: 'wardrobe',
-                    memorableItem: 'Revolutionary War',
-                    description: 'A wardrobe with military uniforms'
+                    memorableItem: 'Revolutionary War uniforms (Revolutionary War)',
+                    description: 'A wardrobe filled with colonial military uniforms'
                 },
                 {
                     anchor: 'rug',
                     memorableItem: 'Liberty Bell',
-                    description: 'A rug with bell patterns'
+                    description: 'A rug with a large bell pattern in the center'
                 },
                 {
                     anchor: 'headboard',
-                    memorableItem: 'Stars and Stripes',
-                    description: 'A headboard with American flag patterns'
+                    memorableItem: 'American flag (Stars and Stripes)',
+                    description: 'A headboard decorated with the American flag pattern'
                 },
                 {
                     anchor: 'ceiling beams',
-                    memorableItem: 'Constitutional Framework',
-                    description: 'Ceiling beams representing the constitutional structure'
+                    memorableItem: 'wooden framework (Constitutional Framework)',
+                    description: 'Ceiling beams forming a strong wooden framework structure'
                 }
             ]
         });

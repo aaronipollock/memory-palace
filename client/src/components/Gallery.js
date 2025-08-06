@@ -20,12 +20,12 @@ const Gallery = ({ images = [] }) => {
                 <div key={index} className="gallery-item">
                     <div className="image-container">
                         <img
-                            src={image.optimizedUrl || image.imageUrl}
+                            src={image.imageData ? `data:image/png;base64,${image.imageData}` : (image.optimizedUrl || image.imageUrl)}
                             alt={image.prompt || `Generated image ${index + 1}`}
                             loading="lazy"
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = image.originalUrl; // Fallback to original
+                                e.target.src = image.imageData ? `data:image/png;base64,${image.imageData}` : image.originalUrl; // Fallback to original
                             }}
                         />
                     </div>

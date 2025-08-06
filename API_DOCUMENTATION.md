@@ -311,9 +311,8 @@ X-CSRF-Token: <csrf_token>
 ```json
 {
   "success": true,
-  "originalUrl": "http://localhost:5001/images/original/1234567890-throne-apple.png",
-  "optimizedUrl": "http://localhost:5001/images/optimized/1234567890-throne-apple.png",
-  "optimizationSuccess": true,
+  "imageData": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "mimeType": "image/png",
   "filename": "1234567890-throne-apple.png"
 }
 ```

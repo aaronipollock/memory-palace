@@ -51,16 +51,6 @@ exports.generateImages = async (req, res) => {
         console.log('Received prompt:', prompt);
         console.log('Using API key:', API_KEY ? `${API_KEY.substring(0, 10)}...` : 'Not found');
 
-        // Ensure directories exist
-        const { originalDir, optimizedDir } = ensureDirectories();
-
-        // Generate filename
-        const safeAnchor = (association.anchor || 'unknown').replace(/\\s+/g, '_');
-        const safeMemorable = (association.memorableItem || 'unknown').replace(/\\s+/g, '_');
-        const filename = `${Date.now()}-${safeAnchor}-${safeMemorable}.png`;
-        const originalPath = path.join(originalDir, filename);
-        const optimizedPath = path.join(optimizedDir, filename);
-
         console.log('Sending request to Stability AI with data:', {
             text_prompts: [{ text: prompt, weight: 1 }],
             cfg_scale: 7,
@@ -98,26 +88,12 @@ exports.generateImages = async (req, res) => {
             // Extract the image data from the response
             const imageData = response.data.artifacts[0];
 
-            // Convert the base64 image to a Buffer
-            const buffer = Buffer.from(imageData.base64, 'base64');
-
-            // Save original image
-            fs.writeFileSync(originalPath, buffer);
-
-            // Generate optimized version
-            const optimizationSuccess = await generateOptimizedImage(originalPath, optimizedPath);
-
-            // Construct URLs
-            const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`;
-            const originalUrl = `${backendUrl}/images/original/${filename}`;
-            const optimizedUrl = `${backendUrl}/images/optimized/${filename}`;
-
+            // Return base64 data directly without saving to disk
             res.json({
                 success: true,
-                originalUrl,
-                optimizedUrl,
-                optimizationSuccess,
-                filename
+                imageData: imageData.base64,
+                mimeType: 'image/png',
+                filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`
             });
 
         } catch (apiError) {
