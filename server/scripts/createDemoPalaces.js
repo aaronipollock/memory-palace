@@ -24,62 +24,62 @@ const createDemoPalaces = async () => {
         });
         console.log('Cleared existing demo palaces');
 
-        // Demo Palace 1: Spanish Vocabulary (Throne Room)
-        const spanishPalace = new MemoryPalace({
-            name: 'Spanish Vocabulary Palace',
+        // Demo Palace 1: Grocery Shopping List (Throne Room)
+        const groceryPalace = new MemoryPalace({
+            name: 'Grocery Shopping List',
             roomType: 'throne room',
             userId: demoUser._id,
             isSeedData: true,
             associations: [
                 {
                     anchor: 'throne',
-                    memorableItem: 'el rey (the king)',
-                    description: 'A majestic king sitting on the throne, wearing a crown with Spanish flag colors'
+                    memorableItem: 'bread',
+                    description: 'A loaf of fresh bread sitting on the throne like a royal crown'
                 },
                 {
                     anchor: 'stained glass window',
-                    memorableItem: 'la ventana (the window)',
-                    description: 'A beautiful stained glass window with Spanish architectural patterns'
+                    memorableItem: 'milk',
+                    description: 'A glass of milk casting a white glow through the stained glass window'
                 },
                 {
                     anchor: 'chandelier',
-                    memorableItem: 'la luz (the light)',
-                    description: 'A glowing chandelier casting warm light throughout the room'
+                    memorableItem: 'eggs',
+                    description: 'Eggs hanging from the chandelier like crystal ornaments'
                 },
                 {
                     anchor: 'red carpet',
-                    memorableItem: 'el camino (the path)',
-                    description: 'A royal red carpet leading to the throne'
+                    memorableItem: 'carrots',
+                    description: 'Orange carrots scattered along the red carpet path'
                 },
                 {
                     anchor: 'banner',
-                    memorableItem: 'la bandera (the flag)',
-                    description: 'A royal banner waving with Spanish colors'
+                    memorableItem: 'apples',
+                    description: 'Red apples hanging from the royal banner like decorations'
                 },
                 {
                     anchor: 'dais',
-                    memorableItem: 'el trono (the throne platform)',
-                    description: 'A raised dais supporting the royal throne'
+                    memorableItem: 'cheese',
+                    description: 'A wheel of cheese placed on the dais like a royal offering'
                 },
                 {
                     anchor: 'column',
-                    memorableItem: 'la columna (the column)',
-                    description: 'A majestic marble column supporting the throne room'
+                    memorableItem: 'tomatoes',
+                    description: 'Ripe red tomatoes growing up the marble column like vines'
                 },
                 {
                     anchor: 'footstool',
-                    memorableItem: 'el taburete (the footstool)',
-                    description: 'A golden footstool at the base of the throne'
+                    memorableItem: 'bananas',
+                    description: 'Yellow bananas arranged on the golden footstool'
                 },
                 {
                     anchor: 'candlestick',
-                    memorableItem: 'la vela (the candle)',
-                    description: 'An ornate candlestick illuminating the throne room'
+                    memorableItem: 'butter',
+                    description: 'A stick of butter melting on the ornate candlestick'
                 },
                 {
                     anchor: 'statue',
-                    memorableItem: 'la estatua (the statue)',
-                    description: 'A marble statue of a Spanish nobleman'
+                    memorableItem: 'potatoes',
+                    description: 'Potatoes stacked around the base of the marble statue'
                 }
             ]
         });
@@ -205,12 +205,12 @@ const createDemoPalaces = async () => {
         });
 
         // Save all demo palaces
-        await spanishPalace.save();
+        await groceryPalace.save();
         await historyPalace.save();
         await anatomyPalace.save();
 
         console.log('✅ Demo palaces created successfully:');
-        console.log('  - Spanish Vocabulary Palace (Throne Room)');
+        console.log('  - Grocery Shopping List (Throne Room)');
         console.log('  - American Revolution History (Bedchamber)');
         console.log('  - Human Anatomy Study (Dungeon)');
 
