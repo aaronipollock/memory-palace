@@ -5,6 +5,9 @@ import VisualizerPage from './components/VisualizerPage';
 import SavedRooms from './components/SavedRooms';
 import LandingPage from './components/LandingPage';
 import FeedbackButton from './components/FeedbackButton';
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import CookiePolicy from './components/CookiePolicy';
 import { ToastProvider } from './context/ToastContext';
 // import UploadPage from './components/UploadPage'; // Uncomment if you have an upload page
 
@@ -59,6 +62,9 @@ function App() {
             element={<VisualizerPage associations={associations} roomType={roomType} />}
           />
           <Route path="/saved-rooms" element={<SavedRooms />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/cookies" element={<CookiePolicy />} />
           {/* <Route path="/upload" element={<UploadPage />} /> */}
         </Routes>
         <FeedbackButton />

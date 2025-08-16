@@ -92,12 +92,12 @@ const LandingPage = () => {
           onLoginClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
         />
         {/* Hero Section */}
-        <img
+        {/* <img
           src="/images/banner_clean.png"
           alt="Banner"
           className="w-48 h-auto mx-auto md:mx-16"
           style={{ borderRadius: '8px' }}
-        />
+        /> */}
         <section className="py-20 px-4 mt-24">
           <div className="container mx-auto max-w-6xl">
             <div className="flex flex-col md:flex-row items-center justify-between gap-12">
@@ -105,8 +105,14 @@ const LandingPage = () => {
                 <h1 className="loci-header text-5xl md:text-6xl mb-6 text-center !text-white">
                   Want to boost your memory? <br /> You've come to the right place.
                 </h1>
-                <p className="text-xl text-text-light text-center text-white mb-8">
-                  Transform how you remember with AI-powered memory palaces, <br />also known as the ancient method of loci (pronounced <em>low·sai</em>).
+                <p className="text-xl text-text-light text-center text-white mb-4">
+                  AI-powered memory palace creation for better learning and retention.
+                </p>
+                <p className="text-lg text-gray-300 text-center mb-2">
+                  Transform how you remember using the ancient method of loci
+                </p>
+                <p className="text-xl text-white font-bold text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                  (pronounced <em>low·sai</em>)
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
@@ -161,10 +167,10 @@ const LandingPage = () => {
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-8 w-full pl-4 pr-4 md:pl-8 md:pr-8">
-            {/* Left: Memorable (4:3) - Bigger */}
-            <div className="flex items-center md:items-start justify-start md:pr-4 mt-0">
-              <div className="relative w-full aspect-[4/3.7] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
+          <div className="flex flex-col gap-8 w-full pl-4 pr-4 md:pl-8 md:pr-8 max-w-5xl mx-auto">
+            {/* Memorable - Bigger */}
+            <div className="w-full">
+              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
                 <img
                   src="/images/memorable.png"
                   alt="Memorable"
@@ -173,13 +179,13 @@ const LandingPage = () => {
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
                   <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
                   <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
-          </div>
+                </div>
               </div>
             </div>
-            {/* Right: Stacked 16:9 cards */}
-            <div className="flex flex-col gap-8 items-start">
-              {/* Throne Room */}
-              <div className="relative w-full aspect-[16/9] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
+
+            {/* Throne Room */}
+            <div className="w-full">
+              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
                 <img
                   src="/images/throne_clicks.png"
                   alt="Throne Room"
@@ -190,8 +196,11 @@ const LandingPage = () => {
                   <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
                 </div>
               </div>
-              {/* Saved Rooms */}
-              <div className="relative w-full aspect-[16/9] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
+            </div>
+
+            {/* Saved Rooms */}
+            <div className="w-full">
+              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
                 <img
                   src="/images/saved_rooms.png"
                   alt="Saved Rooms"
@@ -263,46 +272,50 @@ const LandingPage = () => {
           </div>
         </section>
         {/* Footer */}
-        <footer className="py-12 px-4 bg-primary text-white">
-          <p className="text-gray-300 text-center">
-            Where memories find their place.
-          </p>
+        <footer className="py-16 px-4 bg-primary text-white">
           <div className="container mx-auto max-w-6xl">
-            <div className="grid md:grid-cols-4 gap-8">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">low·sAI</h3>
+            {/* Main Footer Content */}
+            <div className="flex flex-col items-center mb-12">
+              {/* Brand Section */}
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center mb-4">
+                  <h3 className="text-3xl font-bold loci-header">low·sAI</h3>
+                </div>
+                {/* <p className="text-gray-400 text-xs italic">
+                  Where memories find their place.
+                </p> */}
               </div>
-              <div>
-                <h4 className="font-semibold mb-4">Product</h4>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Features</a></li>
-                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Pricing</a></li> */}
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Demo</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Resources</h4>
-                <ul className="space-y-2">
-                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Blog</a></li> */}
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Tutorials</a></li>
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Support</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Company</h4>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">About</a></li>
-                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Contact</a></li>
-                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy</a></li> */}
-                </ul>
+
+              {/* Navigation Links */}
+              <div className="flex flex-wrap justify-center gap-8">
+                <a href="/user-guide" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  User Guide
+                </a>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  Support
+                </a>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  About
+                </a>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
+                  Contact
+                </a>
               </div>
             </div>
-            <div className="mt-12 pt-8 border-t border-gray-700 text-center text-gray-300">
-              <p>&copy; {new Date().getFullYear()} Low·sAI. All rights reserved.</p>
-              <div className="mt-4 flex flex-wrap justify-center gap-6 text-sm">
-                <a href="/terms" className="text-gray-300 hover:text-white transition-colors duration-300">Terms of Service</a>
-                <a href="/privacy" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy Policy</a>
-                <a href="/cookies" className="text-gray-300 hover:text-white transition-colors duration-300">Cookie Policy</a>
+
+            {/* Bottom Section */}
+            <div className="pt-8 border-t border-gray-700/50">
+              <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <p className="text-gray-400 text-sm">
+                  &copy; {new Date().getFullYear()} Low·sAI. All rights reserved.
+                </p>
+                <div className="flex flex-wrap justify-center gap-6 text-sm">
+                  <a href="/terms" className="text-gray-400 hover:text-white transition-colors duration-300">Terms</a>
+                  <span className="text-gray-600">•</span>
+                  <a href="/privacy" className="text-gray-400 hover:text-white transition-colors duration-300">Privacy</a>
+                  <span className="text-gray-600">•</span>
+                  <a href="/cookies" className="text-gray-400 hover:text-white transition-colors duration-300">Cookies</a>
+                </div>
               </div>
             </div>
           </div>
