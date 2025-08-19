@@ -1,95 +1,84 @@
 const jwt = require('jsonwebtoken');
 
-// JWT configuration
-const jwtConfig = {
-  // Token expiration times (more generous for MVP)
-  accessTokenExpiry: process.env.NODE_ENV === 'production' ? '15m' : '1h', // 1 hour for development
-  refreshTokenExpiry: '7d', // 7 days for refresh tokens
+// JWT secret key - should be in environment variables in production
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
-  // Cookie settings for production
-  cookieOptions: {
-    httpOnly: true, // Prevents XSS attacks
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict', // CSRF protection
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-    path: '/',
-    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
-  },
-
-  // Refresh token cookie settings
-  refreshCookieOptions: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/api/auth/refresh',
-    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
-  }
-};
+// In-memory token blacklist (use Redis in production)
+const tokenBlacklist = new Set();
 
 // Generate access token
 const generateAccessToken = (userId, email) => {
-  return jwt.sign(
-    { userId, email },
-    process.env.JWT_SECRET,
-    { expiresIn: jwtConfig.accessTokenExpiry }
-  );
+    return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 // Generate refresh token
 const generateRefreshToken = (userId) => {
-  return jwt.sign(
-    { userId, type: 'refresh' },
-    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
-    { expiresIn: jwtConfig.refreshTokenExpiry }
-  );
+    return jwt.sign({ userId, type: 'refresh' }, JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN });
 };
 
-// Verify token
-const verifyToken = (token, secret = process.env.JWT_SECRET) => {
-  try {
-    return jwt.verify(token, secret);
-  } catch (error) {
-    throw new Error('Invalid token');
-  }
-};
-
-// Verify refresh token
-const verifyRefreshToken = (token) => {
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
-    if (decoded.type !== 'refresh') {
-      throw new Error('Invalid token type');
+// Verify JWT token
+const verifyToken = (token) => {
+    try {
+        return jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+        throw new Error('Invalid token');
     }
-    return decoded;
-  } catch (error) {
-    throw new Error('Invalid refresh token');
-  }
 };
 
-// Token blacklist (for logout functionality)
-const tokenBlacklist = new Set();
-
-// Add token to blacklist
+// Blacklist a token
 const blacklistToken = (token) => {
-  tokenBlacklist.add(token);
-  // Clean up old tokens after 24 hours
-  setTimeout(() => {
-    tokenBlacklist.delete(token);
-  }, 24 * 60 * 60 * 1000);
+    tokenBlacklist.add(token);
 };
 
 // Check if token is blacklisted
 const isTokenBlacklisted = (token) => {
-  return tokenBlacklist.has(token);
+    return tokenBlacklist.has(token);
+};
+
+// Decode token without verification (for debugging)
+const decodeToken = (token) => {
+    try {
+        return jwt.decode(token);
+    } catch (error) {
+        return null;
+    }
+};
+
+// Refresh token
+const refreshToken = (token) => {
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true });
+        delete decoded.exp;
+        delete decoded.iat;
+        return generateAccessToken(decoded.userId, decoded.email);
+    } catch (error) {
+        throw new Error('Invalid token for refresh');
+    }
+};
+
+// JWT configuration for cookies
+const jwtConfig = {
+    refreshCookieOptions: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost'
+    }
 };
 
 module.exports = {
-  jwtConfig,
-  generateAccessToken,
-  generateRefreshToken,
-  verifyToken,
-  verifyRefreshToken,
-  blacklistToken,
-  isTokenBlacklisted
+    generateAccessToken,
+    generateRefreshToken,
+    verifyToken,
+    blacklistToken,
+    isTokenBlacklisted,
+    decodeToken,
+    refreshToken,
+    jwtConfig,
+    JWT_SECRET,
+    JWT_EXPIRES_IN
 };

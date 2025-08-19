@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { authValidation, sanitizeInput, xssProtection } = require('../middleware/validation');
 const { authRateLimit, securityHeaders, authenticateToken } = require('../middleware/auth');
-const { generateAccessToken, generateRefreshToken, jwtConfig, blacklistToken } = require('../config/jwt');
+const { generateToken, refreshToken, blacklistToken } = require('../config/jwt');
 
 // Apply security headers to all auth routes
 router.use(securityHeaders);
@@ -38,11 +38,11 @@ router.post('/refresh', (req, res) => {
   }
 
   try {
-    const { verifyRefreshToken, generateAccessToken } = require('../config/jwt');
-    const decoded = verifyRefreshToken(refreshToken);
+    const { verifyToken, generateToken } = require('../config/jwt');
+    const decoded = verifyToken(refreshToken);
 
     // Generate new access token
-    const newAccessToken = generateAccessToken(decoded.userId, decoded.email);
+    const newAccessToken = generateToken({ userId: decoded.userId, email: decoded.email });
 
     res.json({
       accessToken: newAccessToken,

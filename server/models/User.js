@@ -6,9 +6,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        lowercase: true,
         trim: true,
-        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+        lowercase: true
     },
     password: {
         type: String,
@@ -18,23 +17,15 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    },
-    lastLogin: {
-        type: Date,
-        default: null
-    },
-    isActive: {
-        type: Boolean,
-        default: true
     }
 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();
-    
+
     try {
-        const salt = await bcrypt.genSalt(12);
+        const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
         next();
     } catch (error) {
@@ -42,4 +33,11 @@ userSchema.pre('save', async function(next) {
     }
 });
 
-// Method 
+// Method to compare passwords
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    return bcrypt.compare(candidatePassword, this.password);
+};
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
