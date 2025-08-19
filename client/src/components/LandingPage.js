@@ -164,7 +164,7 @@ const LandingPage = () => {
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
           </h2>
-          <div className="flex flex-col gap-8 w-full pl-4 pr-4 md:pl-8 md:pr-8 max-w-5xl mx-auto">
+          <div className="flex flex-col gap-20 w-full pl-4 pr-4 md:pl-8 md:pr-8 max-w-5xl mx-auto">
             {/* Memorable - Bigger */}
             <div className="w-full">
               <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
@@ -217,17 +217,17 @@ const LandingPage = () => {
           <div className="max-w-4xl mx-auto">
             <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
             <div className="grid gap-6 md:grid-cols-3">
-                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
-                  <div className="font-medium mb-1 text-blue-900">Smarter Images</div>
-                  <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
-                  <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
-                  <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
+              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
+                <div className="font-medium mb-1 text-blue-900">Smarter Images</div>
+                <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
               </div>
-                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
-                  <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
-                  <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
+              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
+                <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
+                <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
+              </div>
+              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
+                <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
+                <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
               </div>
             </div>
           </div>
@@ -254,9 +254,6 @@ const LandingPage = () => {
         {/* CTA Section */}
         <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
-            <h2 className="loci-header text-4xl mb-6 !text-white">
-              Start Building Your Memory Palace Today
-            </h2>
             {/* <p className="text-xl text-text-light mb-8">
               Join thousands of learners who have transformed their memory with Loci.
             </p> */}
@@ -274,6 +271,9 @@ const LandingPage = () => {
             {/* Main Footer Content */}
             <div className="flex flex-col items-center mb-12">
               {/* Brand Section */}
+              <h2 className="loci-header text-4xl mb-6 !text-white">
+                Start Building Your Memory Palace Today
+              </h2>
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <h3 className="text-3xl font-bold loci-header">low·sAI</h3>
