@@ -1,7 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import LoadingSpinner from './LoadingSpinner';
-import ErrorMessage from './ErrorMessage';
-import OptimizedImage from './OptimizedImage';
 import './ImagePopup.css';
 
 const ImagePopup = ({
@@ -97,28 +94,30 @@ const ImagePopup = ({
 
         {isLoading && (
           <div className="text-center py-6" aria-live="assertive">
-            <LoadingSpinner size="lg" text="Creating your memorable image..." />
+            <div className="text-lg text-gray-600">Creating your memorable image...</div>
           </div>
         )}
 
         {error && (
-          <div className="mb-4" aria-live="assertive">
-            <ErrorMessage
-              error={error}
-              context="image-generation"
-              onRetry={onRetry}
-            />
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg" aria-live="assertive">
+            <p className="font-medium">{error.message || 'An error occurred'}</p>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="mt-2 bg-white bg-opacity-50 hover:bg-opacity-75 px-3 py-1 rounded text-sm font-medium transition-colors"
+              >
+                Try Again
+              </button>
+            )}
           </div>
         )}
 
         {image && (
           <div className="mt-4" aria-live="polite">
-            <OptimizedImage
+            <img
               src={image}
-              optimized={true}
               alt={`${association.memorableItem} with ${association.anchor}`}
               className="rounded-lg shadow-md max-w-full h-auto loci-fade-in"
-              sizes="(max-width: 768px) 90vw, (max-width: 1200px) 70vw, 50vw"
               onError={(e) => {
                 console.error('Image failed to load:', e);
               }}

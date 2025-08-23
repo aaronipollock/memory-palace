@@ -120,7 +120,7 @@ const authRateLimit = (req, res, next) => {
 
     const attempts = global.authAttempts.get(key) || 0;
 
-    if (attempts >= 5) {
+    if (attempts >= 50) {
         return res.status(429).json({
             error: 'Too many authentication attempts',
             code: 'AUTH_RATE_LIMIT',

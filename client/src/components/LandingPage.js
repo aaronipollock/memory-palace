@@ -92,24 +92,21 @@ const LandingPage = () => {
           onLoginClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
         />
         {/* Hero Section */}
-        {/* <img
+        <img
           src="/images/banner_clean.png"
           alt="Banner"
           className="w-48 h-auto mx-auto md:mx-16"
           style={{ borderRadius: '8px' }}
-        /> */}
+        />
         <section className="py-20 px-4 mt-24">
           <div className="container mx-auto max-w-6xl">
             <div className="flex flex-col md:flex-row items-center justify-between gap-12">
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-5xl md:text-6xl mb-6 text-center text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                <h1 className="loci-header text-5xl md:text-6xl mb-6 text-center !text-white">
                   Want to boost your memory? <br /> You've come to the right place.
                 </h1>
-                <p className="text-xl text-white text-center mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  AI-powered memory palace creation for better learning and retention.
-                </p>
-                <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  Transform how you remember using the ancient method of <em>loci</em> (Latin for "places," pronounced <strong>low·sai</strong>)
+                <p className="text-xl text-text-light text-center text-white mb-8">
+                  Transform how you remember with AI-powered memory palaces, <br />also known as the ancient method of loci (pronounced <em>low·sai</em>).
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
@@ -122,7 +119,7 @@ const LandingPage = () => {
                           },
                           body: JSON.stringify({
                             email: 'demo@example.com',
-                            password: 'demo123456'
+                            password: 'Demo123!@#'
                           }),
                           credentials: 'include'
                         });
@@ -164,10 +161,10 @@ const LandingPage = () => {
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
           </h2>
-          <div className="flex flex-col gap-20 w-full pl-4 pr-4 md:pl-8 md:pr-8 max-w-5xl mx-auto">
-            {/* Memorable - Bigger */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-8 w-full pl-4 pr-4 md:pl-8 md:pr-8">
+            {/* Left: Memorable (4:3) - Bigger */}
+            <div className="flex items-center md:items-start justify-start md:pr-4 mt-0">
+              <div className="relative w-full aspect-[4/3.7] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
                 <img
                   src="/images/memorable.png"
                   alt="Memorable"
@@ -176,13 +173,13 @@ const LandingPage = () => {
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
                   <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
                   <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
-                </div>
+          </div>
               </div>
             </div>
-
-            {/* Throne Room */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
+            {/* Right: Stacked 16:9 cards */}
+            <div className="flex flex-col gap-8 items-start">
+              {/* Throne Room */}
+              <div className="relative w-full aspect-[16/9] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
                 <img
                   src="/images/throne_clicks.png"
                   alt="Throne Room"
@@ -193,11 +190,8 @@ const LandingPage = () => {
                   <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
                 </div>
               </div>
-            </div>
-
-            {/* Saved Rooms */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
+              {/* Saved Rooms */}
+              <div className="relative w-full aspect-[16/9] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow w-full overflow-hidden">
                 <img
                   src="/images/saved_rooms.png"
                   alt="Saved Rooms"
@@ -217,17 +211,17 @@ const LandingPage = () => {
           <div className="max-w-4xl mx-auto">
             <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
             <div className="grid gap-6 md:grid-cols-3">
-              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Smarter Images</div>
-                <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
+                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                  <div className="font-medium mb-1 text-blue-900">Smarter Images</div>
+                  <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                  <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
+                  <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
               </div>
-              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
-                <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
-              </div>
-              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
-                <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
+                <div className="bg-white rounded-lg shadow p-5 flex flex-col items-center text-center">
+                  <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
+                  <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
               </div>
             </div>
           </div>
@@ -254,6 +248,9 @@ const LandingPage = () => {
         {/* CTA Section */}
         <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
+            <h2 className="loci-header text-4xl mb-6 !text-white">
+              Start Building Your Memory Palace Today
+            </h2>
             {/* <p className="text-xl text-text-light mb-8">
               Join thousands of learners who have transformed their memory with Loci.
             </p> */}
@@ -266,53 +263,46 @@ const LandingPage = () => {
           </div>
         </section>
         {/* Footer */}
-        <footer className="py-16 px-4 bg-primary text-white">
+        <footer className="py-12 px-4 bg-primary text-white">
+          <p className="text-gray-300 text-center">
+            Where memories find their place.
+          </p>
           <div className="container mx-auto max-w-6xl">
-            {/* Main Footer Content */}
-            <div className="flex flex-col items-center mb-12">
-              {/* Brand Section */}
-              <h2 className="loci-header text-4xl mb-6 !text-white">
-                Start Building Your Memory Palace Today
-              </h2>
-              <div className="text-center mb-8">
-                <div className="flex items-center justify-center mb-4">
-                  <h3 className="text-3xl font-bold loci-header">low·sAI</h3>
-                </div>
-                {/* <p className="text-gray-400 text-xs italic">
-                  Where memories find their place.
-                </p> */}
+            <div className="grid md:grid-cols-4 gap-8">
+              <div>
+                <h3 className="text-2xl font-bold mb-4">low·sAI</h3>
               </div>
-
-              {/* Navigation Links */}
-              <div className="flex flex-wrap justify-center gap-8">
-                <a href="/user-guide" className="text-gray-300 hover:text-white transition-colors duration-300">
-                  User Guide
-                </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
-                  Support
-                </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
-                  About
-                </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
-                  Contact
-                </a>
+              <div>
+                <h4 className="font-semibold mb-4">Product</h4>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Features</a></li>
+                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Pricing</a></li> */}
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Demo</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Resources</h4>
+                <ul className="space-y-2">
+                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Blog</a></li> */}
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Tutorials</a></li>
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Support</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Company</h4>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">About</a></li>
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Contact</a></li>
+                  {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy</a></li> */}
+                </ul>
               </div>
             </div>
-
-            {/* Bottom Section */}
-            <div className="pt-8 border-t border-gray-700/50">
-              <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                <p className="text-gray-400 text-sm">
-                  &copy; {new Date().getFullYear()} Low·sAI. All rights reserved.
-                </p>
-                <div className="flex flex-wrap justify-center gap-6 text-sm">
-                  <a href="/terms" className="text-gray-400 hover:text-white transition-colors duration-300">Terms</a>
-                  <span className="text-gray-600">•</span>
-                  <a href="/privacy" className="text-gray-400 hover:text-white transition-colors duration-300">Privacy</a>
-                  <span className="text-gray-600">•</span>
-                  <a href="/cookies" className="text-gray-400 hover:text-white transition-colors duration-300">Cookies</a>
-                </div>
+            <div className="mt-12 pt-8 border-t border-gray-700 text-center text-gray-300">
+              <p>&copy; {new Date().getFullYear()} Low·sAI. All rights reserved.</p>
+              <div className="mt-4 flex flex-wrap justify-center gap-6 text-sm">
+                <a href="/terms" className="text-gray-300 hover:text-white transition-colors duration-300">Terms of Service</a>
+                <a href="/privacy" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy Policy</a>
+                <a href="/cookies" className="text-gray-300 hover:text-white transition-colors duration-300">Cookie Policy</a>
               </div>
             </div>
           </div>
