@@ -53,7 +53,7 @@ const ImagePopup = ({
     };
   }, [onClose]);
 
-  console.log('ImagePopup rendered');
+
 
   return (
     <div

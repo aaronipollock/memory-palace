@@ -44,7 +44,7 @@ const securityConfig = {
   authLimiter: createRateLimit(15 * 60 * 1000, 15, 'Too many authentication attempts, please try again later.'),
 
   // More generous image generation rate limiting for MVP
-  imageGenLimiter: createRateLimit(60 * 60 * 1000, 30, 'Image generation limit reached, please try again later.'),
+  imageGenLimiter: createRateLimit(60 * 60 * 1000, 100, 'Image generation limit reached, please try again later.'),
 
   // Speed limiting for general requests
   speedLimiter: createSpeedLimit(15 * 60 * 1000, 100, 500),

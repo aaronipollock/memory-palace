@@ -48,6 +48,7 @@ app.use('/public', express.static(path.join(__dirname, 'public'), {
 // Serve original and optimized images
 app.use('/images/original', express.static(path.join(__dirname, 'public/images/original')));
 app.use('/images/optimized', express.static(path.join(__dirname, 'public/images/optimized')));
+app.use('/images/demo', express.static(path.join(__dirname, 'public/images/demo')));
 
 // Auth routes (no CSRF protection needed for login/signup)
 const authRoutes = require('./routes/auth');

@@ -8,6 +8,36 @@ require('dotenv').config();
 const STABLE_DIFFUSION_API_URL = 'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image';
 const API_KEY = process.env.STABILITY_API_KEY;
 
+// Debug: Log environment variable loading
+console.log('Environment check:');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- STABILITY_API_KEY exists:', !!process.env.STABILITY_API_KEY);
+console.log('- STABILITY_API_KEY length:', process.env.STABILITY_API_KEY ? process.env.STABILITY_API_KEY.length : 0);
+console.log('- STABILITY_API_KEY first 10 chars:', process.env.STABILITY_API_KEY ? process.env.STABILITY_API_KEY.substring(0, 10) : 'undefined');
+
+// Generate a simple placeholder image as base64
+const generatePlaceholderImage = (association) => {
+    // Create a simple SVG placeholder
+    const svg = `
+        <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+            <rect width="512" height="512" fill="#4E8DED"/>
+            <rect x="50" y="50" width="412" height="412" fill="#2B4C7E" stroke="#B8860B" stroke-width="4"/>
+            <text x="256" y="200" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">
+                ${association.anchor}
+            </text>
+            <text x="256" y="250" font-family="Arial, sans-serif" font-size="20" fill="#B8860B" text-anchor="middle">
+                ${association.memorableItem}
+            </text>
+            <text x="256" y="400" font-family="Arial, sans-serif" font-size="16" fill="#B8860B" text-anchor="middle">
+                Placeholder Image
+            </text>
+        </svg>
+    `;
+
+    // Convert SVG to base64
+    return Buffer.from(svg).toString('base64');
+};
+
 // Ensure directories exist
 const ensureDirectories = () => {
     const originalDir = path.join(__dirname, '../public/images/original');
@@ -99,10 +129,27 @@ exports.generateImages = async (req, res) => {
         } catch (apiError) {
             console.error('Stability AI API error:', apiError.response ? apiError.response.data : apiError.message);
 
-            res.status(500).json({
-                success: false,
-                error: apiError.message || 'Failed to generate image with Stability AI'
-            });
+            // If API key is missing, invalid, or insufficient balance, generate a placeholder image instead of failing
+            if (apiError.response?.status === 401 || apiError.response?.status === 403 ||
+                (apiError.response?.data?.name === 'insufficient_balance')) {
+                console.log('API key issue or insufficient balance, generating placeholder image');
+
+                // Generate a simple placeholder image (base64 encoded)
+                const placeholderImage = generatePlaceholderImage(association);
+
+                res.json({
+                    success: true,
+                    imageData: placeholderImage,
+                    mimeType: 'image/png',
+                    filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
+                    isPlaceholder: true
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    error: apiError.message || 'Failed to generate image with Stability AI'
+                });
+            }
         }
     } catch (error) {
         console.error('Error in generateImages:', error);

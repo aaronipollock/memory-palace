@@ -51,7 +51,7 @@ const OptimizedImage = ({
         />
       )}
       <img
-        src={encodeURI(imageSrc)}
+        src={imageSrc ? encodeURI(imageSrc) : fallbackSrc}
         alt={alt}
         className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
         loading={loading}

@@ -1,17 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NavBar.css';  // We'll create this file next
 
 const NavBar = ({ onLoginClick }) => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const logoutTimeoutRef = useRef(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        setIsLoggedIn(!!token);
+        const checkLoginStatus = () => {
+            const token = localStorage.getItem('token');
+            const loggedIn = !!token;
+            setIsLoggedIn(loggedIn);
+        };
+
+        // Check immediately
+        checkLoginStatus();
     }, []);
 
     const handleLogout = async () => {
+        // Prevent multiple rapid clicks
+        if (isLoggingOut) return;
+
+        setIsLoggingOut(true);
+
+        // Clear any existing timeout
+        if (logoutTimeoutRef.current) {
+            clearTimeout(logoutTimeoutRef.current);
+        }
+
         try {
             const token = localStorage.getItem('token');
             if (token) {
@@ -30,9 +48,14 @@ const NavBar = ({ onLoginClick }) => {
             // Continue with logout even if API call fails
         } finally {
             // Always clear local storage and navigate
-        localStorage.removeItem('token');
-        setIsLoggedIn(false);
-        navigate('/');
+            localStorage.removeItem('token');
+            setIsLoggedIn(false);
+
+            // Add a small delay before navigation to ensure state is updated
+            logoutTimeoutRef.current = setTimeout(() => {
+                navigate('/');
+                setIsLoggingOut(false);
+            }, 100);
         }
     };
 
@@ -69,6 +92,7 @@ const NavBar = ({ onLoginClick }) => {
                                 </button>
                             </>
                         )}
+
                     </div>
 
                     {/* Auth Buttons or Logout Link */}
@@ -76,9 +100,14 @@ const NavBar = ({ onLoginClick }) => {
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}
-                                className="px-4 py-2 bg-primary text-white rounded hover:bg-[#B8860B] transition-colors duration-200"
+                                disabled={isLoggingOut}
+                                className={`px-4 py-2 bg-primary text-white rounded transition-colors duration-200 ${
+                                    isLoggingOut
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : 'hover:bg-[#B8860B]'
+                                }`}
                             >
-                                Log Out
+                                {isLoggingOut ? 'Logging Out...' : 'Log Out'}
                             </button>
                         ) : (
                             <>

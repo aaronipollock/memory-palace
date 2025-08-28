@@ -10,10 +10,7 @@ import { SecureAPIClient } from '../utils/security';
 const ROOM_TYPES = [
     "throne room",
     "bedchamber",
-    // "great hall",
-    // "chapel",
     "dungeon",
-    // "kitchen",
 ];
 
 const ART_STYLES = [
@@ -32,7 +29,7 @@ localStorage.removeItem('anchorPoints');
 const API_URL = 'http://localhost:5001';
 const apiClient = new SecureAPIClient(API_URL);
 
-const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
+const InputPage = ({ setIsLoading, isLoading }) => {
     // Initialize state from localStorage or use default values
     const [roomType, setRoomType] = useState(() =>
         localStorage.getItem('roomType') || 'throne room'
@@ -52,62 +49,6 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
         localStorage.setItem('roomType', roomType);
         localStorage.setItem('artStyle', artStyle);
     }, [roomType, artStyle]);
-
-    // Add console.log to debug
-    console.log('onImagesGenerated prop:', onImagesGenerated);
-    console.log('Current room type:', roomType);
-    console.log('Current anchor points:', currentAnchorPoints);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            console.log('Sending request with:', {
-                anchorPoints: currentAnchorPoints,
-                memorables: memorables.split('\n').map(item => item.trim()).filter(Boolean),
-                roomType,
-                artStyle
-            });
-
-            const response = await apiClient.post('/api/generate-images', {
-                anchorPoints: currentAnchorPoints,
-                memorables: memorables.split('\n').map(item => item.trim()).filter(Boolean),
-                roomType: roomType,
-                artStyle: artStyle
-            });
-
-            const data = await response.json();
-            console.log('Received response:', data);
-
-            if (response.ok && data.images) {
-                console.log('Calling onImagesGenerated with:', data.images, roomType, artStyle);
-                onImagesGenerated(data.images, roomType, artStyle);
-            } else {
-                throw new Error('No images in response');
-            }
-        } catch (err) {
-            console.error('Error details:', {
-                message: err.message,
-                responseData: err.response?.data,
-                status: err.response?.status
-            });
-            setError(err);
-            setIsLoading(false);
-        }
-    };
-
-    // Add a clear form function
-    const handleClear = () => {
-        setMemorables('');
-        setRoomType('throne room');
-        setArtStyle('Random');
-        localStorage.clear();
-        setError(null);
-        showSuccess('Form cleared successfully!');
-    };
 
     const handleProceedToVisualizer = async () => {
         const memorablesList = memorables.split('\n')
@@ -143,9 +84,21 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
 
         // Clear any previously accepted images for this new palace
         localStorage.removeItem('acceptedImages');
+        localStorage.removeItem('imageMetadata');
 
-        showInfo('Creating your memory palace...');
-        onImagesGenerated(associations, roomType, artStyle);
+        showSuccess('Memory palace created! Click on the highlighted areas to generate images.');
+
+        // Navigate to visualizer - images will be generated on-demand when users click anchors
+        window.location.href = '/visualizer';
+    };
+
+    const handleClear = () => {
+        setMemorables('');
+        setRoomType('throne room');
+        setArtStyle('Random');
+        localStorage.clear();
+        setError(null);
+        showSuccess('Form cleared successfully!');
     };
 
     const handleRetry = () => {
@@ -215,97 +168,95 @@ const InputPage = ({ onImagesGenerated, setIsLoading, isLoading }) => {
                         </div>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Tip Box */}
-                        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-2 rounded" role="alert" aria-live="polite">
-                            <strong>Tip:</strong> For best results, use concrete, visual words (like "apple," "car," or "envelope").<br />
-                            For abstract ideas or proper nouns, use a concrete image followed by the original term in parentheses.<br />
-                            Examples: "hourglass (time)", "two-dollar bill (Thomas Jefferson)", "eagle (freedom)", "scales (justice)"
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label htmlFor="anchor-points" className="block text-gray-800 font-bold mb-2">
-                                    Demo Anchor Points:
-                                </label>
-                                <div
-                                    id="anchor-points"
-                                    className="border p-3 w-full h-60 bg-white text-text rounded-lg whitespace-pre-wrap leading-tight overflow-auto"
-                                    style={{ fontFamily: 'inherit', lineHeight: 1.2, margin: 0 }}
-                                    role="textbox"
-                                    aria-readonly="true"
-                                    aria-label="Demo anchor points for the selected room type"
-                                >
-                                    {currentAnchorPoints.join('\n')}
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label htmlFor="memorables" className="block text-gray-800 font-bold">
-                                    Memorables (one per line):
-                                </label>
-                                <textarea
-                                    id="memorables"
-                                    value={memorables}
-                                    onChange={(e) => setMemorables(e.target.value)}
-                                    placeholder=""
-                                    disabled={isLoading}
-                                    className="w-full h-60 bg-white text-text p-3 rounded-lg border border-accent1 focus:border-primary focus:ring-1 focus:ring-primary outline-none focus-visible:ring-2 focus-visible:ring-accent1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    aria-describedby="memorables-help"
-                                    aria-label="Enter memorable items, one per line"
-                                />
-                                <div id="memorables-help" className="sr-only">
-                                    Enter the items or concepts you want to remember. Each item should be on a separate line. Use concrete, visual words for best results.
-                                </div>
+                    {/* Tip Box */}
+                    <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-2 rounded" role="alert" aria-live="polite">
+                        <strong>Tip:</strong> For best results, use concrete, visual words (like "apple," "car," or "envelope").<br />
+                        For abstract ideas or proper nouns, use a concrete image followed by the original term in parentheses.<br />
+                        Examples: "hourglass (time)", "two-dollar bill (Thomas Jefferson)", "eagle (freedom)", "scales (justice)"
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label htmlFor="anchor-points" className="block text-gray-800 font-bold mb-2">
+                                Demo Anchor Points:
+                            </label>
+                            <div
+                                id="anchor-points"
+                                className="border p-3 w-full h-60 bg-white text-text rounded-lg whitespace-pre-wrap leading-tight overflow-auto"
+                                style={{ fontFamily: 'inherit', lineHeight: 1.2, margin: 0 }}
+                                role="textbox"
+                                aria-readonly="true"
+                                aria-label="Demo anchor points for the selected room type"
+                            >
+                                {currentAnchorPoints.join('\n')}
                             </div>
                         </div>
+                        <div className="space-y-2">
+                            <label htmlFor="memorables" className="block text-gray-800 font-bold">
+                                Memorables (one per line):
+                            </label>
+                            <textarea
+                                id="memorables"
+                                value={memorables}
+                                onChange={(e) => setMemorables(e.target.value)}
+                                placeholder=""
+                                disabled={isLoading}
+                                className="w-full h-60 bg-white text-text p-3 rounded-lg border border-accent1 focus:border-primary focus:ring-1 focus:ring-primary outline-none focus-visible:ring-2 focus-visible:ring-accent1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-describedby="memorables-help"
+                                aria-label="Enter memorable items, one per line"
+                            />
+                            <div id="memorables-help" className="sr-only">
+                                Enter the items or concepts you want to remember. Each item should be on a separate line. Use concrete, visual words for best results.
+                            </div>
+                        </div>
+                    </div>
 
-                        <div className="space-y-4">
-                            {error && (
-                                <ErrorMessage
-                                    error={error}
-                                    context="image-generation"
-                                    onRetry={handleRetry}
-                                    className="mb-4"
-                                />
-                            )}
-                            <div className="flex gap-4">
-                                <button
-                                    type="button"
-                                    onClick={handleProceedToVisualizer}
-                                    disabled={isLoading}
-                                    className="flex-1 px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
-                                             hover:bg-[#B8860B] hover:text-white transition-colors duration-300
-                                             disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
-                                    aria-describedby="proceed-help"
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <LoadingSpinner size="sm" text="" className="mr-2" />
-                                            GENERATING IMAGES...
-                                        </>
-                                    ) : (
-                                        'PROCEED TO VISUALIZER'
-                                    )}
-                                </button>
-                                <div id="proceed-help" className="sr-only">
-                                    Click to generate images for your memory palace based on your memorable items and room settings.
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={handleClear}
-                                    disabled={isLoading}
-                                    className="px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
-                                             hover:bg-[#B8860B] hover:text-white transition-colors duration-300
-                                             disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
-                                    aria-describedby="clear-help"
-                                >
-                                    CLEAR FORM
-                                </button>
-                                <div id="clear-help" className="sr-only">
-                                    Click to clear all form fields and start over.
-                                </div>
+                    <div className="space-y-4">
+                        {error && (
+                            <ErrorMessage
+                                error={error}
+                                context="image-generation"
+                                onRetry={handleRetry}
+                                className="mb-4"
+                            />
+                        )}
+                        <div className="flex gap-4">
+                            <button
+                                type="button"
+                                onClick={handleProceedToVisualizer}
+                                disabled={isLoading}
+                                className="flex-1 px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
+                                         hover:bg-[#B8860B] hover:text-white transition-colors duration-300
+                                         disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                                aria-describedby="proceed-help"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <LoadingSpinner size="sm" text="" className="mr-2" />
+                                        GENERATING IMAGES...
+                                    </>
+                                ) : (
+                                    'PROCEED TO VISUALIZER'
+                                )}
+                            </button>
+                            <div id="proceed-help" className="sr-only">
+                                Click to create your memory palace and navigate to the visualizer where you can generate images by clicking on anchor points.
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleClear}
+                                disabled={isLoading}
+                                className="px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
+                                         hover:bg-[#B8860B] hover:text-white transition-colors duration-300
+                                         disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                                aria-describedby="clear-help"
+                            >
+                                CLEAR FORM
+                            </button>
+                            <div id="clear-help" className="sr-only">
+                                Click to clear all form fields and start over.
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

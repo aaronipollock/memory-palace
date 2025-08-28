@@ -122,7 +122,7 @@ const LandingPage = () => {
                           },
                           body: JSON.stringify({
                             email: 'demo@example.com',
-                            password: 'Demo123!@#'
+                            password: 'demo123'
                           }),
                           credentials: 'include'
                         });

@@ -33,6 +33,37 @@ const memoryPalaceSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    acceptedImages: {
+        type: Map,
+        of: {
+            image: String,
+            prompt: String,
+            association: {
+                anchor: String,
+                memorableItem: String
+            },
+            timestamp: Date
+        },
+        default: {}
+    },
+    completionStatus: {
+        totalAnchors: {
+            type: Number,
+            default: 0
+        },
+        acceptedImages: {
+            type: Number,
+            default: 0
+        },
+        isComplete: {
+            type: Boolean,
+            default: false
+        },
+        progressPercentage: {
+            type: Number,
+            default: 0
+        }
+    },
     createdAt: {
         type: Date,
         default: Date.now
