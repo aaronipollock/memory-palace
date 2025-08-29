@@ -80,14 +80,16 @@ const memoryPalaceValidation = {
       .withMessage('Anchor must be between 1 and 50 characters'),
 
     body('associations.*.memorableItem')
+      .optional()
       .trim()
-      .isLength({ min: 1, max: 100 })
-      .withMessage('Memorable item must be between 1 and 100 characters'),
+      .isLength({ min: 0, max: 100 })
+      .withMessage('Memorable item must be between 0 and 100 characters'),
 
     body('associations.*.description')
+      .optional()
       .trim()
-      .isLength({ min: 1, max: 500 })
-      .withMessage('Description must be between 1 and 500 characters'),
+      .isLength({ min: 0, max: 500 })
+      .withMessage('Description must be between 0 and 500 characters'),
 
     handleValidationErrors
   ],

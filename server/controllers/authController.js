@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const MemoryPalace = require('../models/MemoryPalace');
 const { generateAccessToken, generateRefreshToken, jwtConfig } = require('../config/jwt');
 const crypto = require('crypto');
 
@@ -160,9 +161,10 @@ exports.logout = async (req, res) => {
         // If this is the demo user, reset demo palaces
         if (email === 'demo@example.com') {
             try {
-                const { resetDemoPalaces } = require('../scripts/resetDemoPalaces');
-                await resetDemoPalaces();
-                console.log('Demo palaces reset on logout');
+                // Use the smart reset function that reuses existing AI images
+                const { smartResetDemoPalaces } = require('../scripts/smartResetDemoPalaces');
+                await smartResetDemoPalaces();
+                console.log('Demo palaces reset on logout (smart)');
             } catch (resetError) {
                 console.error('Error resetting demo palaces:', resetError);
                 // Don't fail the logout if reset fails

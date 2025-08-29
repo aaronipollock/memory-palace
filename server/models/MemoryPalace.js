@@ -17,11 +17,13 @@ const memoryPalaceSchema = new mongoose.Schema({
         },
         memorableItem: {
             type: String,
-            required: true
+            required: false,
+            default: ''
         },
         description: {
             type: String,
-            required: true
+            required: false,
+            default: ''
         }
     }],
     userId: {

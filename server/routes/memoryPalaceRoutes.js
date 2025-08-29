@@ -13,8 +13,11 @@ router.get('/', async (req, res) => {
     try {
         let palaces;
         if (req.user.email === 'demo@example.com') {
-            // Demo user gets access to all seed data
-            palaces = await MemoryPalace.find({ isSeedData: true }).sort({ createdAt: -1 });
+            // Demo user gets access to their own seed data only
+            palaces = await MemoryPalace.find({
+                userId: req.user.userId,
+                isSeedData: true
+            }).sort({ createdAt: -1 });
         } else {
             // Regular users only get their own palaces
             palaces = await MemoryPalace.find({

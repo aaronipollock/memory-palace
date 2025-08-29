@@ -8,12 +8,7 @@ require('dotenv').config();
 const STABLE_DIFFUSION_API_URL = 'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image';
 const API_KEY = process.env.STABILITY_API_KEY;
 
-// Debug: Log environment variable loading
-console.log('Environment check:');
-console.log('- NODE_ENV:', process.env.NODE_ENV);
-console.log('- STABILITY_API_KEY exists:', !!process.env.STABILITY_API_KEY);
-console.log('- STABILITY_API_KEY length:', process.env.STABILITY_API_KEY ? process.env.STABILITY_API_KEY.length : 0);
-console.log('- STABILITY_API_KEY first 10 chars:', process.env.STABILITY_API_KEY ? process.env.STABILITY_API_KEY.substring(0, 10) : 'undefined');
+
 
 // Generate a simple placeholder image as base64
 const generatePlaceholderImage = (association) => {
@@ -119,12 +114,19 @@ exports.generateImages = async (req, res) => {
             const imageData = response.data.artifacts[0];
 
             // Return base64 data directly without saving to disk
-            res.json({
+            const responseData = {
                 success: true,
                 imageData: imageData.base64,
                 mimeType: 'image/png',
                 filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`
+            };
+            console.log('Sending response to frontend:', {
+                success: responseData.success,
+                hasImageData: !!responseData.imageData,
+                imageDataLength: responseData.imageData ? responseData.imageData.length : 0,
+                filename: responseData.filename
             });
+            res.json(responseData);
 
         } catch (apiError) {
             console.error('Stability AI API error:', apiError.response ? apiError.response.data : apiError.message);

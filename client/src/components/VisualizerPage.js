@@ -82,14 +82,16 @@ const VisualizerPage = () => {
 
   // Get the current palace data from localStorage
   const currentPalace = JSON.parse(localStorage.getItem('currentPalace') || '{}');
-  const { roomType = 'throne room', associations = [], acceptedImages: palaceAcceptedImages = {} } = currentPalace;
+  const { roomType = 'throne room', associations = [], acceptedImages: palaceAcceptedImages = {}, name: palaceName = '', _id: palaceId = null } = currentPalace;
 
 
 
-  // Load accepted images from palace data on component mount
+  // Load accepted images from palace data on component mount and when palace data changes
   useEffect(() => {
     const currentImagesString = JSON.stringify(palaceAcceptedImages);
     const prevImagesString = JSON.stringify(prevPalaceAcceptedImagesRef.current);
+
+
 
     if (currentImagesString !== prevImagesString && palaceAcceptedImages && Object.keys(palaceAcceptedImages).length > 0) {
       // Convert Map to object if needed
@@ -99,8 +101,12 @@ const VisualizerPage = () => {
 
       setAcceptedImages(imagesObject);
       prevPalaceAcceptedImagesRef.current = palaceAcceptedImages;
+
+      // Clear old imageMetadata when loading a new palace to avoid showing old data
+      setImageMetadata({});
+      localStorage.removeItem('imageMetadata');
     }
-  }, [palaceAcceptedImages]);
+  }, [palaceAcceptedImages, currentPalace]); // Added currentPalace dependency
 
   // Save image metadata to localStorage whenever it changes (no base64 data)
   useEffect(() => {
@@ -124,10 +130,19 @@ const VisualizerPage = () => {
     assoc => anchorPositions[assoc.anchor] && assoc.memorableItem
   );
 
-  // Helper function to check if an image is accepted (either in memory or metadata)
+    // Helper function to check if an image is accepted (either in memory or metadata)
   const isImageAccepted = (assoc) => {
-    return (acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image) ||
-           imageMetadata[assoc.anchor];
+    // Check if we have an accepted image in memory
+    if (acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image) {
+      return true;
+    }
+
+    // Check if we have metadata for this anchor (but only if it's not just a placeholder)
+    if (imageMetadata[assoc.anchor] && imageMetadata[assoc.anchor].association) {
+      return true;
+    }
+
+    return false;
   };
 
   const allImagesAccepted = visibleAssociations.every(isImageAccepted);
@@ -149,6 +164,7 @@ const VisualizerPage = () => {
           description: assoc.description,
           hasAcceptedImage: isImageAccepted(assoc)
         })),
+        acceptedImages: acceptedImages, // Include the actual accepted images data
         completionStatus: {
           totalAnchors: totalCount,
           acceptedImages: acceptedCount,
@@ -157,20 +173,43 @@ const VisualizerPage = () => {
         }
       };
 
-      // Save to backend API
-      const response = await apiClient.post('/api/memory-palaces', palaceData);
 
-      if (!response.ok) {
+
+      let response;
+      let isUpdate = false;
+
+      // Check if we're updating an existing palace
+      if (palaceId) {
+        // Update existing palace
+        response = await apiClient.put(`/api/memory-palaces/${palaceId}`, palaceData);
+        isUpdate = true;
+      } else {
+        // Create new palace
+        response = await apiClient.post('/api/memory-palaces', palaceData);
+      }
+
+            if (!response.ok) {
         const data = await response.json();
-        const errorObj = new Error(data.message || 'Failed to save memory palace');
+        const errorObj = new Error(data.message || `Failed to ${isUpdate ? 'update' : 'save'} memory palace`);
         errorObj.response = { data, status: response.status };
         throw errorObj;
       }
 
+      const savedPalace = await response.json();
+
+      // Update localStorage with the saved palace data (including the ID for future updates)
+      localStorage.setItem('currentPalace', JSON.stringify(savedPalace));
+
+      // Update local state with the saved palace data to ensure images persist
+      if (savedPalace.acceptedImages) {
+        setAcceptedImages(savedPalace.acceptedImages);
+      }
+
       setIsSaveModalOpen(false);
+      const action = isUpdate ? 'updated' : 'saved';
       const saveMessage = allImagesAccepted
-        ? `Memory palace "${roomData.name}" saved successfully!`
-        : `Memory palace "${roomData.name}" saved with ${acceptedCount}/${totalCount} images accepted.`;
+        ? `Memory palace "${roomData.name}" ${action} successfully!`
+        : `Memory palace "${roomData.name}" ${action} with ${acceptedCount}/${totalCount} images accepted.`;
       showSuccess(saveMessage);
 
       // Don't clear accepted images after save - let user continue working
@@ -206,10 +245,21 @@ const VisualizerPage = () => {
       } else {
         // Generate new image if no accepted image exists
         const result = await generateImage(association, setCurrentPrompt);
+        console.log('Received result from generateImage:', {
+          success: result.success,
+          hasImageData: !!result.imageData,
+          imageDataLength: result.imageData ? result.imageData.length : 0,
+          hasOptimizedUrl: !!result.optimizedUrl,
+          hasImageUrl: !!result.imageUrl,
+          prompt: result.prompt
+        });
         // Handle base64 image data from backend
         if (result.imageData) {
-          setGeneratedImage(`data:image/png;base64,${result.imageData}`);
+          const imageUrl = `data:image/png;base64,${result.imageData}`;
+          console.log('Setting generated image with base64 data, length:', imageUrl.length);
+          setGeneratedImage(imageUrl);
         } else {
+          console.log('No imageData, using URL:', result.optimizedUrl || result.imageUrl);
           setGeneratedImage(result.optimizedUrl || result.imageUrl);
         }
         setCurrentPrompt(result.prompt);
@@ -383,7 +433,7 @@ const VisualizerPage = () => {
             if (!anchorPositions[assoc.anchor] || !assoc.memorableItem) return null;
 
             // Check if this anchor has an accepted image
-            const hasAcceptedImage = acceptedImages[assoc.anchor] && acceptedImages[assoc.anchor].image;
+            const hasAcceptedImage = isImageAccepted(assoc);
 
             return (
               <button
@@ -485,6 +535,7 @@ const VisualizerPage = () => {
               onSave={handleSaveRoom}
               acceptedImages={acceptedImages}
               roomType={roomType}
+              existingRoomName={palaceName}
             />
           )}
         </div>

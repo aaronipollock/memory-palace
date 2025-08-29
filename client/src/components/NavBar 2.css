@@ -1,0 +1,10 @@
+.loci-italic {
+    font-style: italic;
+}
+
+.loci-nav {
+    background: transparent !important;
+    box-shadow: none;
+}
+
+/* NavBar specific styles can go here */

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType }) => {
+const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType, existingRoomName = '' }) => {
     const [roomName, setRoomName] = useState('');
     const [error, setError] = useState('');
     const modalRef = useRef(null);
@@ -43,6 +43,15 @@ const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType }) =>
         };
     }, [isOpen, onClose]);
 
+    // Preload existing room name when modal opens
+    useEffect(() => {
+        if (isOpen && existingRoomName) {
+            setRoomName(existingRoomName);
+        } else if (isOpen) {
+            setRoomName('');
+        }
+    }, [isOpen, existingRoomName]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -76,7 +85,9 @@ const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType }) =>
                 aria-describedby="save-room-modal-desc"
                 ref={modalRef}
             >
-                <h2 className="text-2xl font-bold mb-4 text-primary" id="save-room-modal-title">Save Your Room</h2>
+                <h2 className="text-2xl font-bold mb-4 text-primary" id="save-room-modal-title">
+                    {existingRoomName ? 'Update Room' : 'Save Your Room'}
+                </h2>
                 <div id="save-room-modal-desc" className="sr-only">
                     Enter a name for your memory room to save it for later use.
                 </div>
@@ -111,7 +122,7 @@ const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType }) =>
                             type="submit"
                             className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                         >
-                            Save Room
+                            {existingRoomName ? 'Update Room' : 'Save Room'}
                         </button>
                     </div>
                 </form>
