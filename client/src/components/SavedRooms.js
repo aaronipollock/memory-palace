@@ -67,8 +67,39 @@ const SavedRooms = () => {
     };
 
     const handlePalaceClick = (palace) => {
-        // Store the complete palace data in localStorage
-        localStorage.setItem('currentPalace', JSON.stringify(palace));
+        // Store only essential palace data in localStorage to avoid quota issues
+        const palaceDataForStorage = {
+            _id: palace._id,
+            name: palace.name,
+            roomType: palace.roomType,
+            associations: palace.associations,
+            completionStatus: palace.completionStatus,
+            acceptedImages: palace.acceptedImages || {} // Keep accepted images for loading
+        };
+
+        // If acceptedImages contains base64 data, convert to paths only
+        if (palaceDataForStorage.acceptedImages && Object.keys(palaceDataForStorage.acceptedImages).length > 0) {
+            const processedAcceptedImages = {};
+            Object.keys(palaceDataForStorage.acceptedImages).forEach(anchor => {
+                const imageData = palaceDataForStorage.acceptedImages[anchor];
+                if (imageData && imageData.image) {
+                    // If it's base64 data, don't store it in localStorage
+                    if (imageData.image.startsWith('data:image')) {
+                        // Skip base64 images - they'll be loaded from the backend
+                        return;
+                    }
+                    // If it's a file path, keep it
+                    processedAcceptedImages[anchor] = imageData;
+                }
+            });
+            palaceDataForStorage.acceptedImages = processedAcceptedImages;
+        }
+
+        // Clear localStorage first to free up space
+        localStorage.removeItem('currentPalace');
+        localStorage.removeItem('imageMetadata');
+
+        localStorage.setItem('currentPalace', JSON.stringify(palaceDataForStorage));
         showInfo(`Loading memory palace "${palace.name}"...`);
         navigate('/visualizer');
     };

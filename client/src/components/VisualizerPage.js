@@ -154,6 +154,9 @@ const VisualizerPage = () => {
 
   const handleSaveRoom = async (roomData) => {
     try {
+      // Clear localStorage to free up space before saving
+      localStorage.removeItem('currentPalace');
+      localStorage.removeItem('imageMetadata');
       // Create the palace data for the API
       const palaceData = {
         name: roomData.name,
@@ -164,7 +167,7 @@ const VisualizerPage = () => {
           description: assoc.description,
           hasAcceptedImage: isImageAccepted(assoc)
         })),
-        acceptedImages: acceptedImages, // Include the actual accepted images data
+        acceptedImages: acceptedImages, // Include the actual accepted images data (backend will store this)
         completionStatus: {
           totalAnchors: totalCount,
           acceptedImages: acceptedCount,
@@ -198,7 +201,16 @@ const VisualizerPage = () => {
       const savedPalace = await response.json();
 
       // Update localStorage with the saved palace data (including the ID for future updates)
-      localStorage.setItem('currentPalace', JSON.stringify(savedPalace));
+      // Only store essential data, not the full acceptedImages to avoid quota issues
+      const palaceDataForStorage = {
+        _id: savedPalace._id,
+        name: savedPalace.name,
+        roomType: savedPalace.roomType,
+        associations: savedPalace.associations,
+        completionStatus: savedPalace.completionStatus,
+        acceptedImages: {} // Don't store full image data in localStorage
+      };
+      localStorage.setItem('currentPalace', JSON.stringify(palaceDataForStorage));
 
       // Update local state with the saved palace data to ensure images persist
       if (savedPalace.acceptedImages) {

@@ -8,7 +8,7 @@ const memoryPalaceSchema = new mongoose.Schema({
     roomType: {
         type: String,
         required: true,
-        enum: ['throne room', 'bedchamber', 'dungeon']
+        enum: ['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen']
     },
     associations: [{
         anchor: {

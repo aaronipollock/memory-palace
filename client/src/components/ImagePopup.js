@@ -94,7 +94,14 @@ const ImagePopup = ({
 
         {isLoading && (
           <div className="text-center py-6" aria-live="assertive">
-            <div className="text-lg text-gray-600">Creating your memorable image...</div>
+            <div className="text-lg text-gray-600">
+              Creating your memorable image       
+              <span className="bouncing-dots">
+                <span className="dot" style={{ animationDelay: '0s' }}>.</span>
+                <span className="dot" style={{ animationDelay: '0.2s' }}>.</span>
+                <span className="dot" style={{ animationDelay: '0.4s' }}>.</span>
+              </span>
+            </div>
           </div>
         )}
 
