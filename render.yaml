@@ -24,7 +24,7 @@ services:
   - type: web
     name: memory-palace-frontend
     env: static
-    plan: free
+    plan: starter
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: client/build
     envVars:
