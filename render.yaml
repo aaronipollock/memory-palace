@@ -21,9 +21,8 @@ services:
     healthCheckPath: /api/health
 
   # Frontend Web Service
-  - type: web
+  - type: static
     name: memory-palace-frontend
-    env: static
     plan: free
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: client/build
