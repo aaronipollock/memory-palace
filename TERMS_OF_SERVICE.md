@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Effective Date: [Current Date]**
+**Effective Date: August 30, 2025**
 
 ## 1. Acceptance of Terms
 
@@ -179,4 +179,4 @@ These Terms constitute the entire agreement between you and Low·sAI regarding t
 
 ---
 
-**Last Updated: [Current Date]**
+**Last Updated: August 30, 2025**

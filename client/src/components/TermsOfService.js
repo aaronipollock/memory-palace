@@ -4,7 +4,7 @@ import LegalPage from './LegalPage';
 const TermsOfService = () => {
   return (
     <LegalPage title="Terms of Service">
-      <p><strong>Effective Date: [Current Date]</strong></p>
+      <p><strong>Effective Date: August 30, 2025</strong></p>
 
       <h2>1. Acceptance of Terms</h2>
       <p>
@@ -237,7 +237,7 @@ const TermsOfService = () => {
 
       <hr />
 
-      <p><strong>Last Updated: [Current Date]</strong></p>
+      <p><strong>Last Updated: August 30, 2025</strong></p>
     </LegalPage>
   );
 };

@@ -1,6 +1,6 @@
 # Cookie Policy
 
-**Effective Date: [Current Date]**
+**Effective Date: August 30, 2025**
 
 ## 1. Introduction
 
@@ -264,4 +264,4 @@ For questions specifically about cookies, you can also contact us at [cookies@lo
 
 ---
 
-**Last Updated: [Current Date]**
+**Last Updated: August 30, 2025**

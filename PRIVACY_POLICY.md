@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Effective Date: [Current Date]**
+**Effective Date: August 30, 2025**
 
 ## 1. Introduction
 
@@ -226,4 +226,4 @@ We are committed to resolving privacy disputes amicably and in accordance with a
 
 ---
 
-**Last Updated: [Current Date]**
+**Last Updated: August 30, 2025**

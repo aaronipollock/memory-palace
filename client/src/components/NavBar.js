@@ -107,7 +107,7 @@ const NavBar = ({ onLoginClick }) => {
                                         : 'hover:bg-[#B8860B]'
                                 }`}
                             >
-                                {isLoggingOut ? 'Logging Out...' : 'Log Out'}
+                                Log Out
                             </button>
                         ) : (
                             <>

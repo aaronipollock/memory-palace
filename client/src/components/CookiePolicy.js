@@ -4,7 +4,7 @@ import LegalPage from './LegalPage';
 const CookiePolicy = () => {
   return (
     <LegalPage title="Cookie Policy">
-      <p><strong>Effective Date: [Current Date]</strong></p>
+      <p><strong>Effective Date: August 30, 2025</strong></p>
 
       <h2>1. Introduction</h2>
       <p>
@@ -312,7 +312,7 @@ Type: Analytics</code></pre>
 
       <hr />
 
-      <p><strong>Last Updated: [Current Date]</strong></p>
+      <p><strong>Last Updated: August 30, 2025</strong></p>
     </LegalPage>
   );
 };

@@ -217,15 +217,15 @@ const LandingPage = () => {
           <div className="max-w-4xl mx-auto">
             <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
             <div className="grid gap-6 md:grid-cols-3">
-              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
+              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
                 <div className="font-medium mb-1 text-blue-900">Smarter Images</div>
                 <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
               </div>
-              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
+              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
                 <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
                 <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
               </div>
-              <div className="bg-amber-400 rounded-lg shadow p-5 flex flex-col items-center text-center">
+              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
                 <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
                 <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
               </div>
