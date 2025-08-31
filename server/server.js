@@ -62,6 +62,11 @@ app.use('/api/feedback', feedbackRoutes);
 const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
+// Health check endpoint for Render
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 // Memory palace routes (no CSRF protection needed for core functionality)
 const memoryPalaceRoutes = require('./routes/memoryPalaceRoutes');
 app.use('/api/memory-palaces', ...routeSecurity.memoryPalaceRoutes, memoryPalaceRoutes);
