@@ -42,6 +42,12 @@ const smartResetDemoPalaces = async () => {
             { anchor: 'statue', memorableItem: 'potatoes', description: 'Potatoes stacked around the base of the marble statue' }
         ];
 
+        // Helper function to extract concrete item from memorableItem (before parentheses)
+        const extractConcreteItem = (memorableItem) => {
+            const match = memorableItem.match(/^([^(]+)/);
+            return match ? match[1].trim() : memorableItem;
+        };
+
         // Create accepted images for all 10 associations (100% complete) - reuse existing images
         const groceryAcceptedImages = {};
         for (const assoc of groceryAssociations) {
@@ -61,9 +67,10 @@ const smartResetDemoPalaces = async () => {
                 }
             }
 
+            const concreteItem = extractConcreteItem(assoc.memorableItem);
             groceryAcceptedImages[assoc.anchor] = {
                 image: imagePath || `/images/demo/${baseName}.png`,
-                prompt: `A ${assoc.memorableItem} at the ${assoc.anchor} location in a grand throne room`,
+                prompt: `A ${concreteItem} positioned at the ${assoc.anchor} location`,
                 association: { anchor: assoc.anchor, memorableItem: assoc.memorableItem },
                 timestamp: Date.now()
             };
@@ -119,9 +126,10 @@ const smartResetDemoPalaces = async () => {
                 }
             }
 
+            const concreteItem = extractConcreteItem(assoc.memorableItem);
             historyAcceptedImages[anchor] = {
                 image: imagePath || `/images/demo/${baseName}.png`,
-                prompt: `A ${assoc.memorableItem} at the ${assoc.anchor} location in a cozy bedchamber`,
+                prompt: `A ${concreteItem} positioned at the ${assoc.anchor} location`,
                 association: { anchor: assoc.anchor, memorableItem: assoc.memorableItem },
                 timestamp: Date.now()
             };
@@ -177,9 +185,10 @@ const smartResetDemoPalaces = async () => {
                 }
             }
 
+            const concreteItem = extractConcreteItem(assoc.memorableItem);
             anatomyAcceptedImages[anchor] = {
                 image: imagePath || `/images/demo/${baseName}.png`,
-                prompt: `A ${assoc.memorableItem} at the ${assoc.anchor} location in a dark dungeon`,
+                prompt: `A ${concreteItem} positioned at the ${assoc.anchor} location`,
                 association: { anchor: assoc.anchor, memorableItem: assoc.memorableItem },
                 timestamp: Date.now()
             };

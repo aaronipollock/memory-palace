@@ -85,6 +85,12 @@ const createDemoPalaces = async () => {
             console.log('Connected to MongoDB');
         }
 
+        // Helper function to extract concrete item from memorableItem (before parentheses)
+        const extractConcreteItem = (memorableItem) => {
+            const match = memorableItem.match(/^([^(]+)/);
+            return match ? match[1].trim() : memorableItem;
+        };
+
         // Find or create demo user
         let demoUser = await User.findOne({ email: 'demo@example.com' });
         if (!demoUser) {
@@ -156,10 +162,11 @@ const createDemoPalaces = async () => {
         // Create accepted images for all 10 associations (100% complete)
         const groceryAcceptedImages = {};
         for (const assoc of groceryAssociations) {
+            const concreteItem = extractConcreteItem(assoc.memorableItem);
             groceryAcceptedImages[assoc.anchor] = await createAcceptedImage(
                 assoc.anchor,
                 assoc.memorableItem,
-                `A ${assoc.memorableItem} at the ${assoc.anchor} location in a grand throne room`
+                `A ${concreteItem} positioned at the ${assoc.anchor} location`
             );
         }
 
@@ -237,10 +244,11 @@ const createDemoPalaces = async () => {
         const completedHistoryAnchors = ['bed', 'lamp', 'mirror', 'dresser', 'armchair', 'nightstand', 'wardrobe'];
         for (const anchor of completedHistoryAnchors) {
             const assoc = historyAssociations.find(a => a.anchor === anchor);
+            const concreteItem = extractConcreteItem(assoc.memorableItem);
             historyAcceptedImages[anchor] = await createAcceptedImage(
                 assoc.anchor,
                 assoc.memorableItem,
-                `A ${assoc.memorableItem} at the ${assoc.anchor} location in a cozy bedchamber`
+                `A ${concreteItem} positioned at the ${assoc.anchor} location`
             );
         }
 
@@ -318,10 +326,11 @@ const createDemoPalaces = async () => {
         const completedAnatomyAnchors = ['iron gate', 'table', 'pillory'];
         for (const anchor of completedAnatomyAnchors) {
             const assoc = anatomyAssociations.find(a => a.anchor === anchor);
+            const concreteItem = extractConcreteItem(assoc.memorableItem);
             anatomyAcceptedImages[anchor] = await createAcceptedImage(
                 assoc.anchor,
                 assoc.memorableItem,
-                `A ${assoc.memorableItem} at the ${assoc.anchor} location in a dark dungeon`
+                `A ${concreteItem} positioned at the ${assoc.anchor} location`
             );
         }
 

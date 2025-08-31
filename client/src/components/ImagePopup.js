@@ -86,16 +86,12 @@ const ImagePopup = ({
           Generated image for {association.memorableItem} at {association.anchor} location.
         </div>
 
-        {prompt && !isLoading && image && (
-          <div className="text-xs text-text-light italic mb-3 bg-background p-3 rounded-lg" aria-live="polite">
-            <span className="font-semibold text-primary">AI Prompt:</span> {prompt}
-          </div>
-        )}
+
 
         {isLoading && (
           <div className="text-center py-6" aria-live="assertive">
             <div className="text-lg text-gray-600">
-              Creating your memorable image       
+              Creating your memorable image
               <span className="bouncing-dots">
                 <span className="dot" style={{ animationDelay: '0s' }}>.</span>
                 <span className="dot" style={{ animationDelay: '0.2s' }}>.</span>
