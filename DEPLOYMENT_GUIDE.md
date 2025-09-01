@@ -14,21 +14,19 @@
 4. Create a database user with read/write permissions
 5. Get your connection string (looks like: `mongodb+srv://username:password@cluster.mongodb.net/memory-palace`)
 
-## Step 2: Deploy Backend API
-
-### Option A: Using Render Dashboard
+## Step 2: Deploy Backend API (Manual)
 
 1. **Create New Web Service**
    - Go to Render Dashboard
    - Click "New +" → "Web Service"
-   - Connect your GitHub repository
+   - Connect your GitHub repository: `aaronipollock/memory-palace`
    - Select the repository
 
 2. **Configure Backend Service**
    - **Name**: `memory-palace-api`
    - **Environment**: `Node`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
+   - **Build Command**: `cd server && npm install`
+   - **Start Command**: `cd server && npm start`
    - **Root Directory**: `server`
 
 3. **Set Environment Variables**
@@ -40,23 +38,12 @@
    PORT=10000
    ```
 
-### Option B: Using render.yaml (Recommended)
-
-1. **Push to GitHub** with the `render.yaml` file
-2. **Create New Blueprint Instance**
-   - Go to Render Dashboard
-   - Click "New +" → "Blueprint"
-   - Connect your GitHub repository
-   - Render will automatically create both services
-
-## Step 3: Deploy Frontend
-
-### Option A: Using Render Dashboard
+## Step 3: Deploy Frontend (Manual)
 
 1. **Create New Static Site**
    - Go to Render Dashboard
    - Click "New +" → "Static Site"
-   - Connect your GitHub repository
+   - Connect your GitHub repository: `aaronipollock/memory-palace`
 
 2. **Configure Frontend Service**
    - **Name**: `memory-palace-frontend`
@@ -68,10 +55,6 @@
    ```
    REACT_APP_API_URL=https://your-backend-service-name.onrender.com
    ```
-
-### Option B: Using render.yaml (Automatic)
-
-If you used the Blueprint option, the frontend will be created automatically.
 
 ## Step 4: Update Frontend API URL
 

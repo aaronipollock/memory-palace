@@ -6,8 +6,8 @@ import ErrorMessage from './ErrorMessage';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
 
-const API_URL = 'http://localhost:5001';
-const apiClient = new SecureAPIClient(API_URL);
+import { getApiUrl } from '../config/api';
+const apiClient = new SecureAPIClient(getApiUrl(''));
 
 const SavedRooms = () => {
     const [palaces, setPalaces] = useState([]);
@@ -141,7 +141,7 @@ const SavedRooms = () => {
             const token = localStorage.getItem('token');
             if (token) {
                 // Call the backend logout API to trigger demo palace reset
-                await fetch('http://localhost:5001/api/auth/logout', {
+                await fetch(getApiUrl('/api/auth/logout'), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

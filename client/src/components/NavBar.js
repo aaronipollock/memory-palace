@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NavBar.css';  // We'll create this file next
+import { getApiUrl } from '../config/api';
 
 const NavBar = ({ onLoginClick }) => {
     const navigate = useNavigate();
@@ -34,7 +35,7 @@ const NavBar = ({ onLoginClick }) => {
             const token = localStorage.getItem('token');
             if (token) {
                 // Call the backend logout API to trigger demo palace reset
-                await fetch('http://localhost:5001/api/auth/logout', {
+                await fetch(getApiUrl('/api/auth/logout'), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

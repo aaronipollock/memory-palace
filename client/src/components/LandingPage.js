@@ -1,13 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
 import LoadingSpinner from './LoadingSpinner';
 import { SecureAPIClient, CSRFManager, TokenManager } from '../utils/security';
 import './LandingPage.css';
-
-const API_URL = 'http://localhost:5001';
-const apiClient = new SecureAPIClient(API_URL);
+import { getApiUrl } from '../config/api';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -15,7 +13,8 @@ const LandingPage = () => {
   const [authMode, setAuthMode] = React.useState('signup'); // or 'login'
   const [formData, setFormData] = React.useState({ email: '', password: '', confirmPassword: '' });
   const [authError, setAuthError] = React.useState('');
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const features = [
     {
@@ -63,7 +62,14 @@ const LandingPage = () => {
     setAuthError('');
     try {
       const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/signup';
-      const response = await apiClient.post(endpoint, data);
+      const response = await fetch(getApiUrl(endpoint), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
 
       const result = await response.json();
 
@@ -82,6 +88,39 @@ const LandingPage = () => {
       setAuthError('Login/Signup failed');
     }
     setIsLoading(false);
+  };
+
+  const handleDemoLogin = async () => {
+      setIsLoading(true);
+      setError('');
+      
+      try {
+          const response = await fetch(getApiUrl('/api/auth/login'), {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  email: 'demo@example.com',
+                  password: 'demo123'
+              }),
+              credentials: 'include'
+          });
+
+          if (response.ok) {
+              const data = await response.json();
+              localStorage.setItem('token', data.token);
+              navigate('/demo');
+          } else {
+              const errorData = await response.json();
+              setError(errorData.message || 'Demo login failed');
+          }
+      } catch (error) {
+          console.error('Demo login error:', error);
+          setError('Demo login failed. Please try again.');
+      } finally {
+          setIsLoading(false);
+      }
   };
 
   return (
@@ -113,37 +152,7 @@ const LandingPage = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch('http://localhost:5001/api/auth/login', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            email: 'demo@example.com',
-                            password: 'demo123'
-                          }),
-                          credentials: 'include'
-                        });
-
-                        const result = await response.json();
-
-                        if (response.ok) {
-                          TokenManager.setAccessToken(result.accessToken);
-                          if (result.csrfToken) {
-                            CSRFManager.setCSRFToken(result.csrfToken);
-                          }
-                          navigate('/demo');
-                        } else {
-                          console.error('Demo login failed:', result.message);
-                          // showError('Demo login failed. Please try again.');
-                        }
-                      } catch (err) {
-                        console.error('Demo login error:', err);
-                        // showError('Demo login failed. Please try again.');
-                      }
-                    }}
+                    onClick={handleDemoLogin}
                     className="btn-loci text-lg px-8 py-4"
                   >
                     Try Demo

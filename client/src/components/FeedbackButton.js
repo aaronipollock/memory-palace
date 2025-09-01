@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SecureAPIClient } from '../utils/security';
 
-const API_URL = 'http://localhost:5001';
-const apiClient = new SecureAPIClient(API_URL);
+import { getApiUrl } from '../config/api';
+const apiClient = new SecureAPIClient(getApiUrl(''));
 
 const FeedbackButton = () => {
   const [isOpen, setIsOpen] = useState(false);

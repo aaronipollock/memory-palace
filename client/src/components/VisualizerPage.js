@@ -9,8 +9,8 @@ import ErrorMessage from './ErrorMessage';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
 
-const API_URL = 'http://localhost:5001';
-const apiClient = new SecureAPIClient(API_URL);
+import { getApiUrl } from '../config/api';
+const apiClient = new SecureAPIClient(getApiUrl(''));
 
 // Temporary inline generateImage function
 const generateImage = async (association, setCurrentPrompt) => {
@@ -246,7 +246,7 @@ const VisualizerPage = () => {
         const imagePath = acceptedImages[association.anchor].image;
         // If it's a file path (starts with /), prefix with backend URL
         const fullImageUrl = imagePath.startsWith('/')
-          ? `http://localhost:5001${imagePath}`
+                          ? `${getApiUrl('')}${imagePath}`
           : imagePath;
         setGeneratedImage(fullImageUrl);
         setCurrentPrompt(acceptedImages[association.anchor].prompt);

@@ -26,8 +26,8 @@ const ART_STYLES = [
 // Clear the stored anchor points to ensure our new list is used
 localStorage.removeItem('anchorPoints');
 
-const API_URL = 'http://localhost:5001';
-const apiClient = new SecureAPIClient(API_URL);
+import { getApiUrl } from '../config/api';
+const apiClient = new SecureAPIClient(getApiUrl(''));
 
 const InputPage = ({ setIsLoading, isLoading }) => {
     // Initialize state from localStorage or use default values

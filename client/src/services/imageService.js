@@ -2,7 +2,8 @@ import { SecureAPIClient, InputSanitizer } from '../utils/security';
 import { generatePrompt } from '../utils/promptGenerator';
 
 // Initialize secure API client
-const apiClient = new SecureAPIClient('http://localhost:5001');
+import { getApiUrl } from '../config/api';
+const apiClient = new SecureAPIClient(getApiUrl(''));
 
 // Cache for storing generated images
 let imageCache = {};
