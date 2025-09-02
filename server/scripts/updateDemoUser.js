@@ -5,7 +5,7 @@ const User = require('../models/User');
 const updateDemoUser = async () => {
     try {
         // Connect to MongoDB
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/memory-palace');
+        await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected to MongoDB');
 
         // Find the demo user
