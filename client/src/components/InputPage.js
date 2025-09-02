@@ -6,6 +6,9 @@ import ErrorMessage from './ErrorMessage';
 import { getContextualErrorMessage } from '../utils/errorHandler';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
+import { getApiUrl } from '../config/api';
+
+const apiClient = new SecureAPIClient(getApiUrl(''));
 
 const ROOM_TYPES = [
     "throne room",
@@ -23,11 +26,7 @@ const ART_STYLES = [
     "Photorealistic"
 ];
 
-// Clear the stored anchor points to ensure our new list is used
-localStorage.removeItem('anchorPoints');
 
-import { getApiUrl } from '../config/api';
-const apiClient = new SecureAPIClient(getApiUrl(''));
 
 const InputPage = ({ setIsLoading, isLoading }) => {
     // Initialize state from localStorage or use default values
