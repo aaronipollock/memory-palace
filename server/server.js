@@ -8,17 +8,16 @@ const { sanitizeInput, xssProtection } = require('./middleware/validation');
 const { csrfProtection } = require('./middleware/auth');
 
 const app = express();
+// Trust proxy for rate limiting and correct IP handling on Render/Proxies
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5001;
 
 // Connect to MongoDB with security options
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/memory-palace', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    // Security options
+    // Removed deprecated options and bufferCommands false to prevent query-before-connect errors
     maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-    bufferCommands: false
+    socketTimeoutMS: 45000
 })
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
@@ -99,51 +98,13 @@ app.use((err, req, res, next) => {
 
   // Don't leak error details in production
   if (process.env.NODE_ENV === 'production') {
-    res.status(500).json({
-      error: 'Internal server error',
-      code: 'INTERNAL_ERROR'
-    });
+    res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
   } else {
-    res.status(500).json({
-      error: err.message || 'Something went wrong!',
-      stack: err.stack,
-      code: 'INTERNAL_ERROR'
-    });
+    res.status(err.status || 500).json({ error: err.message || 'Internal Server Error', stack: err.stack });
   }
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Route not found',
-    code: 'NOT_FOUND'
-  });
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  mongoose.connection.close().then(() => {
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  }).catch(err => {
-    console.error('Error closing MongoDB connection:', err);
-    process.exit(1);
-  });
-});
-
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  mongoose.connection.close().then(() => {
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  }).catch(err => {
-    console.error('Error closing MongoDB connection:', err);
-    process.exit(1);
-  });
-});
-
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
