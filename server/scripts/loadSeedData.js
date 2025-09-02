@@ -27,7 +27,7 @@ const loadSeedData = async () => {
         if (!demoUser) {
             demoUser = await User.create({
                 email: 'demo@example.com',
-                password: 'demo123456'
+                password: 'demo123'
             });
         }
 

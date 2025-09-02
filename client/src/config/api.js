@@ -2,7 +2,7 @@
 const API_CONFIG = {
   // Use environment variable if available, otherwise fallback to development
   BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5001',
-  
+
   // API endpoints
   ENDPOINTS: {
     AUTH: {

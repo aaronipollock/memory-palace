@@ -15,7 +15,7 @@ async function testCSRF() {
             },
             body: JSON.stringify({
                 email: 'demo@example.com',
-                password: 'demo123456'
+                password: 'demo123'
             })
         });
 

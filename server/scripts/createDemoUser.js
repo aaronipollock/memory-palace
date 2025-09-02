@@ -18,7 +18,7 @@ const createDemoUser = async () => {
         // Create demo user
         const demoUser = new User({
             email: 'demo@example.com',
-            password: 'demo123456'
+            password: 'demo123'
         });
 
         await demoUser.save();

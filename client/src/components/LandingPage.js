@@ -93,7 +93,7 @@ const LandingPage = () => {
   const handleDemoLogin = async () => {
       setIsLoading(true);
       setError('');
-      
+
       try {
           const response = await fetch(getApiUrl('/api/auth/login'), {
               method: 'POST',

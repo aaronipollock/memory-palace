@@ -14,20 +14,20 @@ const updateDemoUser = async () => {
             console.log('Demo user does not exist. Creating new demo user...');
             const demoUser = new User({
                 email: 'demo@example.com',
-                password: 'Demo123!@#'
+                password: 'demo123'
             });
             await demoUser.save();
             console.log('Demo user created successfully with strong password');
         } else {
             // Update the existing user's password
-            existingUser.password = 'Demo123!@#';
+            existingUser.password = 'demo123';
             await existingUser.save();
             console.log('Demo user password updated successfully');
         }
 
         console.log('Demo credentials:');
         console.log('Email: demo@example.com');
-        console.log('Password: Demo123!@#');
+        console.log('Password: demo123');
         process.exit(0);
     } catch (error) {
         console.error('Error updating demo user:', error);
