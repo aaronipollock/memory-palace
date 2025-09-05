@@ -96,6 +96,7 @@ const NavBar = ({ onLoginClick }) => {
 
                     </div>
 
+
                     {/* Auth Buttons or Logout Link */}
                     <div className="flex items-center space-x-4">
                         {isLoggedIn ? (
