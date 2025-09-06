@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
@@ -29,6 +30,7 @@ const ART_STYLES = [
 
 
 const InputPage = ({ setIsLoading, isLoading }) => {
+    const navigate = useNavigate();
     // Initialize state from localStorage or use default values
     const [roomType, setRoomType] = useState(() =>
         localStorage.getItem('roomType') || 'throne room'
@@ -88,7 +90,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
         showSuccess('Memory palace created! Click on the highlighted areas to generate images.');
 
         // Navigate to visualizer - images will be generated on-demand when users click anchors
-        window.location.href = '/visualizer';
+        navigate('/visualizer');
     };
 
     const handleClear = () => {
