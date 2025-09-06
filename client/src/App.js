@@ -21,7 +21,7 @@ function App() {
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/login" element={<LandingPage />} />
                         <Route
-                            path="/demo"
+                            path="/input"
                             element={
                                 <InputPage
                                     isLoading={isLoading}

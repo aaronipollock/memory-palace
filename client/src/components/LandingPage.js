@@ -80,7 +80,7 @@ const LandingPage = () => {
           CSRFManager.setCSRFToken(result.csrfToken);
         }
         setShowAuthModal(false);
-        navigate('/demo');
+        navigate('/input');
       } else {
         setAuthError(result.message || 'Login/Signup failed');
       }
@@ -110,7 +110,7 @@ const LandingPage = () => {
           if (response.ok) {
               const data = await response.json();
               localStorage.setItem('token', data.token);
-              navigate('/demo');
+              navigate('/input');
           } else {
               const errorData = await response.json();
               setError(errorData.message || 'Demo login failed');
