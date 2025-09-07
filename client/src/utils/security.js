@@ -181,8 +181,10 @@ class SecureAPIClient {
   // Handle authentication failure
   handleAuthFailure() {
     CSRFManager.clearAllTokens();
-    // Redirect to login page
-    window.location.href = '/login';
+    // Clear token from localStorage
+    localStorage.removeItem('token');
+    // Redirect to login page - use hash router compatible navigation
+    window.location.href = '/#/';
   }
 
   // GET request
