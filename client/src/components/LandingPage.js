@@ -109,7 +109,10 @@ const LandingPage = () => {
 
           if (response.ok) {
               const data = await response.json();
-              localStorage.setItem('token', data.token);
+              localStorage.setItem('token', data.accessToken);
+              if (data.csrfToken) {
+                  localStorage.setItem('csrfToken', data.csrfToken);
+              }
               navigate('/input');
           } else {
               const errorData = await response.json();
