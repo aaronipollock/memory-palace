@@ -4,9 +4,68 @@ const MemoryPalace = require('../models/MemoryPalace');
 const { authenticateToken } = require('../middleware/auth');
 const { memoryPalaceValidation } = require('../middleware/validation');
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 
 // Apply authentication middleware to all routes
 router.use(authenticateToken);
+
+// Function to save base64 image as file
+const saveBase64Image = (base64Data, filename) => {
+    try {
+        // Ensure user images directory exists
+        const userImagesDir = path.join(__dirname, '../public/images/user');
+        if (!fs.existsSync(userImagesDir)) {
+            fs.mkdirSync(userImagesDir, { recursive: true });
+        }
+
+        // Remove data URL prefix if present
+        const base64String = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+
+        // Save the image
+        const filePath = path.join(userImagesDir, filename);
+        fs.writeFileSync(filePath, base64String, 'base64');
+
+        return `/images/user/${filename}`;
+    } catch (error) {
+        console.error('Error saving base64 image:', error);
+        return null;
+    }
+};
+
+// Function to process accepted images and save base64 data as files
+const processAcceptedImages = (acceptedImages) => {
+    if (!acceptedImages || typeof acceptedImages !== 'object') {
+        return acceptedImages;
+    }
+
+    const processedImages = {};
+
+    for (const [anchor, imageData] of Object.entries(acceptedImages)) {
+        if (imageData && imageData.image) {
+            // If it's base64 data, save it as a file
+            if (imageData.image.startsWith('data:image')) {
+                const filename = `${Date.now()}-${anchor.replace(/\s+/g, '-')}-${imageData.association?.memorableItem?.replace(/\s+/g, '-') || 'item'}.png`;
+                const filePath = saveBase64Image(imageData.image, filename);
+
+                if (filePath) {
+                    processedImages[anchor] = {
+                        ...imageData,
+                        image: filePath // Replace base64 with file path
+                    };
+                } else {
+                    // If saving failed, keep the original data
+                    processedImages[anchor] = imageData;
+                }
+            } else {
+                // If it's already a file path, keep it as is
+                processedImages[anchor] = imageData;
+            }
+        }
+    }
+
+    return processedImages;
+};
 
 // Get all memory palaces
 router.get('/', async (req, res) => {
@@ -58,8 +117,12 @@ router.get('/:id', async (req, res) => {
 // Create a new memory palace
 router.post('/', memoryPalaceValidation.create, async (req, res) => {
     try {
+        // Process accepted images to save base64 data as files
+        const processedAcceptedImages = processAcceptedImages(req.body.acceptedImages);
+
         const palace = new MemoryPalace({
             ...req.body,
+            acceptedImages: processedAcceptedImages,
             userId: req.user.userId, // Use userId from JWT token
             isSeedData: req.user.email === 'demo@example.com' // Demo users create seed data that gets reset
         });
@@ -88,10 +151,16 @@ router.put('/:id', memoryPalaceValidation.update, async (req, res) => {
             return res.status(403).json({ error: 'Access denied' });
         }
 
+        // Process accepted images to save base64 data as files
+        const processedAcceptedImages = processAcceptedImages(req.body.acceptedImages);
+
         // Update the palace
         const updatedPalace = await MemoryPalace.findByIdAndUpdate(
             req.params.id,
-            { ...req.body },
+            {
+                ...req.body,
+                acceptedImages: processedAcceptedImages
+            },
             { new: true, runValidators: true }
         );
 
