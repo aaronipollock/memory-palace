@@ -40,30 +40,43 @@ const processAcceptedImages = (acceptedImages) => {
     }
 
     const processedImages = {};
-
+    const totalImages = Object.keys(acceptedImages).length;
+    let savedCount = 0;
+    let failedCount = 0;
+    
+    console.log(`Processing ${totalImages} accepted images...`);
+    
     for (const [anchor, imageData] of Object.entries(acceptedImages)) {
         if (imageData && imageData.image) {
             // If it's base64 data, save it as a file
             if (imageData.image.startsWith('data:image')) {
                 const filename = `${Date.now()}-${anchor.replace(/\s+/g, '-')}-${imageData.association?.memorableItem?.replace(/\s+/g, '-') || 'item'}.png`;
+                console.log(`Saving image for anchor: ${anchor}, filename: ${filename}`);
+                
                 const filePath = saveBase64Image(imageData.image, filename);
-
+                
                 if (filePath) {
                     processedImages[anchor] = {
                         ...imageData,
                         image: filePath // Replace base64 with file path
                     };
+                    savedCount++;
+                    console.log(`Successfully saved image for ${anchor}: ${filePath}`);
                 } else {
                     // If saving failed, keep the original data
                     processedImages[anchor] = imageData;
+                    failedCount++;
+                    console.error(`Failed to save image for ${anchor}`);
                 }
             } else {
                 // If it's already a file path, keep it as is
                 processedImages[anchor] = imageData;
+                console.log(`Keeping existing file path for ${anchor}: ${imageData.image}`);
             }
         }
     }
-
+    
+    console.log(`Image processing complete: ${savedCount} saved, ${failedCount} failed, ${totalImages} total`);
     return processedImages;
 };
 
