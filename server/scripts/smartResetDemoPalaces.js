@@ -91,7 +91,7 @@ const smartResetDemoPalaces = async () => {
             }
         });
 
-        // Demo Palace 2: American Revolution History (Bedchamber) - 70% Complete (7/10)
+        // Demo Palace 2: American History (Bedchamber) - 70% Complete (7/10)
         const historyAssociations = [
             { anchor: 'bed', memorableItem: 'quill pen writing independence (Declaration of Independence)', description: 'A quill pen writing on a scroll on the bed' },
             { anchor: 'lamp', memorableItem: 'tea cup (Boston Tea Party)', description: 'Tea cup floating in a lamp\'s light' },
@@ -136,7 +136,7 @@ const smartResetDemoPalaces = async () => {
         }
 
         const historyPalace = new MemoryPalace({
-            name: 'American Revolution History',
+            name: 'American History',
             roomType: 'bedchamber',
             userId: demoUser._id,
             isSeedData: true,

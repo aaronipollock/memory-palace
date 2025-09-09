@@ -185,7 +185,7 @@ const createDemoPalaces = async () => {
             }
         });
 
-        // Demo Palace 2: American Revolution History (Bedchamber) - 70% Complete (7/10)
+        // Demo Palace 2: American History (Bedchamber) - 70% Complete (7/10)
         const historyAssociations = [
             {
                 anchor: 'bed',
@@ -253,7 +253,7 @@ const createDemoPalaces = async () => {
         }
 
         const historyPalace = new MemoryPalace({
-            name: 'American Revolution History',
+            name: 'American History',
             roomType: 'bedchamber',
             userId: demoUser._id,
             isSeedData: true,
@@ -356,7 +356,7 @@ const createDemoPalaces = async () => {
 
         console.log('✅ Demo palaces created successfully:');
         console.log('  - Grocery Shopping List (Throne Room) - 100% Complete');
-        console.log('  - American Revolution History (Bedchamber) - 70% Complete');
+        console.log('  - American History (Bedchamber) - 70% Complete');
         console.log('  - Human Anatomy Study (Dungeon) - 30% Complete');
 
         // Only exit if this is the main module (standalone script)

@@ -43,18 +43,18 @@ const processAcceptedImages = (acceptedImages) => {
     const totalImages = Object.keys(acceptedImages).length;
     let savedCount = 0;
     let failedCount = 0;
-    
+
     console.log(`Processing ${totalImages} accepted images...`);
-    
+
     for (const [anchor, imageData] of Object.entries(acceptedImages)) {
         if (imageData && imageData.image) {
             // If it's base64 data, save it as a file
             if (imageData.image.startsWith('data:image')) {
                 const filename = `${Date.now()}-${anchor.replace(/\s+/g, '-')}-${imageData.association?.memorableItem?.replace(/\s+/g, '-') || 'item'}.png`;
                 console.log(`Saving image for anchor: ${anchor}, filename: ${filename}`);
-                
+
                 const filePath = saveBase64Image(imageData.image, filename);
-                
+
                 if (filePath) {
                     processedImages[anchor] = {
                         ...imageData,
@@ -75,7 +75,7 @@ const processAcceptedImages = (acceptedImages) => {
             }
         }
     }
-    
+
     console.log(`Image processing complete: ${savedCount} saved, ${failedCount} failed, ${totalImages} total`);
     return processedImages;
 };
