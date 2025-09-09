@@ -80,7 +80,7 @@ const NavBar = ({ onLoginClick }) => {
                         {isLoggedIn && (
                             <>
                                 <button
-                                    onClick={() => navigate('/demo')}
+                                    onClick={() => navigate('/input')}
                                     className="loci-nav-link"
                                 >
                                     Create Palace

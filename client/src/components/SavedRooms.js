@@ -202,7 +202,7 @@ const SavedRooms = () => {
                         <p className="text-lg mb-4">No memory palaces found.</p>
                         {userEmail !== 'demo@example.com' && (
                             <button
-                                onClick={() => navigate('/demo')}
+                                onClick={() => navigate('/input')}
                                 className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
                             >
                                 Create Your First Palace
