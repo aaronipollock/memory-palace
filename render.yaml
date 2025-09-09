@@ -22,7 +22,7 @@ services:
 
   # Frontend Web Service
   - type: web
-    name: memory-palace-frontend
+    name: low-sai
     env: static
     plan: starter
     buildCommand: cd client && npm install && npm run build
