@@ -67,16 +67,25 @@ ${feedback || 'No additional feedback provided'}
 This feedback was submitted from the Low·sAI Memory Palace application.
     `;
 
-    // Send email
-    const transporter = createTransporter();
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER || 'your-email@gmail.com',
-      to: process.env.FEEDBACK_EMAIL || process.env.EMAIL_USER || 'your-email@gmail.com',
-      subject: `Low·sAI Feedback - ${rating}/5 stars`,
-      text: emailContent,
-      html: emailContent.replace(/\n/g, '<br>'),
-    });
+    // Send email (if email configuration is available)
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        const transporter = createTransporter();
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: process.env.FEEDBACK_EMAIL || process.env.EMAIL_USER,
+          subject: `Low·sAI Feedback - ${rating}/5 stars`,
+          text: emailContent,
+          html: emailContent.replace(/\n/g, '<br>'),
+        });
+        console.log('Feedback email sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send feedback email:', emailError.message);
+        // Continue processing even if email fails
+      }
+    } else {
+      console.log('Email configuration not available, feedback logged only');
+    }
 
     // Log feedback for analytics (optional)
     console.log('Feedback received:', {
@@ -88,7 +97,9 @@ This feedback was submitted from the Low·sAI Memory Palace application.
     });
 
     res.status(200).json({
-      message: 'Feedback submitted successfully',
+      message: process.env.EMAIL_USER && process.env.EMAIL_PASS
+        ? 'Feedback submitted successfully'
+        : 'Feedback submitted successfully (development mode)',
     });
 
   } catch (error) {
