@@ -301,16 +301,16 @@ const LandingPage = () => {
 
               {/* Navigation Links */}
               <div className="flex flex-wrap justify-center gap-8">
-                <a href="/user-guide" className="text-gray-300 hover:text-white transition-colors duration-300">
+                <a href="/#/user-guide" className="text-gray-300 hover:text-white transition-colors duration-300">
                   User Guide
                 </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
+                <a href="mailto:support@low-sai.com" className="text-gray-300 hover:text-white transition-colors duration-300">
                   Support
                 </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
+                <a href="/#/about" className="text-gray-300 hover:text-white transition-colors duration-300">
                   About
                 </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">
+                <a href="mailto:contact@low-sai.com" className="text-gray-300 hover:text-white transition-colors duration-300">
                   Contact
                 </a>
               </div>
@@ -323,11 +323,11 @@ const LandingPage = () => {
                   &copy; {new Date().getFullYear()} Low·sAI. All rights reserved.
                 </p>
                 <div className="flex flex-wrap justify-center gap-6 text-sm">
-                  <a href="/terms" className="text-gray-400 hover:text-white transition-colors duration-300">Terms</a>
+                  <a href="/#/terms" className="text-gray-400 hover:text-white transition-colors duration-300">Terms</a>
                   <span className="text-gray-600">•</span>
-                  <a href="/privacy" className="text-gray-400 hover:text-white transition-colors duration-300">Privacy</a>
+                  <a href="/#/privacy" className="text-gray-400 hover:text-white transition-colors duration-300">Privacy</a>
                   <span className="text-gray-600">•</span>
-                  <a href="/cookies" className="text-gray-400 hover:text-white transition-colors duration-300">Cookies</a>
+                  <a href="/#/cookies" className="text-gray-400 hover:text-white transition-colors duration-300">Cookies</a>
                 </div>
               </div>
             </div>

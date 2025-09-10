@@ -8,6 +8,8 @@ import FeedbackButton from './components/FeedbackButton';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import CookiePolicy from './components/CookiePolicy';
+import UserGuide from './components/UserGuide';
+import About from './components/About';
 import { ToastProvider } from './context/ToastContext';
 
 function App() {
@@ -34,6 +36,8 @@ function App() {
                         <Route path="/terms" element={<TermsOfService />} />
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/cookies" element={<CookiePolicy />} />
+                        <Route path="/user-guide" element={<UserGuide />} />
+                        <Route path="/about" element={<About />} />
                     </Routes>
                     <FeedbackButton />
                 </Router>
