@@ -3,17 +3,17 @@ import NavBar from './NavBar';
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-primary">
       <NavBar />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-6">About Memory Palace</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-6">About Low·sAI</h1>
 
           <div className="prose prose-lg max-w-none">
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-700 mb-4">Our Mission</h2>
               <p className="text-gray-600 mb-4">
-                At Memory Palace, we believe that everyone has the potential to dramatically improve their memory and learning capabilities. Our mission is to make the ancient and powerful technique of memory palaces accessible to everyone through modern AI technology.
+                At Low·sAI, we believe that everyone has the potential to dramatically improve their memory and learning capabilities. Our mission is to make the ancient and powerful technique of memory palaces accessible to everyone through modern AI technology.
               </p>
               <p className="text-gray-600 mb-4">
                 We're passionate about helping students, professionals, and lifelong learners unlock their cognitive potential through the method of loci (pronounced <em>low-sai</em>), a time-tested memory technique that has been used for thousands of years.
@@ -97,7 +97,7 @@ const About = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-700 mb-4">Our Technology</h2>
               <p className="text-gray-600 mb-4">
-                Memory Palace is built using cutting-edge AI technology and modern web development practices. We use advanced image generation models to create vivid, memorable images that help you retain information more effectively.
+                Low·sAI is built using cutting-edge AI technology and modern web development practices. We use advanced image generation models to create vivid, memorable images that help you retain information more effectively.
               </p>
               <p className="text-gray-600 mb-4">
                 Our platform is designed to be intuitive and accessible, whether you're a complete beginner to memory techniques or an experienced practitioner looking to enhance your skills with AI assistance.
@@ -123,10 +123,10 @@ const About = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-700 mb-4">Our Commitment</h2>
               <p className="text-gray-600 mb-4">
-                We're committed to continuously improving Memory Palace based on user feedback and the latest research in cognitive science and AI technology. Our goal is to make memory enhancement accessible, effective, and enjoyable for everyone.
+                We're committed to continuously improving Low·sAI based on user feedback and the latest research in cognitive science and AI technology. Our goal is to make memory enhancement accessible, effective, and enjoyable for everyone.
               </p>
               <p className="text-gray-600 mb-4">
-                We believe that with the right tools and techniques, anyone can dramatically improve their memory and learning capabilities. Memory Palace is our contribution to making that vision a reality.
+                We believe that with the right tools and techniques, anyone can dramatically improve their memory and learning capabilities. Low·sAI is our contribution to making that vision a reality.
               </p>
             </section>
 
@@ -137,7 +137,8 @@ const About = () => {
               </p>
               <a
                 href="/#/"
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300"
+                className="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+                style={{ color: 'white' }}
               >
                 Try Demo Now
               </a>

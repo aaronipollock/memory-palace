@@ -54,6 +54,7 @@ const securityConfig = {
     origin: process.env.NODE_ENV === 'production'
       ? [
           'https://memory-palace-frontend.onrender.com',
+          'https://low-sai.onrender.com',
           'https://low-sai.com',
           'https://www.low-sai.com',
           process.env.FRONTEND_URL

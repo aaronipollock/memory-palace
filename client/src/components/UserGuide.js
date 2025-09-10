@@ -3,11 +3,11 @@ import NavBar from './NavBar';
 
 const UserGuide = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-primary">
       <NavBar />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-6">Memory Palace User Guide</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-6">Low·sAI User Guide</h1>
 
           <div className="prose prose-lg max-w-none">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4">Table of Contents</h2>
@@ -25,7 +25,7 @@ const UserGuide = () => {
             <section id="introduction" className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-700 mb-4">Introduction</h2>
               <p className="text-gray-600 mb-4">
-                Welcome to Memory Palace, an AI-powered application that helps you create and use the ancient method of loci (pronounced <em>low-sai</em>) to improve your memory. This technique uses spatial memory and visual associations to make information more memorable.
+                Welcome to Low·sAI, an AI-powered application that helps you create and use the ancient method of loci (pronounced <em>low-sai</em>) to improve your memory. This technique uses spatial memory and visual associations to make information more memorable.
               </p>
 
               <h3 className="text-xl font-semibold text-gray-700 mb-3">What is a Memory Palace?</h3>
@@ -150,7 +150,7 @@ Pasta</pre>
                 <li><strong>Create Stories</strong>: Link items together in a narrative when possible</li>
               </ol>
 
-              <h3 className="text-xl font-semibold text-gray-700 mb-3">Practicing Your Memory Palace</h3>
+              <h3 className="text-xl font-semibold text-gray-700 mb-3">Reviewing Your Memory Palace</h3>
               <ol className="list-decimal list-inside text-gray-600 space-y-2">
                 <li><strong>Regular Review</strong>: Visit your palace daily for the first week</li>
                 <li><strong>Mental Walkthrough</strong>: Practice mentally walking through the room</li>
@@ -188,7 +188,7 @@ Pasta</pre>
             <div className="mt-8 p-6 bg-blue-50 rounded-lg">
               <h3 className="text-lg font-semibold text-blue-800 mb-2">Support and Feedback</h3>
               <p className="text-blue-700">
-                If you encounter any issues or have suggestions for improvement, please contact our support team. We're committed to making Memory Palace the best tool for improving your memory and learning.
+                If you encounter any issues or have suggestions for improvement, please contact our support team. We're committed to making Low·sAI the best tool for improving your memory and learning.
               </p>
               <p className="text-blue-800 font-semibold mt-2">Happy memorizing!</p>
             </div>
