@@ -17,7 +17,7 @@ const ROOM_IMAGES = {
       'dais': { top: '75%', left: '25%', width: '180px', height: '80px' },
       'statue': { top: '60%', left: '33%', width: '100px', height: '200px' },
       'stained glass window': { top: '40%', left: '40%', width: '150px', height: '150px' },
-      'banner': { top: '50%', left: '75%', width: '120px', height: '180px' },
+      'tapestry': { top: '50%', left: '75%', width: '120px', height: '180px' },
       'candlestick': { top: '70%', left: '85%', width: '80px', height: '150px' },
       'footstool': { top: '90%', left: '75%', width: '100px', height: '80px' },
       'red carpet': { top: '85%', left: '55%', width: '200px', height: '100px' },

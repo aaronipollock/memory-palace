@@ -24,9 +24,9 @@ const seedData = {
         description: "A royal red carpet leading to the throne"
       },
       {
-        anchor: "banner",
+        anchor: "tapestry",
         memorable: "la bandera (the flag)",
-        description: "A royal banner waving with Spanish colors"
+        description: "A royal tapestry displaying Spanish colors"
       },
       {
         anchor: "dais",
@@ -120,9 +120,9 @@ const seedData = {
         description: "A carpet with binary code patterns flowing"
       },
       {
-        anchor: "banner",
+        anchor: "tapestry",
         memorable: "API",
-        description: "A banner displaying REST API endpoints"
+        description: "A tapestry displaying REST API endpoints"
       },
       {
         anchor: "dais",
@@ -189,9 +189,9 @@ const seedData = {
         description: "A path showing different customer touchpoints"
       },
       {
-        anchor: "banner",
+        anchor: "tapestry",
         memorable: "Brand Identity",
-        description: "A banner displaying company logo and values"
+        description: "A tapestry displaying company logo and values"
       },
       {
         anchor: "dais",

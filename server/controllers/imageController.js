@@ -76,10 +76,10 @@ exports.generateImages = async (req, res) => {
         console.log('Received prompt:', prompt);
         console.log('Using API key:', API_KEY ? `${API_KEY.substring(0, 10)}...` : 'Not found');
 
-        // Enhanced parameters for better banner and anchor point generation
-        const isBannerPrompt = prompt.toLowerCase().includes('banner');
-        const cfgScale = isBannerPrompt ? 8 : 7; // Higher CFG for banners
-        const steps = isBannerPrompt ? 35 : 30; // More steps for complex banners
+        // Enhanced parameters for better tapestry and anchor point generation
+        const isTapestryPrompt = prompt.toLowerCase().includes('tapestry');
+        const cfgScale = isTapestryPrompt ? 8 : 7; // Higher CFG for tapestries
+        const steps = isTapestryPrompt ? 35 : 30; // More steps for complex tapestries
 
         console.log('Sending request to Stability AI with data:', {
             text_prompts: [{ text: prompt, weight: 1 }],

@@ -26,7 +26,7 @@ const ART_STYLES = [
 
 // Anchor-specific context for better AI generation
 const ANCHOR_CONTEXT = {
-  'banner': 'a medieval heraldic banner hanging from a wall or pole, with coat of arms or symbols',
+  'tapestry': 'a large medieval tapestry prominently displayed, hanging vertically on a stone wall, featuring intricate embroidery, heraldic symbols, rich colors, and decorative patterns, clearly visible in the foreground',
   'column': 'a tall stone column or pillar, classical architecture style',
   'dais': 'a raised platform or podium, often with steps',
   'statue': 'a detailed stone or bronze statue, classical or medieval style',

@@ -128,9 +128,9 @@ const createDemoPalaces = async () => {
                 description: 'Orange carrots scattered along the red carpet path'
             },
             {
-                anchor: 'banner',
+                anchor: 'tapestry',
                 memorableItem: 'apples',
-                description: 'Red apples hanging from the royal banner like decorations'
+                description: 'Red apples hanging from the royal tapestry like decorations'
             },
             {
                 anchor: 'dais',
