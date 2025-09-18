@@ -76,10 +76,12 @@ exports.generateImages = async (req, res) => {
         console.log('Received prompt:', prompt);
         console.log('Using API key:', API_KEY ? `${API_KEY.substring(0, 10)}...` : 'Not found');
 
-        // Enhanced parameters for better tapestry and anchor point generation
+        // Enhanced parameters for better tapestry, dais, and anchor point generation
         const isTapestryPrompt = prompt.toLowerCase().includes('tapestry');
-        const cfgScale = isTapestryPrompt ? 8 : 7; // Higher CFG for tapestries
-        const steps = isTapestryPrompt ? 35 : 30; // More steps for complex tapestries
+        const isDaisPrompt = prompt.toLowerCase().includes('dais');
+        const needsEnhancedParams = isTapestryPrompt || isDaisPrompt;
+        const cfgScale = needsEnhancedParams ? 8 : 7; // Higher CFG for complex architectural elements
+        const steps = needsEnhancedParams ? 35 : 30; // More steps for complex architectural elements
 
         console.log('Sending request to Stability AI with data:', {
             text_prompts: [{ text: prompt, weight: 1 }],

@@ -28,7 +28,7 @@ const ART_STYLES = [
 const ANCHOR_CONTEXT = {
   'tapestry': 'a large medieval tapestry prominently displayed, hanging vertically on a stone wall, featuring intricate embroidery, heraldic symbols, rich colors, and decorative patterns, clearly visible in the foreground',
   'column': 'a tall stone column or pillar, classical architecture style',
-  'dais': 'a raised platform or podium, often with steps',
+  'dais': 'a large raised stone platform with multiple steps leading up to it, prominently positioned in the center, featuring ornate stone railings and decorative carvings, clearly elevated above the floor level',
   'statue': 'a detailed stone or bronze statue, classical or medieval style',
   'stained glass window': 'a colorful stained glass window with intricate patterns',
   'candlestick': 'a ornate candlestick or candelabra, medieval or gothic style',
