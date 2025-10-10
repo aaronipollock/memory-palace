@@ -17,7 +17,7 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Authentication validation rules (MVP-friendly)
+// Authentication validation rules
 const authValidation = {
   login: [
     body('email')
@@ -43,7 +43,7 @@ const authValidation = {
       .withMessage('Email is too long'),
 
     body('password')
-      .isLength({ min: 6 }) // Relaxed from 8 to 6 for MVP
+      .isLength({ min: 6 })
       .withMessage('Password must be at least 6 characters long'),
 
     body('confirmPassword')
@@ -58,7 +58,64 @@ const authValidation = {
   ]
 };
 
-// Memory palace validation rules (MVP-friendly)
+// User validation rules
+const userValidation = {
+  updateProfile: [
+    body('firstName')
+      .optional()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('First name must be between 1 and 50 characters'),
+
+    body('lastName')
+      .optional()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Last name must be between 1 and 50 characters'),
+
+    body('username')
+      .optional()
+      .trim()
+      .isLength({ min: 3, max: 30 })
+      .withMessage('Username must be between 3 and 30 characters')
+      .matches(/^[a-zA-Z0-9_]+$/)
+      .withMessage('Username can only contain letters, numbers, and underscores'),
+
+    body('preferences.room')
+      .optional()
+      .isIn(['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen'])
+      .withMessage('Invalid room preference'),
+
+    body('preferences.artStyle')
+      .optional()
+      .isIn(['Random', 'Digital Art', 'Cartoon', '3D Render', 'Watercolor', 'Pop Art', 'Photorealistic'])
+      .withMessage('Invalid art style preference'),
+
+    handleValidationErrors
+  ],
+
+  changePassword: [
+    body('currentPassword')
+      .isLength({ min: 6 })
+      .withMessage('Current password is required'),
+
+    body('newPassword')
+      .isLength({ min: 6 })
+      .withMessage('New password must be at least 6 characters long'),
+
+    handleValidationErrors
+  ],
+
+  deleteAccount: [
+    body('password')
+      .isLength({ min: 6 })
+      .withMessage('Password is required for account deletion'),
+
+    handleValidationErrors
+  ]
+};
+
+// Memory palace validation rules
 const memoryPalaceValidation = {
   create: [
     body('name')
@@ -105,7 +162,7 @@ const memoryPalaceValidation = {
   ]
 };
 
-// Image generation validation rules (MVP-friendly)
+// Image generation validation rules
 const imageGenerationValidation = {
   generateImages: [
     body('anchorPoints')
@@ -163,7 +220,7 @@ const imageGenerationValidation = {
   ]
 };
 
-// Feedback validation rules (MVP-friendly)
+// Feedback validation rules
 const feedbackValidation = {
   submit: [
     body('rating')
@@ -275,6 +332,7 @@ const xssProtection = (req, res, next) => {
 
 module.exports = {
   authValidation,
+  userValidation,
   memoryPalaceValidation,
   imageGenerationValidation,
   feedbackValidation,
