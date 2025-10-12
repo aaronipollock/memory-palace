@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const MemoryPalace = require('../models/MemoryPalace');
 const { generateAccessToken, generateRefreshToken, jwtConfig } = require('../config/jwt');
 const crypto = require('crypto');
 
@@ -53,7 +52,11 @@ exports.signup = async (req, res) => {
             csrfToken,
             user: {
                 id: user._id,
-                email: user.email
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                username: user.username,
+                preferences: user.preferences
             }
         });
     } catch (error) {
@@ -121,7 +124,11 @@ exports.login = async (req, res) => {
             csrfToken,
             user: {
                 id: user._id,
-                email: user.email
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                username: user.username,
+                preferences: user.preferences
             }
         });
     } catch (error) {

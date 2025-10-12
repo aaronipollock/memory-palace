@@ -1,3 +1,4 @@
+const MemoryPalace = require('../models/MemoryPalace');
 const User = require('../models/User');
 
 // GET /api/user/profile - Get user profile

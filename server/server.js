@@ -14,7 +14,6 @@ const PORT = process.env.PORT || 5001;
 
 // Connect to MongoDB with security options
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/memory-palace', {
-    // Removed deprecated options and bufferCommands false to prevent query-before-connect errors
     maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000
@@ -53,6 +52,10 @@ app.use('/images/user', express.static(path.join(__dirname, 'public/images/user'
 // Auth routes (no CSRF protection needed for login/signup)
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', ...routeSecurity.authRoutes, authRoutes);
+
+// User routes (with CSRF protection)
+const userRoutes = require('./routes/user');
+app.use('/api/user', userRoutes);
 
 // Feedback routes (no CSRF protection needed for public feedback)
 const feedbackRoutes = require('./routes/feedback');

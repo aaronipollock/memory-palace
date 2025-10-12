@@ -4,7 +4,6 @@ const userController = require('../controllers/userController');
 const { authenticateToken } = require('../middleware/auth');
 const { userValidation, sanitizeInput, xssProtection } = require('../middleware/validation');
 
-// All user routes require authentication
 router.use(authenticateToken);
 
 // Profile management
