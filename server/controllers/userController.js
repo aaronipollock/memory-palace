@@ -80,6 +80,45 @@ exports.updateProfile = async (req, res) => {
     }
   };
 
+// PUT /api/user/password - Change password
+exports.changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.user.userId;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                error: 'User not found',
+                code: 'USER_NOT_FOUND'
+            });
+        }
+
+        // Verify current password
+        const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+        if (!isCurrentPasswordValid) {
+            return res.status(400).json({
+                error: 'Current password is incorrect',
+                code: 'INVALID_CURRENT_PASSWORD'
+            });
+        }
+
+        // Update password
+        user.password = newPassword;
+        await user.save();
+
+        res.json({
+            message: 'Password changed successfully'
+        });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({
+            error: 'Failed to change password',
+            code: 'PASSWORD_CHANGE_ERROR'
+        });
+    }
+};
+
 // GET /api/user/stats - Get user statistics
 exports.getStats = async (req, res) => {
     try {

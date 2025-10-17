@@ -10,9 +10,10 @@ import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
 const UserDashboard = () => {
-    const [user, setUser] = useState(null);
-    const [stats, setStats] = useState(null);
-    const [showProfileSettings, setShowProfileSettings] = useState(false);
+    // TODO: Add these when implementing full profile features
+    // const [user, setUser] = useState(null);
+    // const [stats, setStats] = useState(null);
+    // const [showProfileSettings, setShowProfileSettings] = useState(false);
     const [palaces, setPalaces] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -44,10 +45,11 @@ const UserDashboard = () => {
         }
     }, [navigate]);
 
-    useEffect(() => {
-        fetchUserProfile();
-        fetchUserStats();
-    }, []);
+    // TODO: Implement these functions when backend is ready
+    // useEffect(() => {
+    //     fetchUserProfile();
+    //     fetchUserStats();
+    // }, []);
 
     const fetchPalaces = async () => {
         try {
@@ -319,10 +321,10 @@ const UserDashboard = () => {
                     </div>
                 )}
             </div>
-            {/* NEW: Profile Settings Modal */}
-            {showProfileSettings && <ProfileSettingsModal />}
+            {/* TODO: Add Profile Settings Modal when backend is ready */}
+            {/* {showProfileSettings && <ProfileSettingsModal />} */}
         </div>
     );
 };
 
-export default SavedRooms;
+export default UserDashboard;
