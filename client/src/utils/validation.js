@@ -128,6 +128,46 @@ export const validateAuthForm = (formData, mode) => {
       errors.confirmPassword = confirmValidation.message;
     }
     isValidations.confirmPassword = confirmValidation.isValid;
+
+    // First name validation
+    if (!formData.firstName || formData.firstName.trim().length === 0) {
+      errors.firstName = 'First name is required';
+      isValidations.firstName = false;
+    } else if (formData.firstName.length > 50) {
+      errors.firstName = 'First name must be less than 50 characters';
+      isValidations.firstName = false;
+    } else {
+      isValidations.firstName = true;
+    }
+
+    // Last name validation
+    if (!formData.lastName || formData.lastName.trim().length === 0) {
+      errors.lastName = 'Last name is required';
+      isValidations.lastName = false;
+    } else if (formData.lastName.length > 50) {
+      errors.lastName = 'Last name must be less than 50 characters';
+      isValidations.lastName = false;
+    } else {
+      isValidations.lastName = true;
+    }
+
+    // Username validation (optional)
+    if (formData.username && formData.username.trim().length > 0) {
+      if (formData.username.length < 3) {
+        errors.username = 'Username must be at least 3 characters';
+        isValidations.username = false;
+      } else if (formData.username.length > 30) {
+        errors.username = 'Username must be less than 30 characters';
+        isValidations.username = false;
+      } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+        errors.username = 'Username can only contain letters, numbers, and underscores';
+        isValidations.username = false;
+      } else {
+        isValidations.username = true;
+      }
+    } else {
+      isValidations.username = true; // Optional field
+    }
   }
 
   const isFormValid = Object.keys(errors).length === 0;

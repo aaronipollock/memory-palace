@@ -109,23 +109,15 @@ const NavBar = ({ onLoginClick }) => {
                                         : 'hover:bg-[#B8860B]'
                                 }`}
                             >
-                                Log Out
+                                Log out
                             </button>
                         ) : (
-                            <>
-                                {/* <button
-                                    onClick={onLoginClick}
-                                    className="loci-nav-link !text-white"
-                                >
-                                    Log In
-                                </button>
-                                <button
-                                    onClick={onSignUpClick}
-                                    className="btn-loci"
-                                >
-                                    Sign Up
-                                </button> */}
-                            </>
+                            <button
+                                onClick={onLoginClick}
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:scale-105 transition-transform duration-200"
+                            >
+                                Login
+                            </button>
                         )}
                     </div>
                 </div>

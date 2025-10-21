@@ -146,12 +146,12 @@ h1, h2, h3, h4, h5, h6 {
   overflow: hidden;
 }
 
-.btn-loci:hover {
+/* .btn-loci:hover {
   background-color: var(--color-secondary);
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+} */
 
 .btn-loci:active {
   transform: translateY(1px);
@@ -172,9 +172,9 @@ h1, h2, h3, h4, h5, h6 {
   transform-origin: 50% 50%;
 }
 
-.btn-loci:hover::after {
+/* .btn-loci:hover::after {
   animation: ripple 1s ease-out;
-}
+} */
 
 @keyframes ripple {
   0% {
@@ -189,8 +189,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-loci-secondary {
   background-color: var(--color-secondary);
-  color: var(--color-primary);
-  font-weight: 600;
+  color: white;
+  /* font-weight: 600; */
 }
 
 /* Interactive Elements */

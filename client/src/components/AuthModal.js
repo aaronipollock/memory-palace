@@ -9,8 +9,15 @@ import {
   getFieldIcon
 } from '../utils/validation';
 
-const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData, setFormData }) => {
-  const [touched, setTouched] = useState({ email: false, password: false, confirmPassword: false });
+const AuthModal = ({ isOpen, onClose, mode, setMode, onSubmit, error, isLoading, formData, setFormData }) => {
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+    confirmPassword: false,
+    firstName: false,
+    lastName: false,
+    username: false
+  });
   const [validation, setValidation] = useState({
     isValid: false,
     errors: {},
@@ -275,6 +282,120 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
             </div>
           )}
 
+          {mode === 'signup' && (
+            <>
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                  First Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('firstName')}
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
+                      getFieldStyling(
+                        validation.isValidations.firstName,
+                        formData.firstName,
+                        touched.firstName
+                      )
+                    }`}
+                    required
+                    disabled={isLoading}
+                    maxLength={50}
+                    placeholder="Enter your first name"
+                  />
+                  {touched.firstName && formData.firstName && (
+                    <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                      validation.isValidations.firstName ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {getFieldIcon(validation.isValidations.firstName, formData.firstName, touched.firstName)}
+                    </span>
+                  )}
+                </div>
+                {touched.firstName && validation.errors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">{validation.errors.firstName}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Last Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('lastName')}
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
+                      getFieldStyling(
+                        validation.isValidations.lastName,
+                        formData.lastName,
+                        touched.lastName
+                      )
+                    }`}
+                    required
+                    disabled={isLoading}
+                    maxLength={50}
+                    placeholder="Enter your last name"
+                  />
+                  {touched.lastName && formData.lastName && (
+                    <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                      validation.isValidations.lastName ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {getFieldIcon(validation.isValidations.lastName, formData.lastName, touched.lastName)}
+                    </span>
+                  )}
+                </div>
+                {touched.lastName && validation.errors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">{validation.errors.lastName}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                  Username (Optional)
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={formData.username || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('username')}
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
+                      getFieldStyling(
+                        validation.isValidations.username,
+                        formData.username,
+                        touched.username
+                      )
+                    }`}
+                    disabled={isLoading}
+                    maxLength={30}
+                    placeholder="Choose a username"
+                  />
+                  {touched.username && formData.username && (
+                    <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                      validation.isValidations.username ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {getFieldIcon(validation.isValidations.username, formData.username, touched.username)}
+                    </span>
+                  )}
+                </div>
+                {touched.username && validation.errors.username && (
+                  <p className="text-red-500 text-xs mt-1">{validation.errors.username}</p>
+                )}
+              </div>
+            </>
+          )}
+
           <button
             type="submit"
             disabled={!validation.isValid || isLoading}
@@ -300,7 +421,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
             <p>
               Don't have an account?{' '}
               <button
-                onClick={() => onClose()}
+                onClick={() => setMode('signup')}
                 className="text-primary hover:text-primary-dark underline"
               >
                 Sign up
@@ -309,12 +430,12 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
           ) : (
             <p>
               Already have an account?{' '}
-              <button
-                onClick={() => onClose()}
-                className="text-primary hover:text-primary-dark underline"
-              >
-                Sign in
-              </button>
+                <button
+                  onClick={() => setMode('login')}
+                  className="text-primary hover:text-primary-dark underline"
+                >
+                  Login
+                </button>
             </p>
           )}
         </div>

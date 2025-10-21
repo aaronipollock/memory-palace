@@ -160,16 +160,16 @@ const LandingPage = () => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
                     onClick={handleDemoLogin}
-                    className="btn-loci text-lg px-8 py-4"
+                    className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
                   >
                     Try Demo
                   </button>
-                  {/* <button
+                  <button
                     onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-                    className="btn-loci-secondary text-lg px-8 py-4"
+                    className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
                   >
                     Get Started
-                  </button> */}
+                  </button>
                 </div>
               </div>
             </div>
@@ -270,19 +270,16 @@ const LandingPage = () => {
               ))}
             </div>
           </div>
-        </section> */}
+        </section>
         {/* CTA Section */}
         <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
-            {/* <p className="text-xl text-text-light mb-8">
-              Join thousands of learners who have transformed their memory with Loci.
-            </p> */}
-            {/* <button
+            <button
               onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-              className="btn-loci text-lg px-8 py-4"
+              className="btn-loci text-lg px-8 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
             >
               Create Free Account
-            </button> */}
+            </button>
           </div>
         </section>
         {/* Footer */}
@@ -341,6 +338,7 @@ const LandingPage = () => {
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           mode={authMode}
+          setMode={setAuthMode}
           onSubmit={handleAuthSubmit}
           error={authError}
           isLoading={isLoading}
