@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './NavBar.css';  // We'll create this file next
 import { getApiUrl } from '../config/api';
 
 const NavBar = ({ onLoginClick }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const logoutTimeoutRef = useRef(null);
@@ -77,7 +78,7 @@ const NavBar = ({ onLoginClick }) => {
 
                     {/* Navigation Links */}
                     <div className="hidden md:flex items-center space-x-8">
-                        {isLoggedIn && (
+                        {isLoggedIn && location.pathname !== '/saved-rooms' && location.pathname !== '/input' && (
                             <>
                                 <button
                                     onClick={() => navigate('/input')}

@@ -223,6 +223,19 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                         <div className="flex gap-4">
                             <button
                                 type="button"
+                                onClick={() => navigate('/saved-rooms')}
+                                className="px-6 py-3 bg-gray-500 text-white border-2 border-gray-500 rounded-lg
+                                         hover:bg-gray-600 hover:text-white transition-colors duration-300
+                                         focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+                                aria-describedby="dashboard-help"
+                            >
+                                Back to Dashboard
+                            </button>
+                            <div id="dashboard-help" className="sr-only">
+                                Return to your dashboard to view your saved memory palaces.
+                            </div>
+                            <button
+                                type="button"
                                 onClick={handleProceedToVisualizer}
                                 disabled={isLoading}
                                 className="flex-1 px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg

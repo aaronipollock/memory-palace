@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 import PasswordStrength from './PasswordStrength';
@@ -18,27 +18,18 @@ const AuthModal = ({ isOpen, onClose, mode, setMode, onSubmit, error, isLoading,
     lastName: false,
     username: false
   });
-  const [validation, setValidation] = useState({
-    isValid: false,
-    errors: {},
-    isValidations: {},
-    passwordStrength: 0,
-    passwordStrengthLabel: '',
-    passwordStrengthColor: '',
-    passwordRequirements: []
-  });
   const modalRef = useRef(null);
   const firstInputRef = useRef(null);
 
-  // Validate form whenever formData changes
-  useEffect(() => {
-    const validationResult = validateAuthForm(formData, mode);
-    setValidation(validationResult);
+  // Memoize validation to prevent unnecessary re-renders
+  const validation = useMemo(() => {
+    return validateAuthForm(formData, mode);
   }, [formData, mode]);
 
   // Focus trap and Escape key support
   useEffect(() => {
     if (!isOpen) return;
+
     const focusableElements = modalRef.current.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
@@ -64,10 +55,12 @@ const AuthModal = ({ isOpen, onClose, mode, setMode, onSubmit, error, isLoading,
       }
     }
     document.addEventListener('keydown', handleKeyDown);
-    // Focus the first input
-    if (firstInputRef.current) {
+
+    // Only focus first input when modal first opens
+    if (firstInputRef.current && document.activeElement === document.body) {
       firstInputRef.current.focus();
     }
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
@@ -102,15 +95,7 @@ const AuthModal = ({ isOpen, onClose, mode, setMode, onSubmit, error, isLoading,
     if (mode === 'signup') {
       const passwordValidation = PasswordValidator.validate(formData.password);
       if (!passwordValidation.isValid) {
-        // Update validation state with password errors
-        setValidation(prev => ({
-          ...prev,
-          errors: {
-            ...prev.errors,
-            password: passwordValidation.errors[0]
-          },
-          isValid: false
-        }));
+        // Show password error - validation will be handled by the memoized validation
         return;
       }
     }

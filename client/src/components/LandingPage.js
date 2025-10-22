@@ -80,7 +80,7 @@ const LandingPage = () => {
           CSRFManager.setCSRFToken(result.csrfToken);
         }
         setShowAuthModal(false);
-        navigate('/input');
+        navigate('/saved-rooms');
       } else {
         setAuthError(result.message || 'Login/Signup failed');
       }
