@@ -99,11 +99,11 @@ const LandingPage = () => {
       description: "Build vocabulary and grammar through memorable visual associations.",
       icon: "🌍"
     },
-    {
-      title: "Medical Students",
-      description: "Learn anatomy, terms, and procedures through visual memory palaces.",
-      icon: "⚕️"
-    }
+    // {
+    //   title: "Medical Students",
+    //   description: "Learn anatomy, terms, and procedures through visual memory palaces.",
+    //   icon: "⚕️"
+    // }
   ];
 
   const handleAuthSubmit = async (data) => {
@@ -315,7 +315,7 @@ const LandingPage = () => {
             <h2 className="loci-header text-4xl text-center mb-16 !text-white">
               Perfect For
             </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {useCases.map((useCase, index) => (
                 <div key={index} className="loci-container p-6 feature-card group bg-primary text-secondary text-center">
                   <h3 className="loci-header text-xl mb-3 text-secondary text-center">{useCase.title}</h3>
@@ -325,45 +325,20 @@ const LandingPage = () => {
             </div>
           </div>
         </section>
-        {/* Upcoming Features Section - Only show for non-logged-in users */}
-        {!isLoggedIn && (
-        <section className="py-10 px-4">
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Personal Accounts</div>
-                <div className="text-sm text-blue-800">Create your own account to save and access your memory palaces across all your devices.</div>
-              </div>
-              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Smarter Images</div>
-                <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
-              </div>
-              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
-                <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
-              </div>
-              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
-                <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-        )}
         {/* CTA Section - Show for non-logged-in users and demo users */}
         {(!isLoggedIn || userEmail === 'demo@example.com') && (
         <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
             <button
               onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-              className="btn-loci text-lg px-8 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+              className="btn-loci text-lg px-8 py-4 rounded-lg bg-secondary hover:scale-105 transition-transform duration-200"
             >
               Create Free Account
             </button>
           </div>
         </section>
         )}
+        {/* Upcoming Features moved to footer */}
         {/* Footer */}
         <footer className="py-16 px-4 bg-primary text-white">
           <div className="container mx-auto max-w-6xl">
@@ -381,6 +356,27 @@ const LandingPage = () => {
                   Where memories find their place.
                 </p> */}
               </div>
+
+              {/* Upcoming Features Section - Only show for non-logged-in users */}
+              {!isLoggedIn && (
+              <div className="w-full mb-8">
+                <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
+                <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
+                  <div className="bg-secondary rounded-lg p-4 text-center">
+                    <div className="font-medium mb-2 text-white">Smarter Images</div>
+                    <div className="text-sm text-gray-200">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
+                  </div>
+                  <div className="bg-secondary rounded-lg p-4 text-center">
+                    <div className="font-medium mb-2 text-white">Create Your Own Rooms</div>
+                    <div className="text-sm text-gray-200">Design layouts that match your real spaces for a more personal memory journey.</div>
+                  </div>
+                  <div className="bg-secondary rounded-lg p-4 text-center">
+                    <div className="font-medium mb-2 text-white">Upload Photos of Real Rooms</div>
+                    <div className="text-sm text-gray-200">Anchor memories to your own room photos for maximum familiarity.</div>
+                  </div>
+                </div>
+              </div>
+              )}
 
               {/* Navigation Links */}
               <div className="flex flex-wrap justify-center gap-8">
