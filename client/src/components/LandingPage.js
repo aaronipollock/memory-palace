@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
@@ -15,6 +15,55 @@ const LandingPage = () => {
   const [authError, setAuthError] = React.useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+
+  // Check authentication status on component mount and listen for changes
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          setUserEmail(payload.email);
+          setIsLoggedIn(true);
+        } catch (err) {
+          console.error('Error decoding token:', err);
+          localStorage.removeItem('token');
+          setUserEmail('');
+          setIsLoggedIn(false);
+        }
+      } else {
+        setUserEmail('');
+        setIsLoggedIn(false);
+      }
+    };
+
+    // Check immediately
+    checkAuthStatus();
+
+    // Listen for storage changes (logout events)
+    const handleStorageChange = (e) => {
+      if (e.key === 'token') {
+        checkAuthStatus();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also listen for custom logout events
+    const handleLogout = () => {
+      setUserEmail('');
+      setIsLoggedIn(false);
+    };
+
+    window.addEventListener('logout', handleLogout);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('logout', handleLogout);
+    };
+  }, []);
 
   const features = [
     {
@@ -117,7 +166,7 @@ const LandingPage = () => {
                   localStorage.setItem('csrfToken', data.csrfToken);
               }
               console.log('Token stored in localStorage:', localStorage.getItem('token'));
-              navigate('/input');
+              navigate('/saved-rooms');
           } else {
               const errorData = await response.json();
               setError(errorData.message || 'Demo login failed');
@@ -138,44 +187,75 @@ const LandingPage = () => {
           onLoginClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
         />
         {/* Hero Section */}
-        {/* <img
-          src="/images/banner_clean.png"
-          alt="Banner"
-          className="w-48 h-auto mx-auto md:mx-16"
-          style={{ borderRadius: '8px' }}
-        /> */}
-        <section className="py-20 px-4 mt-24">
-          <div className="container mx-auto max-w-6xl">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-5xl md:text-6xl mb-6 text-center text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  Want to boost your memory? <br /> You've come to the right place.
-                </h1>
-                <p className="text-xl text-white text-center mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  AI-powered memory palace creation for better learning and retention.
-                </p>
-                <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  Transform how you remember using the ancient method of <em>loci</em> (Latin for "places," pronounced <strong>low·sai</strong>)
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button
-                    onClick={handleDemoLogin}
-                    className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
-                  >
-                    Try Demo
-                  </button>
-                  <button
-                    onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-                    className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
-                  >
-                    Get Started
-                  </button>
+        {isLoggedIn ? (
+          /* Personalized Welcome for Logged-in Users */
+          <section className="py-20 px-4 mt-24">
+            <div className="container mx-auto max-w-6xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+                <div className="flex-1 text-center md:text-left">
+                  <h1 className="text-5xl md:text-6xl mb-6 text-center text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Welcome back, {userEmail === 'demo@example.com' ? 'Demo User' : userEmail.split('@')[0]}!
+                  </h1>
+                  <p className="text-xl text-white text-center mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Ready to create your next memory palace?
+                  </p>
+                  <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Continue building your collection of memory palaces for better learning and retention.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                      onClick={() => navigate('/saved-rooms')}
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+                    >
+                      View My Palaces
+                    </button>
+                    <button
+                      onClick={() => navigate('/input')}
+                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+                    >
+                      Create New Palace
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-        {/* Features Section */}
+          </section>
+        ) : (
+          /* Original Marketing Content for Non-logged-in Users */
+          <section className="py-20 px-4 mt-24">
+            <div className="container mx-auto max-w-6xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+                <div className="flex-1 text-center md:text-left">
+                  <h1 className="text-5xl md:text-6xl mb-6 text-center text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Want to boost your memory? <br /> You've come to the right place.
+                  </h1>
+                  <p className="text-xl text-white text-center mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    AI-powered memory palace creation for better learning and retention.
+                  </p>
+                  <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Transform how you remember using the ancient method of <em>loci</em> (Latin for "places," pronounced <strong>low·sai</strong>)
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                      onClick={handleDemoLogin}
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+                    >
+                      Try Demo
+                    </button>
+                    <button
+                      onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
+                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+                    >
+                      Get Started
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+        {/* Features Section - Only show for non-logged-in users */}
+        {!isLoggedIn && (
         <section className="py-0 px-0 section-overlay">
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
@@ -227,8 +307,10 @@ const LandingPage = () => {
             </div>
           </div>
         </section>
+        )}
         <div className="mb-16" />
-        {/* Upcoming Features Section */}
+        {/* Upcoming Features Section - Only show for non-logged-in users */}
+        {!isLoggedIn && (
         <section className="py-10 px-4">
           <div className="max-w-4xl mx-auto">
             <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
@@ -252,6 +334,7 @@ const LandingPage = () => {
             </div>
           </div>
         </section>
+        )}
         {/* Use Cases Section */}
         {/* <section className="py-20 px-4 bg-background gradient-use-cases">
           <div className="container mx-auto max-w-6xl">
@@ -271,7 +354,8 @@ const LandingPage = () => {
             </div>
           </div>
         </section>
-        {/* CTA Section */}
+        {/* CTA Section - Show for non-logged-in users and demo users */}
+        {(!isLoggedIn || userEmail === 'demo@example.com') && (
         <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
             <button
@@ -282,6 +366,7 @@ const LandingPage = () => {
             </button>
           </div>
         </section>
+        )}
         {/* Footer */}
         <footer className="py-16 px-4 bg-primary text-white">
           <div className="container mx-auto max-w-6xl">

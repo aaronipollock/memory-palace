@@ -53,6 +53,9 @@ const NavBar = ({ onLoginClick }) => {
             localStorage.removeItem('token');
             setIsLoggedIn(false);
 
+            // Dispatch custom logout event for other components to listen
+            window.dispatchEvent(new CustomEvent('logout'));
+
             // Add a small delay before navigation to ensure state is updated
             logoutTimeoutRef.current = setTimeout(() => {
                 navigate('/');
@@ -77,7 +80,7 @@ const NavBar = ({ onLoginClick }) => {
                     </div>
 
                     {/* Navigation Links */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    {/* <div className="hidden md:flex items-center space-x-8">
                         {isLoggedIn && location.pathname !== '/saved-rooms' && location.pathname !== '/input' && (
                             <>
                                 <button
@@ -95,7 +98,7 @@ const NavBar = ({ onLoginClick }) => {
                             </>
                         )}
 
-                    </div>
+                    </div> */}
 
 
                     {/* Auth Buttons or Logout Link */}
