@@ -309,6 +309,22 @@ const LandingPage = () => {
         </section>
         )}
         <div className="mb-16" />
+        {/* Use Cases Section */}
+        <section className="py-20 px-4">
+          <div className="container mx-auto max-w-6xl">
+            <h2 className="loci-header text-4xl text-center mb-16 !text-white">
+              Perfect For
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {useCases.map((useCase, index) => (
+                <div key={index} className="loci-container p-6 feature-card group bg-primary text-secondary text-center">
+                  <h3 className="loci-header text-xl mb-3 text-secondary text-center">{useCase.title}</h3>
+                  <p className="text-text-light">{useCase.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
         {/* Upcoming Features Section - Only show for non-logged-in users */}
         {!isLoggedIn && (
         <section className="py-10 px-4">
@@ -335,25 +351,6 @@ const LandingPage = () => {
           </div>
         </section>
         )}
-        {/* Use Cases Section */}
-        {/* <section className="py-20 px-4 bg-background gradient-use-cases">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="loci-header text-4xl text-center mb-16">
-              Perfect For
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {useCases.map((useCase, index) => (
-                <div key={index} className="loci-container p-6 feature-card group">
-                  <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                    {useCase.icon}
-                  </div>
-                  <h3 className="loci-header text-xl mb-3">{useCase.title}</h3>
-                  <p className="text-text-light">{useCase.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
         {/* CTA Section - Show for non-logged-in users and demo users */}
         {(!isLoggedIn || userEmail === 'demo@example.com') && (
         <section className="py-20 px-4 section-overlay">

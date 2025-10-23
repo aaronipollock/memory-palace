@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
+import ProfileSettingsModal from './ProfileSettingsModal';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
 
@@ -44,11 +45,40 @@ const UserDashboard = () => {
         }
     }, [navigate]);
 
-    // TODO: Implement these functions when backend is ready
-    // useEffect(() => {
-    //     fetchUserProfile();
-    //     fetchUserStats();
-    // }, []);
+    // Fetch user profile data
+    const fetchUserProfile = async () => {
+        try {
+            const response = await apiClient.get('/api/user/profile');
+            if (response.ok) {
+                const profileData = await response.json();
+                setUser(profileData);
+            } else {
+                console.error('Failed to fetch user profile');
+            }
+        } catch (err) {
+            console.error('Error fetching user profile:', err);
+        }
+    };
+
+    // Fetch user statistics
+    const fetchUserStats = async () => {
+        try {
+            const response = await apiClient.get('/api/user/stats');
+            if (response.ok) {
+                const statsData = await response.json();
+                setStats(statsData);
+            } else {
+                console.error('Failed to fetch user stats');
+            }
+        } catch (err) {
+            console.error('Error fetching user stats:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserProfile();
+        fetchUserStats();
+    }, []);
 
     const fetchPalaces = async () => {
         try {
@@ -175,6 +205,10 @@ const UserDashboard = () => {
         fetchPalaces();
     };
 
+    const handleProfileUpdate = (updatedUser) => {
+        setUser(updatedUser);
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-background">
@@ -201,13 +235,17 @@ const UserDashboard = () => {
                     <div className="flex flex-col md:flex-row items-center justify-between">
                         <div className="flex items-center space-x-4 mb-4 md:mb-0">
                             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                                {userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}
+                                {user?.firstName ? user.firstName.charAt(0).toUpperCase() : (userEmail ? userEmail.charAt(0).toUpperCase() : 'U')}
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-800">
-                                    {userEmail === 'demo@example.com' ? 'Demo User' : 'Welcome back!'}
+                                    {userEmail === 'demo@example.com' ? 'Demo User' :
+                                     user?.firstName ? `Welcome back, ${user.firstName}!` : 'Welcome back!'}
                                 </h1>
                                 <p className="text-gray-600">{userEmail}</p>
+                                {user?.username && (
+                                    <p className="text-sm text-gray-500">@{user.username}</p>
+                                )}
                             </div>
                         </div>
                         <div className="flex space-x-4">
@@ -412,6 +450,14 @@ const UserDashboard = () => {
                     </div>
                 </div>
             )}
+
+            {/* Profile Settings Modal */}
+            <ProfileSettingsModal
+                isOpen={showProfileSettings}
+                onClose={() => setShowProfileSettings(false)}
+                user={user}
+                onProfileUpdate={handleProfileUpdate}
+            />
         </div>
     );
 };
