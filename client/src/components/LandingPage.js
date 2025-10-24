@@ -317,8 +317,8 @@ const LandingPage = () => {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {useCases.map((useCase, index) => (
-                <div key={index} className="loci-container p-6 feature-card group bg-primary text-secondary text-center">
-                  <h3 className="loci-header text-xl mb-3 text-secondary text-center">{useCase.title}</h3>
+                <div key={index} className="loci-container p-6 feature-card group bg-primary text-center text-white">
+                  <h3 className="loci-header text-xl mb-3 text-center !text-white">{useCase.title}</h3>
                   <p className="text-text-light">{useCase.description}</p>
                 </div>
               ))}
