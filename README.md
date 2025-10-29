@@ -1,5 +1,8 @@
 # Low·sai
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 Low·sai is an AI-powered learning platform that helps users memorize information by creating visual memory palaces with AI-generated imagery. The application combines the ancient memory technique of the "method of loci" with modern AI technology to create personalized, memorable learning experiences.
 
 ## Live Site
@@ -245,7 +248,10 @@ This application implements several security measures:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License, Version 2.0.
+
+- Full text: [LICENSE](LICENSE.md)
+- Notices/attributions: [NOTICE](NOTICE.md)
 
 ## Contact
 
