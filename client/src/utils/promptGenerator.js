@@ -1,15 +1,8 @@
-import nlp from 'compromise';
 
 // Constants for prompt generation
+// Relational prepositions (kept for fallback)
 const ACTION_VERBS = [
-  'on',
-  'next to',
-  'inside',
-  'above',
-  'below',
-  'behind',
-  'in front of',
-  'around'
+  'on', 'next to', 'inside', 'above', 'below', 'behind', 'in front of', 'around'
 ];
 
 const DESCRIPTIVE_ADJECTIVES = [
@@ -22,6 +15,45 @@ const ART_STYLES = [
   'realistic',
   'detailed illustration',
   'high quality render'
+];
+
+// Fusion/transformation patterns to boost memorability
+const FUSION_PATTERNS = [
+  // X made of Y
+  ({ mem, anchor }) => `${anchor} constructed entirely from ${mem} stacked/combined together`,
+  // Y wears/uses X
+  ({ mem, anchor }) => `${mem} wearing the ${anchor} as armor or clothing`,
+  // X transforms into Y
+  ({ mem, anchor }) => `${anchor} transforming into ${mem}, mid‑morph with visible details`,
+  // Y replaces a part of X
+  ({ mem, anchor }) => `${anchor} whose surface is covered with ${mem} replacing its normal material`,
+  // Y interacting impossibly with X
+  ({ mem, anchor }) => `${mem} juggling/spiraling around the ${anchor}, forming a single coherent shape`
+];
+
+// Exaggerations to force vividness
+const EXAGGERATIONS = [
+  'colossal scale',
+  'a swarm of thousands forming one shape',
+  'gravity‑defying balance',
+  'impossibly glossy highlights and deep shadows',
+  'golden hour lighting creating a strong silhouette'
+];
+
+// Sensory texture/color pairs
+const SENSORY_DETAILS = [
+  'slick marble sheen and bristly fur texture',
+  'wet stone glisten and rough rope fibers',
+  'polished metal shine and cracked leather',
+  'glowing embers and cold blue shadows',
+  'powdery dust motes and oily reflections'
+];
+
+// Composition presets for clean single‑subject images
+const COMPOSITION = [
+  'centered composition, portrait orientation, 35mm lens, low angle, strong silhouette, simple background',
+  'medium shot, slight vignette, clean backdrop, subject fully in frame',
+  'close‑up hero shot, shallow depth of field, uncluttered environment'
 ];
 
 // Anchor-specific context for better AI generation
@@ -72,39 +104,38 @@ const extractConcreteImage = (memorableItem) => {
   return memorableItem;
 };
 
-// Prompt generator (Enhanced version with anchor context)
+// Prompt generator (fusion + exaggeration schema)
 const generatePrompt = async (association, setCurrentPrompt) => {
-  const verb = pickRandom(ACTION_VERBS);
   const adjective = pickRandom(DESCRIPTIVE_ADJECTIVES);
   const artStyle = pickRandom(ART_STYLES);
+  const exaggeration = pickRandom(EXAGGERATIONS);
+  const sensory = pickRandom(SENSORY_DETAILS);
+  const framing = pickRandom(COMPOSITION);
 
-  // Extract the concrete image for AI generation, but keep full text for display
-  const concreteImage = extractConcreteImage(association.memorableItem);
-  const description = `a ${adjective} ${concreteImage}, clearly visible and prominent`;
+  const mem = extractConcreteImage(association.memorableItem);
+  const anchor = association.anchor.toLowerCase();
+  const anchorContext = ANCHOR_CONTEXT[anchor] || `${anchor}`;
 
-  // Get anchor-specific context for better AI generation
-  const anchorContext = ANCHOR_CONTEXT[association.anchor.toLowerCase()] || `a ${association.anchor}`;
+  // Fusion description
+  const fusion = pickRandom(FUSION_PATTERNS)({ mem, anchor: anchorContext });
 
-  // Create enhanced prompt with anchor context
-  const core = `${description} ${verb} ${anchorContext}`;
-  const fullPrompt = `${core}, ${artStyle}, centered composition, clear focus on the ${concreteImage}, medieval fantasy setting.`;
-  const displayPrompt = `${description} ${verb} a ${association.anchor}.`;
+  const displayPrompt = `${adjective} ${mem} + ${association.anchor}: ${fusion}.`;
+  const fullPrompt = `Create a single, high‑contrast image of ${fusion}. Style: ${artStyle}. Composition: ${framing}. Mood: striking and memorable. Details: ${sensory}. Constraint: single focal subject, simple background, no text.`;
 
-  if (setCurrentPrompt) {
-    setCurrentPrompt(displayPrompt);
-  }
+  if (setCurrentPrompt) setCurrentPrompt(displayPrompt);
 
-  return {
-    fullPrompt,
-    displayPrompt
-  };
+  return { fullPrompt, displayPrompt };
 };
 
-// Export essentials
+
 export {
   ACTION_VERBS,
   DESCRIPTIVE_ADJECTIVES,
   ART_STYLES,
   ANCHOR_CONTEXT,
+  FUSION_PATTERNS,
+  EXAGGERATIONS,
+  SENSORY_DETAILS,
+  COMPOSITION,
   generatePrompt
 };
