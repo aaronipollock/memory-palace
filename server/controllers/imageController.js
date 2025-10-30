@@ -73,8 +73,6 @@ const generateOptimizedImage = async (originalPath, optimizedPath) => {
 exports.generateImages = async (req, res) => {
     try {
         const { prompt, association } = req.body;
-        console.log('Received prompt:', prompt);
-        console.log('Using API key:', API_KEY ? `${API_KEY.substring(0, 10)}...` : 'Not found');
 
         // Enhanced parameters for better tapestry, dais, and anchor point generation
         const isTapestryPrompt = prompt.toLowerCase().includes('tapestry');
@@ -82,10 +80,6 @@ exports.generateImages = async (req, res) => {
         const needsEnhancedParams = isTapestryPrompt || isDaisPrompt;
         const cfgScale = needsEnhancedParams ? 8 : 7; // Higher CFG for complex architectural elements
         const steps = needsEnhancedParams ? 35 : 30; // More steps for complex architectural elements
-
-        console.log('Sending request to Stability AI with data:', {
-            text_prompts: [{ text: prompt, weight: 1 }],
-            cfg_scale: cfgScale,
             height: 1024,
             width: 1024,
             steps: steps,
@@ -127,12 +121,6 @@ exports.generateImages = async (req, res) => {
                 mimeType: 'image/png',
                 filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`
             };
-            console.log('Sending response to frontend:', {
-                success: responseData.success,
-                hasImageData: !!responseData.imageData,
-                imageDataLength: responseData.imageData ? responseData.imageData.length : 0,
-                filename: responseData.filename
-            });
             res.json(responseData);
 
         } catch (apiError) {
@@ -141,7 +129,6 @@ exports.generateImages = async (req, res) => {
             // If API key is missing, invalid, or insufficient balance, generate a placeholder image instead of failing
             if (apiError.response?.status === 401 || apiError.response?.status === 403 ||
                 (apiError.response?.data?.name === 'insufficient_balance')) {
-                console.log('API key issue or insufficient balance, generating placeholder image');
 
                 // Generate a simple placeholder image (base64 encoded)
                 const placeholderImage = generatePlaceholderImage(association);

@@ -150,22 +150,10 @@ const csrfProtection = (req, res, next) => {
   const csrfCookie = cookies['csrfToken'];
   const csrfHeader = req.headers['x-csrf-token'];
 
-  console.log('CSRF Debug:', {
-    method: req.method,
-    path: req.path,
-    csrfCookie: csrfCookie,
-    csrfHeader: csrfHeader,
-    cookies: Object.keys(cookies),
-    headers: Object.keys(req.headers).filter(h => h.toLowerCase().includes('csrf'))
-  });
+  // CSRF token validation
 
   // Both must be present and match exactly
   if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
-        console.log('CSRF validation failed:', {
-          hasCookie: !!csrfCookie,
-          hasHeader: !!csrfHeader,
-          cookieMatchesHeader: csrfCookie === csrfHeader
-        });
         return res.status(403).json({
             error: 'CSRF token validation failed',
             code: 'CSRF_ERROR'

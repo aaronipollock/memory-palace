@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Memory Palace API is a RESTful service that enables users to create, manage, and interact with AI-powered memory palaces. The API provides endpoints for authentication, image generation, room creation, and memory palace management.
+The Low·sAI API is a RESTful service that enables users to create, manage, and interact with AI-powered memory palaces. The API provides endpoints for authentication, image generation, room creation, and memory palace management.
 
 **Base URL:** `http://localhost:5001` (Development)
 **API Version:** v1
@@ -605,16 +605,14 @@ PORT=5001
 NODE_ENV=development
 
 # Database
-MONGODB_URI=mongodb://localhost:27017/memory-palace
+MONGODB_URI=<your_mongodb_connection_string>
 
 # JWT Secrets
 JWT_SECRET=your-super-secret-jwt-key
 JWT_REFRESH_SECRET=your-super-secret-refresh-key
 
 # API Keys
-OPENAI_API_KEY=your-openai-api-key
 STABILITY_API_KEY=your-stability-api-key
-REACT_APP_RAPID_API_KEY=your-rapid-api-key
 
 # Security
 FRONTEND_URL=http://localhost:3000

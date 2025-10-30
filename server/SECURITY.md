@@ -103,6 +103,36 @@ IMAGE_GEN_RATE_LIMIT_MAX_REQUESTS=30  # MVP: 30, Production: 10
 ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 ```
 
+## Threat Boundaries
+
+### What We Protect
+- Authentication flows (signup, login, refresh, logout)
+- User profile data and memory palace content
+- Image generation requests and responses
+- API availability and fair usage via rate limiting and slowdown
+
+### What We Assume/Do Not Protect
+- Client devices and browsers (compromised endpoints, malware)
+- Networks between client and server prior to HTTPS termination
+- Third‑party image model internals (Stability/OpenAI behavior beyond API contract)
+- User‑installed browser extensions that can exfiltrate content
+
+### Trust Zones
+- Public internet → Edge/Load balancer (untrusted)
+- Edge/Load balancer → Express app (trusted after TLS)
+- Express app → MongoDB (trusted VPC/connection with auth)
+
+### Key Boundaries and Controls
+- Per‑IP and per‑route rate limits at Express middleware boundary
+- JWT verification and CSRF protection at API boundary
+- Strict input validation and sanitization at controller boundary
+- Helmet/CSP at HTTP response boundary
+
+### Abuse and DoS Considerations
+- General, auth, and image generation rate limits mitigate brute force and abuse
+- Speed limiting (progressive backoff) reduces resource exhaustion
+- Log and monitor rate‑limit violations for IP blocks where necessary
+
 ## Security Best Practices
 
 ### 1. Password Requirements

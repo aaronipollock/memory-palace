@@ -61,8 +61,6 @@ const InputPage = ({ setIsLoading, isLoading }) => {
             return;
         }
 
-        console.log('Memorables list:', memorablesList);
-
         // Create associations with anchor points for the current room
         const associations = currentAnchorPoints.map((anchor, index) => {
             const memorableItem = index < memorablesList.length ? memorablesList[index] : '';
@@ -72,8 +70,6 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                 description: `A memorable representation of ${memorableItem} at the ${anchor}`
             };
         });
-
-        console.log('Created associations:', associations);
 
         // Save the complete palace data to localStorage
         const palaceData = {

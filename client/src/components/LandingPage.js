@@ -109,14 +109,10 @@ const LandingPage = () => {
 
           if (response.ok) {
               const data = await response.json();
-              console.log('Demo login response data:', data);
-              console.log('Access token:', data.accessToken);
-              console.log('CSRF token:', data.csrfToken);
               localStorage.setItem('token', data.accessToken);
               if (data.csrfToken) {
                   localStorage.setItem('csrfToken', data.csrfToken);
               }
-              console.log('Token stored in localStorage:', localStorage.getItem('token'));
               navigate('/input');
           } else {
               const errorData = await response.json();
