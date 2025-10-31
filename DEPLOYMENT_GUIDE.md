@@ -12,7 +12,7 @@
 2. Create a free account
 3. Create a new cluster (free tier)
 4. Create a database user with read/write permissions
-5. Get your connection string (looks like: `mongodb+srv://username:password@cluster.mongodb.net/memory-palace`)
+5. Get your connection string (Format: `mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>`)
 
 ## Step 2: Deploy Backend API (Manual)
 
@@ -32,7 +32,7 @@
 3. **Set Environment Variables**
    ```
    NODE_ENV=production
-   MONGODB_URI=mongodb+srv://your-username:your-password@your-cluster.mongodb.net/memory-palace
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>
    JWT_SECRET=your-super-secret-jwt-key-here
    STABILITY_API_KEY=your-stability-ai-api-key
    PORT=10000
@@ -53,7 +53,7 @@
 
 3. **Set Environment Variables**
    ```
-   REACT_APP_API_URL=https://your-backend-service-name.onrender.com
+   VITE_API_URL=https://your-backend-service-name.onrender.com
    ```
 
 ## Step 4: Update Frontend API URL
@@ -76,7 +76,7 @@ After your backend is deployed, update the frontend environment variable:
 ### Backend Variables
 ```bash
 NODE_ENV=production
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/memory-palace
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>
 JWT_SECRET=your-32-character-secret-key
 STABILITY_API_KEY=your-stability-ai-api-key
 PORT=10000
@@ -84,7 +84,7 @@ PORT=10000
 
 ### Frontend Variables
 ```bash
-REACT_APP_API_URL=https://your-backend-service-name.onrender.com
+   VITE_API_URL=https://your-backend-service-name.onrender.com
 ```
 
 ## Troubleshooting
@@ -102,7 +102,7 @@ REACT_APP_API_URL=https://your-backend-service-name.onrender.com
    - Ensure database user has correct permissions
 
 3. **API Calls Fail**
-   - Verify REACT_APP_API_URL is correct
+   - Verify VITE_API_URL is correct (Note: Vite uses VITE_ prefix instead of REACT_APP_)
    - Check CORS settings
    - Verify environment variables are set
 
