@@ -96,7 +96,8 @@ class Analytics {
     // To enable external analytics, explicit user consent is required
 
     // For now, just log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    // Vite uses import.meta.env.MODE instead of process.env.NODE_ENV
+    if (import.meta.env.MODE === 'development') {
       console.log('📊 Analytics Event (Local Only):', event);
     }
   }

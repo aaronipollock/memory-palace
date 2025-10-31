@@ -80,11 +80,6 @@ exports.generateImages = async (req, res) => {
         const needsEnhancedParams = isTapestryPrompt || isDaisPrompt;
         const cfgScale = needsEnhancedParams ? 8 : 7; // Higher CFG for complex architectural elements
         const steps = needsEnhancedParams ? 35 : 30; // More steps for complex architectural elements
-            height: 1024,
-            width: 1024,
-            steps: steps,
-            samples: 1
-        });
 
         try {
             // Generate image using Stability AI API
