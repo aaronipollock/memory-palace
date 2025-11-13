@@ -10,7 +10,7 @@ const generateCSRFToken = () => {
 // Signup controller
 exports.signup = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, firstName, lastName, username } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -21,10 +21,24 @@ exports.signup = async (req, res) => {
             });
         }
 
+        // Check if username is taken (if provided)
+        if (username) {
+            const existingUsername = await User.findOne({ username: username.toLowerCase() });
+            if (existingUsername) {
+                return res.status(400).json({
+                    error: 'Username already taken',
+                    code: 'USERNAME_EXISTS'
+                });
+            }
+        }
+
         // Create new user
         const user = new User({
             email,
-            password
+            password,
+            firstName: firstName || undefined,
+            lastName: lastName || undefined,
+            username: username ? username.toLowerCase() : undefined
         });
 
         await user.save();

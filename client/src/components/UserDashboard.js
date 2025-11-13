@@ -225,10 +225,6 @@ const UserDashboard = () => {
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#DAA520]/60 via-[#FFD700]/40 to-white">
             <NavBar onLogout={handleLogout} />
-               {/* NEW: Profile Header */}
-            <div className="profile-header">
-              {/* User info, stats, quick actions */}
-            </div>
             <div className="container mx-auto px-4 py-8">
                 {/* Profile Header Section */}
                 <div className="bg-white/90 rounded-lg shadow-lg p-6 mb-8">
@@ -389,68 +385,6 @@ const UserDashboard = () => {
                     </div>
                 )}
             </div>
-            {/* Profile Settings Modal */}
-            {showProfileSettings && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-semibold">Profile Settings</h3>
-                            <button
-                                onClick={() => setShowProfileSettings(false)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                ×
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    First Name
-                                </label>
-                                <input
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter first name"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Last Name
-                                </label>
-                                <input
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter last name"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Username
-                                </label>
-                                <input
-                                    type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter username"
-                                />
-                            </div>
-                            <div className="flex justify-end space-x-4">
-                                <button
-                                    onClick={() => setShowProfileSettings(false)}
-                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                                >
-                                    Save Changes
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Profile Settings Modal */}
             <ProfileSettingsModal
                 isOpen={showProfileSettings}
