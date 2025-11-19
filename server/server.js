@@ -74,6 +74,10 @@ app.get('/api/health', (req, res) => {
 const memoryPalaceRoutes = require('./routes/memoryPalaceRoutes');
 app.use('/api/memory-palaces', ...routeSecurity.memoryPalaceRoutes, memoryPalaceRoutes);
 
+// Custom room routes (no CSRF protection needed for core functionality)
+const customRoomRoutes = require('./routes/customRoomRoutes');
+app.use('/api/custom-rooms', ...routeSecurity.customRoomRoutes, customRoomRoutes);
+
 // Apply CSRF protection to all other API routes (after auth, feedback, image, and memory palace routes)
 app.use('/api', csrfProtection);
 

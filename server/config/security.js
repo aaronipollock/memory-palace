@@ -146,7 +146,10 @@ const routeSecurity = {
   imageGenRoutes: [securityConfig.imageGenLimiter],
 
   // Memory palace routes with general security
-  memoryPalaceRoutes: [securityConfig.generalLimiter]
+  memoryPalaceRoutes: [securityConfig.generalLimiter],
+
+  // Custom room routes with general security
+  customRoomRoutes: [securityConfig.generalLimiter]
 };
 
 module.exports = {
