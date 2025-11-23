@@ -19,6 +19,26 @@ const NavBar = ({ onLoginClick }) => {
 
         // Check immediately
         checkLoginStatus();
+
+        // Listen for storage changes (when user logs in/out)
+        const handleStorageChange = () => {
+            checkLoginStatus();
+        };
+
+        // Listen for custom login event
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('login', handleStorageChange);
+        window.addEventListener('logout', handleStorageChange);
+
+        // Also check periodically (in case token is set from another tab)
+        const interval = setInterval(checkLoginStatus, 1000);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('login', handleStorageChange);
+            window.removeEventListener('logout', handleStorageChange);
+            clearInterval(interval);
+        };
     }, []);
 
     const handleLogout = async () => {
@@ -80,25 +100,33 @@ const NavBar = ({ onLoginClick }) => {
                     </div>
 
                     {/* Navigation Links */}
-                    {/* <div className="hidden md:flex items-center space-x-8">
-                        {isLoggedIn && location.pathname !== '/saved-rooms' && location.pathname !== '/input' && (
+                    <div className="flex items-center space-x-2 md:space-x-4">
+                        {isLoggedIn && (
                             <>
                                 <button
                                     onClick={() => navigate('/input')}
-                                    className="loci-nav-link"
+                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Create Palace
                                 </button>
                                 <button
+                                    onClick={() => navigate('/custom-rooms/upload')}
+                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    style={{ whiteSpace: 'nowrap' }}
+                                >
+                                    Create Custom Room
+                                </button>
+                                <button
                                     onClick={() => navigate('/saved-rooms')}
-                                    className="loci-nav-link"
+                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Saved Rooms
                                 </button>
                             </>
                         )}
-
-                    </div> */}
+                    </div>
 
 
                     {/* Auth Buttons or Logout Link */}

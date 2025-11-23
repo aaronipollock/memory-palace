@@ -13,11 +13,32 @@ const NavBar = ({ onLoginClick }) => {
         const checkLoginStatus = () => {
             const token = localStorage.getItem('token');
             const loggedIn = !!token;
+            console.log('NavBar: Checking login status', { token: token ? 'exists' : 'null', loggedIn });
             setIsLoggedIn(loggedIn);
         };
 
         // Check immediately
         checkLoginStatus();
+
+        // Listen for storage changes (when user logs in/out)
+        const handleStorageChange = () => {
+            checkLoginStatus();
+        };
+
+        // Listen for custom login event
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('login', handleStorageChange);
+        window.addEventListener('logout', handleStorageChange);
+
+        // Also check periodically (in case token is set from another tab)
+        const interval = setInterval(checkLoginStatus, 1000);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('login', handleStorageChange);
+            window.removeEventListener('logout', handleStorageChange);
+            clearInterval(interval);
+        };
     }, []);
 
     const handleLogout = async () => {
@@ -76,24 +97,38 @@ const NavBar = ({ onLoginClick }) => {
                     </div>
 
                     {/* Navigation Links */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        {isLoggedIn && (
+                    <div className="flex items-center space-x-2 md:space-x-4" style={{ minWidth: '300px', backgroundColor: 'rgba(255,0,0,0.1)' }}>
+                        {/* Debug: Show login status */}
+                        <span style={{ fontSize: '10px', color: 'red', marginRight: '10px' }}>
+                            {isLoggedIn ? 'LOGGED IN' : 'NOT LOGGED IN'}
+                        </span>
+                        {isLoggedIn ? (
                             <>
                                 <button
                                     onClick={() => navigate('/input')}
-                                    className="loci-nav-link"
+                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    style={{ whiteSpace: 'nowrap', backgroundColor: 'rgba(0,255,0,0.2)' }}
                                 >
                                     Create Palace
                                 </button>
                                 <button
+                                    onClick={() => navigate('/custom-rooms/upload')}
+                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    style={{ whiteSpace: 'nowrap', backgroundColor: 'rgba(0,255,0,0.2)' }}
+                                >
+                                    Create Custom Room
+                                </button>
+                                <button
                                     onClick={() => navigate('/saved-rooms')}
-                                    className="loci-nav-link"
+                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    style={{ whiteSpace: 'nowrap', backgroundColor: 'rgba(0,255,0,0.2)' }}
                                 >
                                     Saved Rooms
                                 </button>
                             </>
+                        ) : (
+                            <span style={{ color: 'red' }}>No links - not logged in</span>
                         )}
-
                     </div>
 
 
