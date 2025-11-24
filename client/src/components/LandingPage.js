@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
@@ -17,6 +17,8 @@ const LandingPage = () => {
   const [error, setError] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [visibleFeatures, setVisibleFeatures] = useState([false, false, false]);
+  const featureRefs = [useRef(null), useRef(null), useRef(null)];
 
   // Check authentication status on component mount and listen for changes
   useEffect(() => {
@@ -64,6 +66,44 @@ const LandingPage = () => {
       window.removeEventListener('logout', handleLogout);
     };
   }, []);
+
+  // Intersection Observer for scroll-triggered animations
+  useEffect(() => {
+    if (isLoggedIn) return; // Only animate for non-logged-in users
+
+    const observers = featureRefs.map((ref, index) => {
+      if (!ref.current) return null;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleFeatures((prev) => {
+                const newState = [...prev];
+                newState[index] = true;
+                return newState;
+              });
+              // Unobserve after animation triggers
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold: 0.15,
+          rootMargin: '0px 0px -50px 0px'
+        }
+      );
+
+      observer.observe(ref.current);
+      return observer;
+    });
+
+    return () => {
+      observers.forEach((observer) => {
+        if (observer) observer.disconnect();
+      });
+    };
+  }, [isLoggedIn]);
 
   const features = [
     {
@@ -189,7 +229,7 @@ const LandingPage = () => {
         {/* Hero Section */}
         {isLoggedIn ? (
           /* Personalized Welcome for Logged-in Users */
-          <section className="py-20 px-4 mt-24">
+          <section className="py-20 px-4 mt-[224px]">
             <div className="container mx-auto max-w-6xl">
               <div className="flex flex-col md:flex-row items-center justify-between gap-12">
                 <div className="flex-1 text-center md:text-left">
@@ -205,13 +245,13 @@ const LandingPage = () => {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={() => navigate('/saved-rooms')}
-                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px]"
                     >
                       View My Palaces
                     </button>
                     <button
                       onClick={() => navigate('/input')}
-                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px]"
                     >
                       Create New Palace
                     </button>
@@ -222,7 +262,7 @@ const LandingPage = () => {
           </section>
         ) : (
           /* Original Marketing Content for Non-logged-in Users */
-          <section className="py-20 px-4 mt-24">
+          <section className="py-20 px-4 mt-[224px]">
             <div className="container mx-auto max-w-6xl">
               <div className="flex flex-col md:flex-row items-center justify-between gap-12">
                 <div className="flex-1 text-center md:text-left">
@@ -238,13 +278,13 @@ const LandingPage = () => {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={handleDemoLogin}
-                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
                     >
                       Try Demo
                     </button>
                     <button
                       onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200"
+                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
                     >
                       Get Started
                     </button>
@@ -262,46 +302,64 @@ const LandingPage = () => {
           </h2>
           <div className="flex flex-col gap-20 w-full pl-4 pr-4 md:pl-8 md:pr-8 max-w-5xl mx-auto">
             {/* Memorable - Bigger */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
-                <img
-                  src="/images/memorable.png"
-                  alt="Memorable"
-                  className="absolute inset-0 w-full h-full object-cover z-0 scale-105"
-                />
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
-                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
-                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
+            <div
+              ref={featureRefs[0]}
+              className={`w-full feature-card-container ${visibleFeatures[0] ? 'feature-visible' : 'feature-hidden'}`}
+              style={{ transitionDelay: '0ms' }}
+            >
+              <div className="p-2 group">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden hover:scale-[1.02]">
+                  <img
+                    src="/images/memorable.png"
+                    alt="Memorable"
+                    className="absolute inset-0 w-full h-full object-cover z-0 scale-105 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Throne Room */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
-                <img
-                  src="/images/throne_clicks.png"
-                  alt="Throne Room"
-                  className="absolute inset-0 w-full h-full object-cover z-0"
-                />
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
-                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Interactive Memory Palaces</h3>
-                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
+            <div
+              ref={featureRefs[1]}
+              className={`w-full feature-card-container ${visibleFeatures[1] ? 'feature-visible' : 'feature-hidden'}`}
+              style={{ transitionDelay: '150ms' }}
+            >
+              <div className="p-2 group">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden hover:scale-[1.02]">
+                  <img
+                    src="/images/throne_clicks.png"
+                    alt="Throne Room"
+                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Interactive Memory Palaces</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Saved Rooms */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
-                <img
-                  src="/images/saved_rooms.png"
-                  alt="Saved Rooms"
-                  className="absolute inset-0 w-full h-full object-cover z-0"
-                />
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
-                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Personalized Learning</h3>
-                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save, organize, and review your memory palaces at your own pace.</p>
+            <div
+              ref={featureRefs[2]}
+              className={`w-full feature-card-container ${visibleFeatures[2] ? 'feature-visible' : 'feature-hidden'}`}
+              style={{ transitionDelay: '300ms' }}
+            >
+              <div className="p-2 group">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden hover:scale-[1.02]">
+                  <img
+                    src="/images/saved_rooms.png"
+                    alt="Saved Rooms"
+                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Personalized Learning</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save, organize, and review your memory palaces at your own pace.</p>
+                  </div>
                 </div>
               </div>
             </div>

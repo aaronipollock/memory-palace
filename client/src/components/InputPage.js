@@ -239,7 +239,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                                 onClick={handleProceedToVisualizer}
                                 disabled={isLoading}
                                 className="flex-1 px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
-                                         hover:bg-[#B8860B] hover:text-white transition-colors duration-300
+                                         hover:bg-[#7C3AED] hover:text-white transition-colors duration-300
                                          disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                                 aria-describedby="proceed-help"
                             >
@@ -260,7 +260,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                                 onClick={handleClear}
                                 disabled={isLoading}
                                 className="px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
-                                         hover:bg-[#B8860B] hover:text-white transition-colors duration-300
+                                         hover:bg-[#7C3AED] hover:text-white transition-colors duration-300
                                          disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                                 aria-describedby="clear-help"
                             >
