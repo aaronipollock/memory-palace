@@ -314,6 +314,7 @@ const LandingPage = () => {
                     alt="Memorable"
                     className="absolute inset-0 w-full h-full object-cover z-0 scale-105 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
                     <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
                     <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
@@ -335,6 +336,7 @@ const LandingPage = () => {
                     alt="Throne Room"
                     className="absolute inset-0 w-full h-full object-cover z-0 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
                     <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Interactive Memory Palaces</h3>
                     <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
@@ -356,6 +358,7 @@ const LandingPage = () => {
                     alt="Saved Rooms"
                     className="absolute inset-0 w-full h-full object-cover z-0 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
                     <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Personalized Learning</h3>
                     <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save, organize, and review your memory palaces at your own pace.</p>
