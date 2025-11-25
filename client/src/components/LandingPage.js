@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
 import LoadingSpinner from './LoadingSpinner';
+import UserGuide from './UserGuide';
+import About from './About';
 import { SecureAPIClient, CSRFManager, TokenManager } from '../utils/security';
 import './LandingPage.css';
 import { getApiUrl } from '../config/api';
@@ -19,6 +21,8 @@ const LandingPage = () => {
   const [userEmail, setUserEmail] = useState('');
   const [visibleFeatures, setVisibleFeatures] = useState([false, false, false]);
   const featureRefs = [useRef(null), useRef(null), useRef(null)];
+  const [showUserGuide, setShowUserGuide] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   // Check authentication status on component mount and listen for changes
   useEffect(() => {
@@ -245,13 +249,13 @@ const LandingPage = () => {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={() => navigate('/saved-rooms')}
-                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px]"
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px]"
                     >
                       View My Palaces
                     </button>
                     <button
                       onClick={() => navigate('/input')}
-                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px]"
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px]"
                     >
                       Create New Palace
                     </button>
@@ -278,13 +282,13 @@ const LandingPage = () => {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={handleDemoLogin}
-                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
                     >
                       Try Demo
                     </button>
                     <button
                       onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
                     >
                       Get Started
                     </button>
@@ -390,9 +394,12 @@ const LandingPage = () => {
         {(!isLoggedIn || userEmail === 'demo@example.com') && (
         <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="loci-header text-4xl mb-6 !text-white">
+                Start Building Your Memory Palace Today
+              </h2>
             <button
               onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-              className="btn-loci text-lg px-8 py-4 rounded-lg bg-secondary hover:scale-105 transition-transform duration-200"
+              className="btn-loci text-lg px-8 py-4 rounded-lg hover:scale-105 transition-transform duration-200 mb-12"
             >
               Create Free Account
             </button>
@@ -401,14 +408,11 @@ const LandingPage = () => {
         )}
         {/* Upcoming Features moved to footer */}
         {/* Footer */}
-        <footer className="py-16 px-4 bg-primary text-white">
+        <footer className="px-4 bg-primary text-white">
           <div className="container mx-auto max-w-6xl">
             {/* Main Footer Content */}
             <div className="flex flex-col items-center mb-12">
               {/* Brand Section */}
-              <h2 className="loci-header text-4xl mb-6 !text-white">
-                Start Building Your Memory Palace Today
-              </h2>
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <h3 className="text-3xl font-bold loci-header">low·sAI</h3>
@@ -420,18 +424,18 @@ const LandingPage = () => {
 
               {/* Upcoming Features Section - Only show for non-logged-in users */}
               {!isLoggedIn && (
-              <div className="w-full mb-8">
+              <div className="w-full">
                 <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
                 <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
-                  <div className="bg-secondary rounded-lg p-4 text-center">
+                  <div className="rounded-lg p-4 text-center">
                     <div className="font-medium mb-2 text-white">Smarter Images</div>
                     <div className="text-sm text-gray-200">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
                   </div>
-                  <div className="bg-secondary rounded-lg p-4 text-center">
+                  <div className="rounded-lg p-4 text-center">
                     <div className="font-medium mb-2 text-white">Create Your Own Rooms</div>
                     <div className="text-sm text-gray-200">Design layouts that match your real spaces for a more personal memory journey.</div>
                   </div>
-                  <div className="bg-secondary rounded-lg p-4 text-center">
+                  <div className="rounded-lg p-4 text-center">
                     <div className="font-medium mb-2 text-white">Upload Photos of Real Rooms</div>
                     <div className="text-sm text-gray-200">Anchor memories to your own room photos for maximum familiarity.</div>
                   </div>
@@ -440,16 +444,22 @@ const LandingPage = () => {
               )}
 
               {/* Navigation Links */}
-              <div className="flex flex-wrap justify-center gap-8">
-                <a href="/#/user-guide" className="text-gray-300 hover:text-white transition-colors duration-300">
+              <div className="flex flex-wrap justify-center gap-8 mt-16">
+                <button
+                  onClick={() => setShowUserGuide(true)}
+                  className="text-gray-300 hover:text-white transition-colors duration-300"
+                >
                   User Guide
-                </a>
+                </button>
                 <a href="mailto:support@low-sai.com" className="text-gray-300 hover:text-white transition-colors duration-300">
                   Support
                 </a>
-                <a href="/#/about" className="text-gray-300 hover:text-white transition-colors duration-300">
+                <button
+                  onClick={() => setShowAbout(true)}
+                  className="text-gray-300 hover:text-white transition-colors duration-300"
+                >
                   About
-                </a>
+                </button>
                 <a href="mailto:contact@low-sai.com" className="text-gray-300 hover:text-white transition-colors duration-300">
                   Contact
                 </a>
@@ -483,6 +493,14 @@ const LandingPage = () => {
           isLoading={isLoading}
           formData={formData}
           setFormData={setFormData}
+        />
+        <UserGuide
+          isOpen={showUserGuide}
+          onClose={() => setShowUserGuide(false)}
+        />
+        <About
+          isOpen={showAbout}
+          onClose={() => setShowAbout(false)}
         />
       </div>
     </>

@@ -223,7 +223,7 @@ const UserDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#DAA520]/60 via-[#FFD700]/40 to-white">
+        <div className="min-h-screen bg-gradient-to-b from-[#7C3AED]/60 via-[#8B5CF6]/40 to-white">
             <NavBar onLogout={handleLogout} />
             <div className="container mx-auto px-4 py-8">
                 {/* Profile Header Section */}
