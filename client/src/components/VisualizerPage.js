@@ -469,8 +469,8 @@ const VisualizerPage = () => {
               >
                 <div className={`w-full h-full flex items-center justify-center text-white text-lg font-bold transition-all duration-200 ${
                   hasAcceptedImage
-                    ? 'bg-primary bg-opacity-90'
-                    : 'bg-secondary bg-opacity-75'
+                    ? 'bg-secondary bg-opacity-90'
+                    : 'bg-primary bg-opacity-90'
                 }`}>
                   {isLoading && selectedAssociation?.anchor === assoc.anchor ? (
                     <LoadingSpinner size="sm" text="" />
@@ -494,11 +494,7 @@ const VisualizerPage = () => {
           <div className="absolute bottom-6 right-6 z-20">
             <button
               onClick={() => setIsSaveModalOpen(true)}
-              className={`group relative px-6 py-3 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 ${
-                allImagesAccepted
-                  ? 'bg-primary hover:bg-primary-dark text-white'
-                  : 'bg-secondary hover:bg-secondary-dark text-white'
-              }`}
+              className="group relative px-6 py-3 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 bg-primary hover:bg-primary-dark text-white"
               aria-describedby="save-room-help"
             >
               <div className="flex items-center space-x-2">

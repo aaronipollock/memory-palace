@@ -63,23 +63,63 @@ const userValidation = {
   updateProfile: [
     body('firstName')
       .optional()
-      .trim()
-      .isLength({ min: 1, max: 50 })
-      .withMessage('First name must be between 1 and 50 characters'),
+      .custom((value) => {
+        // If value is undefined, skip validation (field not sent)
+        if (value === undefined) {
+          return true;
+        }
+        // Allow null/empty to clear firstName
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          return true;
+        }
+        // If provided, validate it
+        const trimmed = typeof value === 'string' ? value.trim() : String(value).trim();
+        if (trimmed.length < 1 || trimmed.length > 50) {
+          throw new Error('First name must be between 1 and 50 characters');
+        }
+        return true;
+      }),
 
     body('lastName')
       .optional()
-      .trim()
-      .isLength({ min: 1, max: 50 })
-      .withMessage('Last name must be between 1 and 50 characters'),
+      .custom((value) => {
+        // If value is undefined, skip validation (field not sent)
+        if (value === undefined) {
+          return true;
+        }
+        // Allow null/empty to clear lastName
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          return true;
+        }
+        // If provided, validate it
+        const trimmed = typeof value === 'string' ? value.trim() : String(value).trim();
+        if (trimmed.length < 1 || trimmed.length > 50) {
+          throw new Error('Last name must be between 1 and 50 characters');
+        }
+        return true;
+      }),
 
     body('username')
       .optional()
-      .trim()
-      .isLength({ min: 3, max: 30 })
-      .withMessage('Username must be between 3 and 30 characters')
-      .matches(/^[a-zA-Z0-9_]+$/)
-      .withMessage('Username can only contain letters, numbers, and underscores'),
+      .custom((value) => {
+        // If value is undefined, skip validation (field not sent)
+        if (value === undefined) {
+          return true;
+        }
+        // Allow null/empty to clear username
+        if (value === null || value === '' || (typeof value === 'string' && value.trim() === '')) {
+          return true;
+        }
+        // If provided, validate it
+        const trimmed = typeof value === 'string' ? value.trim() : String(value).trim();
+        if (trimmed.length < 3 || trimmed.length > 30) {
+          throw new Error('Username must be between 3 and 30 characters');
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
+          throw new Error('Username can only contain letters, numbers, and underscores');
+        }
+        return true;
+      }),
 
     body('preferences.room')
       .optional()

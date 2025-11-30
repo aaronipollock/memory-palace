@@ -18,17 +18,31 @@ const ProfileSettingsModal = ({ isOpen, onClose, user, onProfileUpdate }) => {
     const [loading, setLoading] = useState(false);
     const { showSuccess, showError } = useToast();
 
+    // Preload user data when user prop is available or modal opens
     useEffect(() => {
-        if (user && isOpen) {
-            setFormData({
-                firstName: user.firstName || '',
-                lastName: user.lastName || '',
-                username: user.username || '',
-                preferences: {
-                    room: user.preferences?.room || 'throne room',
-                    artStyle: user.preferences?.artStyle || 'Random'
-                }
-            });
+        if (isOpen) {
+            if (user) {
+                setFormData({
+                    firstName: user.firstName || '',
+                    lastName: user.lastName || '',
+                    username: user.username || '',
+                    preferences: {
+                        room: user.preferences?.room || 'throne room',
+                        artStyle: user.preferences?.artStyle || 'Random'
+                    }
+                });
+            } else {
+                // Reset form if user data is not available
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    username: '',
+                    preferences: {
+                        room: 'throne room',
+                        artStyle: 'Random'
+                    }
+                });
+            }
         }
     }, [user, isOpen]);
 
@@ -37,7 +51,25 @@ const ProfileSettingsModal = ({ isOpen, onClose, user, onProfileUpdate }) => {
         setLoading(true);
 
         try {
-            const response = await apiClient.put('/api/user/profile', formData);
+            // Only send fields that have values (filter out empty strings)
+            const payload = {
+                preferences: formData.preferences
+            };
+
+            if (formData.firstName && formData.firstName.trim()) {
+                payload.firstName = formData.firstName.trim();
+            }
+
+            if (formData.lastName && formData.lastName.trim()) {
+                payload.lastName = formData.lastName.trim();
+            }
+
+            // Username can be set or cleared (empty string clears it)
+            if (formData.username !== undefined) {
+                payload.username = formData.username.trim() || null;
+            }
+
+            const response = await apiClient.put('/api/user/profile', payload);
 
             if (response.ok) {
                 const updatedUser = await response.json();
@@ -78,8 +110,15 @@ const ProfileSettingsModal = ({ isOpen, onClose, user, onProfileUpdate }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-                <h2 className="text-2xl font-bold mb-4">Profile Settings</h2>
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 relative">
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl leading-none w-8 h-8 flex items-center justify-center"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+                <h2 className="text-2xl font-bold mb-4 pr-8">Profile Settings</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -161,14 +200,14 @@ const ProfileSettingsModal = ({ isOpen, onClose, user, onProfileUpdate }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                            className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50"
+                            className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : 'Save Changes'}
                         </button>

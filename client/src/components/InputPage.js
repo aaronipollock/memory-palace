@@ -224,9 +224,9 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                             <button
                                 type="button"
                                 onClick={() => navigate('/saved-rooms')}
-                                className="px-6 py-3 bg-gray-500 text-white border-2 border-gray-500 rounded-lg
-                                         hover:bg-gray-600 hover:text-white transition-colors duration-300
-                                         focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+                                className="px-6 py-3 bg-primary text-white border-2 border-primary rounded-lg
+                                         hover:bg-primary-dark hover:text-white transition-colors duration-300
+                                         focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 aria-describedby="dashboard-help"
                             >
                                 Back to Dashboard

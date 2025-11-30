@@ -41,12 +41,10 @@ class TokenManager {
 class CSRFManager {
   static getCSRFToken() {
     const token = localStorage.getItem('csrfToken');
-    console.log('CSRFManager.getCSRFToken() called, returning:', token);
     return token;
   }
 
   static setCSRFToken(token) {
-    console.log('CSRFManager.setCSRFToken() called with:', token);
     localStorage.setItem('csrfToken', token);
   }
 
@@ -90,12 +88,8 @@ class SecureAPIClient {
 
     // Add CSRF token
     const csrfToken = CSRFProtection.getCSRFToken();
-    console.log('CSRF Token from storage:', csrfToken);
     if (csrfToken) {
       headers['X-CSRF-Token'] = csrfToken;
-      console.log('Added CSRF token to headers:', csrfToken);
-    } else {
-      console.log('No CSRF token found in storage');
     }
 
     // Add authorization token

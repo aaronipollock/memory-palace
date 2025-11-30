@@ -179,7 +179,7 @@ const About = ({ isOpen, onClose }) => {
               </p>
               <a
                 href="/#/"
-                className="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+                className="inline-block bg-primary text-white font-semibold px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors duration-300 shadow-lg hover:shadow-xl"
                 style={{ color: 'white' }}
               >
                 Try Demo Now

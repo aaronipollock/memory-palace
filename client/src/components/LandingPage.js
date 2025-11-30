@@ -13,7 +13,14 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const [authMode, setAuthMode] = React.useState('signup'); // or 'login'
-  const [formData, setFormData] = React.useState({ email: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = React.useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    username: ''
+  });
   const [authError, setAuthError] = React.useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
