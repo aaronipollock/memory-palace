@@ -311,12 +311,12 @@ const LandingPage = () => {
               className={`w-full feature-card-container ${visibleFeatures[0] ? 'feature-visible' : 'feature-hidden'}`}
               style={{ transitionDelay: '0ms' }}
             >
-              <div className="p-2 group">
-                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden hover:scale-[1.02]">
+              <div className="p-2">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
                   <img
                     src="/images/memorable.png"
                     alt="Memorable"
-                    className="absolute inset-0 w-full h-full object-cover z-0 scale-105 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
+                    className="absolute inset-0 w-full h-full object-cover z-0 scale-105 feature-image"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
@@ -333,12 +333,12 @@ const LandingPage = () => {
               className={`w-full feature-card-container ${visibleFeatures[1] ? 'feature-visible' : 'feature-hidden'}`}
               style={{ transitionDelay: '150ms' }}
             >
-              <div className="p-2 group">
-                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden hover:scale-[1.02]">
+              <div className="p-2">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
                   <img
                     src="/images/throne_clicks.png"
                     alt="Throne Room"
-                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
+                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
@@ -355,12 +355,12 @@ const LandingPage = () => {
               className={`w-full feature-card-container ${visibleFeatures[2] ? 'feature-visible' : 'feature-hidden'}`}
               style={{ transitionDelay: '300ms' }}
             >
-              <div className="p-2 group">
-                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden hover:scale-[1.02]">
+              <div className="p-2">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
                   <img
                     src="/images/saved_rooms.png"
                     alt="Saved Rooms"
-                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image group-hover:scale-110 transition-transform duration-500 ease-out"
+                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
@@ -382,7 +382,10 @@ const LandingPage = () => {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {useCases.map((useCase, index) => (
-                <div key={index} className="loci-container p-6 feature-card group bg-primary text-center text-white">
+                <div
+                  key={index}
+                  className="loci-container p-6 feature-card group bg-primary text-center text-white hover:scale-105 transition-transform duration-300 cursor-pointer"
+                >
                   <h3 className="loci-header text-xl mb-3 text-center !text-white">{useCase.title}</h3>
                   <p className="text-text-light">{useCase.description}</p>
                 </div>
