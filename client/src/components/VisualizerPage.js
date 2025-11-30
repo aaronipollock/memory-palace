@@ -78,6 +78,7 @@ const VisualizerPage = () => {
   }, []);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const { showSuccess, showError, showInfo } = useToast();
 
   // Get the current palace data from localStorage
@@ -118,6 +119,19 @@ const VisualizerPage = () => {
       prevImageMetadataRef.current = imageMetadata;
     }
   }, [imageMetadata]);
+
+  // Show welcome modal for new palaces (no accepted images yet)
+  useEffect(() => {
+    const hasAcceptedImages = Object.keys(acceptedImages).length > 0 ||
+                               (palaceAcceptedImages && Object.keys(palaceAcceptedImages).length > 0);
+    const welcomeShown = sessionStorage.getItem('welcomeModalShown');
+
+    // Show welcome modal if no images accepted and haven't shown it this session
+    if (!hasAcceptedImages && !welcomeShown && associations.length > 0) {
+      setShowWelcomeModal(true);
+      sessionStorage.setItem('welcomeModalShown', 'true');
+    }
+  }, [acceptedImages, palaceAcceptedImages, associations]);
 
   // Get the appropriate room image
   const roomImage = ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
@@ -424,6 +438,54 @@ const VisualizerPage = () => {
                   <strong>Save Your Palace:</strong> Click "Save Progress" at any time to save your work, or "Save Room" when all images are accepted.
                 </li>
               </ol>
+            </div>
+          </div>
+        )}
+        {/* Welcome Modal for New Palaces */}
+        {showWelcomeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title">
+            <div className="bg-white rounded-lg p-8 shadow-lg max-w-2xl w-full relative">
+              <button
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                onClick={() => setShowWelcomeModal(false)}
+                aria-label="Close welcome"
+              >
+                &times;
+              </button>
+              <h2 className="text-3xl font-bold mb-4 text-primary" id="welcome-modal-title">Welcome to Your Memory Palace! 🏰</h2>
+              <p className="text-gray-700 mb-6 text-lg">
+                Your memory palace has been created! Here's what to do next:
+              </p>
+              <ol className="list-decimal pl-6 space-y-4 mb-6 text-gray-700">
+                <li>
+                  <strong>Click on Anchor Points:</strong> Look for the highlighted areas (marked with "?") in the room. Click on any of these anchor points to generate an image for that location.
+                </li>
+                <li>
+                  <strong>Review the Generated Image:</strong> A popup will show you an AI-generated image representing your memorable item at that location.
+                </li>
+                <li>
+                  <strong>Accept or Reject:</strong> If you like the image, click "Accept" to save it. If not, click "Reject" to generate a new one.
+                </li>
+                <li>
+                  <strong>Complete All Points:</strong> Continue clicking on anchor points and accepting images until all points have been completed (you'll see a checkmark ✓ on accepted points).
+                </li>
+                <li>
+                  <strong>Save Your Palace:</strong> Once you're happy with your images, click "Save Room" in the bottom-right corner to save your memory palace for later review.
+                </li>
+              </ol>
+              <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                <p className="text-gray-700 text-sm">
+                  <strong>💡 Tip:</strong> The spatial layout of the room helps your brain remember. Take time to notice where each image is placed!
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowWelcomeModal(false)}
+                  className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+                >
+                  Got it!
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -171,7 +171,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
 
                     {/* Tip Box */}
                     <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-2 rounded" role="alert" aria-live="polite">
-                        <strong>Tip:</strong> For best results, use concrete, visual words (like "apple," "car," or "envelope").<br />
+                        <strong>Tip for Memorables:</strong> When entering your memorables below, use concrete, visual words (like "apple," "car," or "envelope") for best results.<br />
                         For abstract ideas or proper nouns, use a concrete image followed by the original term in parentheses.<br />
                         Examples: "hourglass (time)", "two-dollar bill (Thomas Jefferson)", "eagle (freedom)", "scales (justice)"
                     </div>

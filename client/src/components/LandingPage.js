@@ -30,6 +30,8 @@ const LandingPage = () => {
   const featureRefs = [useRef(null), useRef(null), useRef(null)];
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showDemoIntro, setShowDemoIntro] = useState(false);
+  const [isInfoExpanded, setIsInfoExpanded] = useState(false);
 
   // Check authentication status on component mount and listen for changes
   useEffect(() => {
@@ -190,6 +192,10 @@ const LandingPage = () => {
     setIsLoading(false);
   };
 
+  const handleDemoClick = () => {
+    setShowDemoIntro(true);
+  };
+
   const handleDemoLogin = async () => {
       setIsLoading(true);
       setError('');
@@ -286,9 +292,74 @@ const LandingPage = () => {
                   <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                     Transform how you remember using the ancient method of <em>loci</em> (Latin for "places," pronounced <strong>low·sai</strong>)
                   </p>
+
+                  {/* What is a Memory Palace? Accordion */}
+                  <div className="mb-8 max-w-3xl mx-auto">
+                    <button
+                      onClick={() => setIsInfoExpanded(!isInfoExpanded)}
+                      className="w-full bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-4 transition-all duration-300 flex items-center justify-between group relative"
+                      aria-expanded={isInfoExpanded}
+                      aria-controls="memory-palace-info"
+                    >
+                      <h3 className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] flex-1 text-center">
+                        What is a Memory Palace?
+                      </h3>
+                      <svg
+                        className={`w-6 h-6 text-white transition-transform duration-300 absolute right-4 ${isInfoExpanded ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isInfoExpanded && (
+                      <div
+                        id="memory-palace-info"
+                        className="mt-2 bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white animate-fade-in"
+                      >
+                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          A <strong>memory palace</strong> (also called the <em>method of loci</em>, pronounced <strong>low·sai</strong>) is an ancient memory technique that uses spatial memory to help you remember information.
+                        </p>
+                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          Here's how it works:
+                        </p>
+                        <ol className="list-decimal list-inside mb-4 space-y-2 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          <li>You choose a familiar room (like a throne room or bedchamber)</li>
+                          <li>You place items you want to remember at specific locations (anchor points) in that room</li>
+                          <li>AI generates vivid images for each item at each location</li>
+                          <li>To recall the information, you mentally "walk through" the room and see the images</li>
+                        </ol>
+                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          This technique is incredibly powerful because our brains are excellent at remembering spatial relationships and visual images.
+                        </p>
+                        <div className="flex flex-wrap gap-4 justify-center mt-6">
+                          <button
+                            onClick={() => {
+                              setIsInfoExpanded(false);
+                              setShowUserGuide(true);
+                            }}
+                            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-semibold"
+                          >
+                            📖 Read User Guide
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsInfoExpanded(false);
+                              setShowAbout(true);
+                            }}
+                            className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-semibold"
+                          >
+                            ℹ️ Learn More
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
-                      onClick={handleDemoLogin}
+                      onClick={handleDemoClick}
                       className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
                     >
                       Try Demo
@@ -512,6 +583,74 @@ const LandingPage = () => {
           isOpen={showAbout}
           onClose={() => setShowAbout(false)}
         />
+        {/* Demo Intro Modal */}
+        {showDemoIntro && (
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowDemoIntro(false);
+              }
+            }}
+          >
+            <div
+              className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-3xl font-bold text-gray-800">What is a Memory Palace?</h2>
+                <button
+                  onClick={() => setShowDemoIntro(false)}
+                  className="text-gray-500 hover:text-gray-700 text-3xl leading-none w-8 h-8 flex items-center justify-center"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="overflow-y-auto flex-1 p-6">
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-gray-700 mb-4 text-lg">
+                    A <strong>memory palace</strong> (also called the <em>method of loci</em>, pronounced <strong>low·sai</strong>) is an ancient memory technique that uses spatial memory to help you remember information.
+                  </p>
+                  <p className="text-gray-700 mb-4 text-lg">
+                    Here's how it works:
+                  </p>
+                  <ol className="list-decimal list-inside text-gray-700 space-y-3 mb-6 text-lg">
+                    <li>You choose a familiar room (like a throne room or bedchamber)</li>
+                    <li>You place items you want to remember at specific locations (anchor points) in that room</li>
+                    <li>AI generates vivid images for each item at each location</li>
+                    <li>To recall the information, you mentally "walk through" the room and see the images</li>
+                  </ol>
+                  <p className="text-gray-700 mb-6 text-lg">
+                    This technique is incredibly powerful because our brains are excellent at remembering spatial relationships and visual images.
+                  </p>
+                  <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                    <p className="text-gray-700 text-lg">
+                      <strong>💡 Tip:</strong> Want to learn more? Check out our <button onClick={() => { setShowDemoIntro(false); setShowUserGuide(true); }} className="text-primary hover:underline font-semibold">User Guide</button> or <button onClick={() => { setShowDemoIntro(false); setShowAbout(true); }} className="text-primary hover:underline font-semibold">About</button> pages for detailed information.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-4 p-6 border-t border-gray-200">
+                <button
+                  onClick={() => setShowDemoIntro(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDemoIntro(false);
+                    handleDemoLogin();
+                  }}
+                  className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+                >
+                  Get Started
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
