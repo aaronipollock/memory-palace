@@ -1,7 +1,11 @@
 const API_CONFIG = {
   // Use environment variable if available, otherwise fallback to development
   // Vite uses import.meta.env instead of process.env
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5001',
+  // In production, default to the Render API URL if env var is missing
+  BASE_URL: import.meta.env.VITE_API_URL ||
+    (import.meta.env.MODE === 'production'
+      ? 'https://memory-palace-api.onrender.com'
+      : 'http://localhost:5001'),
 
   // API endpoints
   ENDPOINTS: {
