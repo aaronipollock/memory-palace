@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ROOM_IMAGES, ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
 import ImagePopup from './ImagePopup';
 import SaveRoomModal from './SaveRoomModal';
@@ -55,6 +56,7 @@ const generateImage = async (association, setCurrentPrompt) => {
 };
 
 const VisualizerPage = () => {
+  const navigate = useNavigate();
   const [selectedAssociation, setSelectedAssociation] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,6 +81,8 @@ const VisualizerPage = () => {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showRecallModal, setShowRecallModal] = useState(false);
+  const [savedPalaceName, setSavedPalaceName] = useState('');
   const { showSuccess, showError, showInfo } = useToast();
 
   // Get the current palace data from localStorage
@@ -238,6 +242,12 @@ const VisualizerPage = () => {
         : `Memory palace "${roomData.name}" ${action} with ${acceptedCount}/${totalCount} images accepted.`;
       showSuccess(saveMessage);
 
+      // Show recall instructions modal if palace is complete
+      if (allImagesAccepted && !isUpdate) {
+        setSavedPalaceName(roomData.name);
+        setShowRecallModal(true);
+      }
+
       // Don't clear accepted images after save - let user continue working
       // setAcceptedImages({});
       // localStorage.removeItem('acceptedImages');
@@ -393,8 +403,24 @@ const VisualizerPage = () => {
     <div className="min-h-screen bg-gradient-to-b from-[#4E8DED]/60 via-[#4E8DED]/30 to-white">
       <NavBar />
       <div className="py-12 px-4">
-        {/* How to Use Button at the top */}
-        <div className="max-w-5xl mx-auto mb-6 flex justify-end">
+        {/* Top actions: navigation + How to Use */}
+        <div className="max-w-5xl mx-auto mb-6 flex justify-between items-center">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+              onClick={() => navigate('/saved-rooms')}
+            >
+              ← Back to Dashboard
+            </button>
+            <button
+              type="button"
+              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+              onClick={() => navigate('/input')}
+            >
+              + New Palace
+            </button>
+          </div>
           <button
             className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-primary-dark transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
             onClick={() => setShowInstructionsModal(true)}
@@ -435,7 +461,7 @@ const VisualizerPage = () => {
                   <strong>Complete All Points:</strong> Continue until you've accepted images for all anchor points in the room.
                 </li>
                 <li>
-                  <strong>Save Your Palace:</strong> Click "Save Progress" at any time to save your work, or "Save Room" when all images are accepted.
+                  <strong>Save Your Palace:</strong> Click "Save Progress" at any time to save your work, or "Save Palace" when all images are accepted.
                 </li>
               </ol>
             </div>
@@ -452,7 +478,7 @@ const VisualizerPage = () => {
               >
                 &times;
               </button>
-              <h2 className="text-3xl font-bold mb-4 text-primary" id="welcome-modal-title">Welcome to Your Memory Palace! 🏰</h2>
+              <h2 className="text-3xl font-bold mb-4 text-primary" id="welcome-modal-title">Welcome to Your Memory Palace!</h2>
               <p className="text-gray-700 mb-6 text-lg">
                 Your memory palace has been created! Here's what to do next:
               </p>
@@ -470,17 +496,65 @@ const VisualizerPage = () => {
                   <strong>Complete All Points:</strong> Continue clicking on anchor points and accepting images until all points have been completed (you'll see a checkmark ✓ on accepted points).
                 </li>
                 <li>
-                  <strong>Save Your Palace:</strong> Once you're happy with your images, click "Save Room" in the bottom-right corner to save your memory palace for later review.
+                  <strong>Save Your Palace:</strong> Once you're happy with your images, click "Save Palace" in the bottom-right corner to save your memory palace for later review.
                 </li>
               </ol>
               <div className="bg-blue-50 p-4 rounded-lg mb-6">
                 <p className="text-gray-700 text-sm">
-                  <strong>💡 Tip:</strong> The spatial layout of the room helps your brain remember. Take time to notice where each image is placed!
+                  <strong>Tip:</strong> The spatial layout of the room helps your brain remember. Take time to notice where each image is placed! Once saved, you can mentally "walk through" this room to recall your memorables.
                 </p>
               </div>
               <div className="flex justify-end">
                 <button
                   onClick={() => setShowWelcomeModal(false)}
+                  className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+                >
+                  Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Recall Instructions Modal - shown after saving complete palace */}
+        {showRecallModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" role="dialog" aria-modal="true" aria-labelledby="recall-modal-title">
+            <div className="bg-white rounded-lg p-8 shadow-lg max-w-2xl w-full relative">
+              <button
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                onClick={() => setShowRecallModal(false)}
+                aria-label="Close recall instructions"
+              >
+                &times;
+              </button>
+              <h2 className="text-3xl font-bold mb-4 text-primary" id="recall-modal-title">How to Use Your Memory Palace for Recall</h2>
+              <p className="text-gray-700 mb-6 text-lg">
+                Great! Your memory palace "<strong>{savedPalaceName}</strong>" is complete. Here's how to use it to remember your items:
+              </p>
+              <ol className="list-decimal pl-6 space-y-4 mb-6 text-gray-700">
+                <li>
+                  <strong>Mentally Walk Through the Room:</strong> Close your eyes and visualize yourself entering the room. Start from one end and move through the space in a logical path.
+                </li>
+                <li>
+                  <strong>Visit Each Anchor Point:</strong> As you mentally visit each location where you placed an image, visualize the image you accepted for that spot.
+                </li>
+                <li>
+                  <strong>Recall the Memorable Item:</strong> The vivid image at each location will trigger your memory of the associated item. Let the visual cue remind you of what you wanted to remember.
+                </li>
+                <li>
+                  <strong>Practice Regularly:</strong> Return to this memory palace periodically and mentally walk through it. The more you practice, the stronger your recall will become.
+                </li>
+                <li>
+                  <strong>Review on the Dashboard:</strong> You can always come back to view your saved palace on your dashboard to refresh your memory of the images and locations.
+                </li>
+              </ol>
+              <div className="bg-purple-50 p-4 rounded-lg mb-6">
+                <p className="text-gray-700 text-sm">
+                  <strong>Why This Works:</strong> Your brain is excellent at remembering spatial relationships and visual images. By connecting information to specific locations in a room, you're using one of the most powerful memory systems available!
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowRecallModal(false)}
                   className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                 >
                   Got it!
@@ -552,7 +626,7 @@ const VisualizerPage = () => {
             );
           })}
 
-          {/* Save Room Button - bottom right of image container */}
+          {/* Save Palace Button - bottom right of image container */}
           <div className="absolute bottom-6 right-6 z-20">
             <button
               onClick={() => setIsSaveModalOpen(true)}
@@ -562,7 +636,7 @@ const VisualizerPage = () => {
               <div className="flex items-center space-x-2">
                 {/* Text */}
                 <span className="font-semibold">
-                  {allImagesAccepted ? 'Save Room' : 'Save Progress'}
+                  {allImagesAccepted ? 'Save Palace' : 'Save Progress'}
                 </span>
 
                 {/* Pulse animation for incomplete palaces */}
@@ -600,7 +674,7 @@ const VisualizerPage = () => {
             />
           )}
 
-          {/* Save Room Modal */}
+          {/* Save Palace Modal */}
           {isSaveModalOpen && (
             <SaveRoomModal
               isOpen={isSaveModalOpen}
