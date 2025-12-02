@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { setupSecurityMiddleware, routeSecurity } = require('./config/security');
@@ -80,20 +81,28 @@ app.use('/api', csrfProtection);
 const roomController = require('./controllers/roomController');
 app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, roomController.generateRoom);
 
-// Serve React app in production with security headers
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the React app
-  app.use(express.static(path.join(__dirname, '../client/build'), {
-    setHeaders: (res, path) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('Cache-Control', 'public, max-age=31536000');
-    }
-  }));
+// Optionally serve React app in production when running as a combined service
+// On Render, the frontend is deployed separately as a static site, so we do NOT
+// serve the client build from the API service by default.
+if (process.env.NODE_ENV === 'production' && process.env.SERVE_CLIENT === 'true') {
+  const clientBuildPath = path.join(__dirname, '../client/build');
 
-  // Handle any requests that don't match the ones above
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-  });
+  if (fs.existsSync(path.join(clientBuildPath, 'index.html'))) {
+    // Serve static files from the React app
+    app.use(express.static(clientBuildPath, {
+      setHeaders: (res, filePath) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+      }
+    }));
+
+    // Handle any requests that don't match the ones above
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(clientBuildPath, 'index.html'));
+    });
+  } else {
+    console.warn('Client build directory not found; skipping static file serving.');
+  }
 }
 
 // Global error handling middleware
