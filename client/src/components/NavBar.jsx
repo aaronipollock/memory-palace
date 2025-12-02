@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './NavBar.css';  // We'll create this file next
 import { getApiUrl } from '../config/api';
 
 const NavBar = ({ onLoginClick }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const logoutTimeoutRef = useRef(null);
@@ -52,6 +53,9 @@ const NavBar = ({ onLoginClick }) => {
             localStorage.removeItem('token');
             setIsLoggedIn(false);
 
+            // Dispatch custom logout event for other components to listen
+            window.dispatchEvent(new CustomEvent('logout'));
+
             // Add a small delay before navigation to ensure state is updated
             logoutTimeoutRef.current = setTimeout(() => {
                 navigate('/');
@@ -76,8 +80,8 @@ const NavBar = ({ onLoginClick }) => {
                     </div>
 
                     {/* Navigation Links */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        {isLoggedIn && (
+                    {/* <div className="hidden md:flex items-center space-x-8">
+                        {isLoggedIn && location.pathname !== '/saved-rooms' && location.pathname !== '/input' && (
                             <>
                                 <button
                                     onClick={() => navigate('/input')}
@@ -94,7 +98,7 @@ const NavBar = ({ onLoginClick }) => {
                             </>
                         )}
 
-                    </div>
+                    </div> */}
 
 
                     {/* Auth Buttons or Logout Link */}
@@ -106,26 +110,18 @@ const NavBar = ({ onLoginClick }) => {
                                 className={`px-4 py-2 bg-primary text-white rounded transition-colors duration-200 ${
                                     isLoggingOut
                                         ? 'opacity-50 cursor-not-allowed'
-                                        : 'hover:bg-[#B8860B]'
+                                        : 'hover:bg-[#7C3AED]'
                                 }`}
                             >
-                                Log Out
+                                Log out
                             </button>
                         ) : (
-                            <>
-                                {/* <button
-                                    onClick={onLoginClick}
-                                    className="loci-nav-link !text-white"
-                                >
-                                    Log In
-                                </button>
-                                <button
-                                    onClick={onSignUpClick}
-                                    className="btn-loci"
-                                >
-                                    Sign Up
-                                </button> */}
-                            </>
+                            <button
+                                onClick={onLoginClick}
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:scale-105 transition-transform duration-200"
+                            >
+                                Login
+                            </button>
                         )}
                     </div>
                 </div>

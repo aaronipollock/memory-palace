@@ -14,7 +14,53 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 6
     },
+    firstName: {
+        type: String,
+        trim: true,
+        maxlength: 50
+    },
+    lastName: {
+        type: String,
+        trim: true,
+        maxlength: 50
+    },
+    username: {
+        type: String,
+        trim: true,
+        lowercase: true,
+        unique: true,
+        sparse: true
+    },
+
+    preferences: {
+        room: {
+            type: String,
+            enum: ['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen'],
+            default: 'throne room'
+        },
+        artStyle: {
+            type: String,
+            enum: ['Random', 'Digital Art', 'Cartoon', '3D Render', 'Watercolor', 'Pop Art', 'Photorealistic'],
+            default: 'Digital Art'
+        },
+        // theme: {
+        //     type: String,
+        //     enum: ['light', 'dark', 'auto'],
+        //     default: 'light'
+        // }
+    },
+
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    lastLoginAt: Date,
+
     createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
         type: Date,
         default: Date.now
     }
@@ -31,6 +77,12 @@ userSchema.pre('save', async function(next) {
     } catch (error) {
         next(error);
     }
+});
+
+// updatedAt middleware
+userSchema.pre('save', function(next) {
+    this.updatedAt = Date.now();
+    next();
 });
 
 // Method to compare passwords

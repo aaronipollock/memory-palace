@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const MemoryPalace = require('../models/MemoryPalace');
 const { generateAccessToken, generateRefreshToken, jwtConfig } = require('../config/jwt');
 const crypto = require('crypto');
 
@@ -11,7 +10,7 @@ const generateCSRFToken = () => {
 // Signup controller
 exports.signup = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, firstName, lastName, username } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -22,10 +21,24 @@ exports.signup = async (req, res) => {
             });
         }
 
+        // Check if username is taken (if provided)
+        if (username) {
+            const existingUsername = await User.findOne({ username: username.toLowerCase() });
+            if (existingUsername) {
+                return res.status(400).json({
+                    error: 'Username already taken',
+                    code: 'USERNAME_EXISTS'
+                });
+            }
+        }
+
         // Create new user
         const user = new User({
             email,
-            password
+            password,
+            firstName: firstName || undefined,
+            lastName: lastName || undefined,
+            username: username ? username.toLowerCase() : undefined
         });
 
         await user.save();
@@ -53,7 +66,11 @@ exports.signup = async (req, res) => {
             csrfToken,
             user: {
                 id: user._id,
-                email: user.email
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                username: user.username,
+                preferences: user.preferences
             }
         });
     } catch (error) {
@@ -121,7 +138,11 @@ exports.login = async (req, res) => {
             csrfToken,
             user: {
                 id: user._id,
-                email: user.email
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                username: user.username,
+                preferences: user.preferences
             }
         });
     } catch (error) {

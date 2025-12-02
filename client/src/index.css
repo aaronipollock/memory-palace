@@ -7,7 +7,7 @@
 :root {
   /* Jewel Tone Color Palette */
   --color-primary: #1B365D;    /* Deep Sapphire */
-  --color-secondary: #B8860B;  /* Gold */
+  --color-secondary: #7C3AED;  /* Amethyst Purple */
   --color-accent: #2E8B57;     /* Emerald */
   --color-background: #F8F9FA; /* Light Gray */
   --color-text: #1B365D;       /* Deep Sapphire for text */
@@ -71,6 +71,23 @@
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
+}
+
+/* Feature Card Scroll Animations */
+.feature-card-container {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.feature-card-container.feature-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.feature-image {
+  transform-origin: center center;
+  will-change: transform;
 }
 
 /* Base Styles */
@@ -146,12 +163,12 @@ h1, h2, h3, h4, h5, h6 {
   overflow: hidden;
 }
 
-.btn-loci:hover {
+/* .btn-loci:hover {
   background-color: var(--color-secondary);
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+} */
 
 .btn-loci:active {
   transform: translateY(1px);
@@ -172,9 +189,9 @@ h1, h2, h3, h4, h5, h6 {
   transform-origin: 50% 50%;
 }
 
-.btn-loci:hover::after {
+/* .btn-loci:hover::after {
   animation: ripple 1s ease-out;
-}
+} */
 
 @keyframes ripple {
   0% {
@@ -189,8 +206,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-loci-secondary {
   background-color: var(--color-secondary);
-  color: var(--color-primary);
-  font-weight: 600;
+  color: white;
+  /* font-weight: 600; */
 }
 
 /* Interactive Elements */

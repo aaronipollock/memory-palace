@@ -16,14 +16,14 @@ const generatePlaceholderImage = (association) => {
     const svg = `
         <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
             <rect width="512" height="512" fill="#4E8DED"/>
-            <rect x="50" y="50" width="412" height="412" fill="#2B4C7E" stroke="#B8860B" stroke-width="4"/>
+            <rect x="50" y="50" width="412" height="412" fill="#2B4C7E" stroke="#7C3AED" stroke-width="4"/>
             <text x="256" y="200" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">
                 ${association.anchor}
             </text>
-            <text x="256" y="250" font-family="Arial, sans-serif" font-size="20" fill="#B8860B" text-anchor="middle">
+            <text x="256" y="250" font-family="Arial, sans-serif" font-size="20" fill="#7C3AED" text-anchor="middle">
                 ${association.memorableItem}
             </text>
-            <text x="256" y="400" font-family="Arial, sans-serif" font-size="16" fill="#B8860B" text-anchor="middle">
+            <text x="256" y="400" font-family="Arial, sans-serif" font-size="16" fill="#7C3AED" text-anchor="middle">
                 Placeholder Image
             </text>
         </svg>

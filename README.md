@@ -258,9 +258,8 @@ This application respects user privacy and does not collect or send personal dat
 
 This project is licensed under the Apache License, Version 2.0.
 
-- Full text: [LICENSE](LICENSE.md)
-- Notices/attributions: [NOTICE](NOTICE.md)
-- Asset licenses: [ASSETS_LICENSES](ASSETS_LICENSES.md)
+- See the full text in [LICENSE](LICENSE.md)
+- Attributions and additional notices in [NOTICE](NOTICE.md)
 
 ## Contact
 

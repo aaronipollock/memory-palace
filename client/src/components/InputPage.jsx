@@ -167,8 +167,9 @@ const InputPage = ({ setIsLoading, isLoading }) => {
 
                     {/* Tip Box */}
                     <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-2 rounded" role="alert" aria-live="polite">
-                        <strong>Tip:</strong> For best results, use concrete, visual words (like "apple," "car," or "envelope").<br />
-                        For abstract ideas or proper nouns, use a concrete image followed by the original term in parentheses.<br />
+                        <strong>Tip for Memorables:</strong> When entering your memorables below, use concrete, visual words (like "apple," "car," or "envelope") for best results.<br />
+                        <br />
+                        For <i>abstract ideas</i> or <i>proper nouns</i>, use a concrete image followed by the original term in parentheses.<br />
                         Examples: "hourglass (time)", "two-dollar bill (Thomas Jefferson)", "eagle (freedom)", "scales (justice)"
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -219,10 +220,23 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                         <div className="flex gap-4">
                             <button
                                 type="button"
+                                onClick={() => navigate('/saved-rooms')}
+                                className="px-6 py-3 bg-primary text-white border-2 border-primary rounded-lg
+                                         hover:bg-primary-dark hover:text-white transition-colors duration-300
+                                         focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                                aria-describedby="dashboard-help"
+                            >
+                                Back to Dashboard
+                            </button>
+                            <div id="dashboard-help" className="sr-only">
+                                Return to your dashboard to view your saved memory palaces.
+                            </div>
+                            <button
+                                type="button"
                                 onClick={handleProceedToVisualizer}
                                 disabled={isLoading}
                                 className="flex-1 px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
-                                         hover:bg-[#B8860B] hover:text-white transition-colors duration-300
+                                         hover:bg-[#7C3AED] hover:text-white transition-colors duration-300
                                          disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                                 aria-describedby="proceed-help"
                             >
@@ -243,7 +257,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                                 onClick={handleClear}
                                 disabled={isLoading}
                                 className="px-6 py-3 bg-primary text-white border-2 border-secondary rounded-lg
-                                         hover:bg-[#B8860B] hover:text-white transition-colors duration-300
+                                         hover:bg-[#7C3AED] hover:text-white transition-colors duration-300
                                          disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                                 aria-describedby="clear-help"
                             >

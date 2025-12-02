@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import InputPage from './components/InputPage';
 import VisualizerPage from './components/VisualizerPage';
-import SavedRooms from './components/SavedRooms';
+import UserDashboard from './components/UserDashboard';
 import LandingPage from './components/LandingPage';
 import FeedbackButton from './components/FeedbackButton';
 import TermsOfService from './components/TermsOfService';
@@ -32,7 +32,7 @@ function App() {
                             }
                         />
                         <Route path="/visualizer" element={<VisualizerPage />} />
-                        <Route path="/saved-rooms" element={<SavedRooms />} />
+                        <Route path="/saved-rooms" element={<UserDashboard />} />
                         <Route path="/terms" element={<TermsOfService />} />
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/cookies" element={<CookiePolicy />} />

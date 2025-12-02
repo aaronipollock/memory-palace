@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
 import LoadingSpinner from './LoadingSpinner';
+import UserGuide from './UserGuide';
+import About from './About';
 import { SecureAPIClient, CSRFManager, TokenManager } from '../utils/security';
 import './LandingPage.css';
 import { getApiUrl } from '../config/api';
@@ -11,10 +13,109 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const [authMode, setAuthMode] = React.useState('signup'); // or 'login'
-  const [formData, setFormData] = React.useState({ email: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = React.useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    username: ''
+  });
   const [authError, setAuthError] = React.useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [visibleFeatures, setVisibleFeatures] = useState([false, false, false]);
+  const featureRefs = [useRef(null), useRef(null), useRef(null)];
+  const [showUserGuide, setShowUserGuide] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+  const [isInfoExpanded, setIsInfoExpanded] = useState(false);
+
+  // Check authentication status on component mount and listen for changes
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          setUserEmail(payload.email);
+          setIsLoggedIn(true);
+        } catch (err) {
+          console.error('Error decoding token:', err);
+          localStorage.removeItem('token');
+          setUserEmail('');
+          setIsLoggedIn(false);
+        }
+      } else {
+        setUserEmail('');
+        setIsLoggedIn(false);
+      }
+    };
+
+    // Check immediately
+    checkAuthStatus();
+
+    // Listen for storage changes (logout events)
+    const handleStorageChange = (e) => {
+      if (e.key === 'token') {
+        checkAuthStatus();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also listen for custom logout events
+    const handleLogout = () => {
+      setUserEmail('');
+      setIsLoggedIn(false);
+    };
+
+    window.addEventListener('logout', handleLogout);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('logout', handleLogout);
+    };
+  }, []);
+
+  // Intersection Observer for scroll-triggered animations
+  useEffect(() => {
+    if (isLoggedIn) return; // Only animate for non-logged-in users
+
+    const observers = featureRefs.map((ref, index) => {
+      if (!ref.current) return null;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleFeatures((prev) => {
+                const newState = [...prev];
+                newState[index] = true;
+                return newState;
+              });
+              // Unobserve after animation triggers
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold: 0.15,
+          rootMargin: '0px 0px -50px 0px'
+        }
+      );
+
+      observer.observe(ref.current);
+      return observer;
+    });
+
+    return () => {
+      observers.forEach((observer) => {
+        if (observer) observer.disconnect();
+      });
+    };
+  }, [isLoggedIn]);
 
   const features = [
     {
@@ -50,11 +151,11 @@ const LandingPage = () => {
       description: "Build vocabulary and grammar through memorable visual associations.",
       icon: "🌍"
     },
-    {
-      title: "Medical Students",
-      description: "Learn anatomy, terms, and procedures through visual memory palaces.",
-      icon: "⚕️"
-    }
+    // {
+    //   title: "Medical Students",
+    //   description: "Learn anatomy, terms, and procedures through visual memory palaces.",
+    //   icon: "⚕️"
+    // }
   ];
 
   const handleAuthSubmit = async (data) => {
@@ -80,7 +181,7 @@ const LandingPage = () => {
           CSRFManager.setCSRFToken(result.csrfToken);
         }
         setShowAuthModal(false);
-        navigate('/input');
+        navigate('/saved-rooms');
       } else {
         setAuthError(result.message || 'Login/Signup failed');
       }
@@ -88,6 +189,10 @@ const LandingPage = () => {
       setAuthError('Login/Signup failed');
     }
     setIsLoading(false);
+  };
+
+  const handleDemoClick = () => {
+    handleDemoLogin();
   };
 
   const handleDemoLogin = async () => {
@@ -113,7 +218,8 @@ const LandingPage = () => {
               if (data.csrfToken) {
                   localStorage.setItem('csrfToken', data.csrfToken);
               }
-              navigate('/input');
+              console.log('Token stored in localStorage:', localStorage.getItem('token'));
+              navigate('/saved-rooms');
           } else {
               const errorData = await response.json();
               setError(errorData.message || 'Demo login failed');
@@ -134,162 +240,257 @@ const LandingPage = () => {
           onLoginClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
         />
         {/* Hero Section */}
-        {/* <img
-          src="/images/banner_clean.png"
-          alt="Banner"
-          className="w-48 h-auto mx-auto md:mx-16"
-          style={{ borderRadius: '8px' }}
-        /> */}
-        <section className="py-20 px-4 mt-24">
-          <div className="container mx-auto max-w-6xl">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-5xl md:text-6xl mb-6 text-center text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  Want to boost your memory? <br /> You've come to the right place.
-                </h1>
-                <p className="text-xl text-white text-center mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  AI-powered memory palace creation for better learning and retention.
-                </p>
-                <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  Transform how you remember using the ancient method of <em>loci</em> (Latin for "places," pronounced <strong>low·sai</strong>)
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button
-                    onClick={handleDemoLogin}
-                    className="btn-loci text-lg px-8 py-4"
-                  >
-                    Try Demo
-                  </button>
-                  {/* <button
-                    onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-                    className="btn-loci-secondary text-lg px-8 py-4"
-                  >
-                    Get Started
-                  </button> */}
+        {isLoggedIn ? (
+          /* Personalized Welcome for Logged-in Users */
+          <section className="py-20 px-4 mt-[224px]">
+            <div className="container mx-auto max-w-6xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+                <div className="flex-1 text-center md:text-left">
+                  <h1 className="text-5xl md:text-6xl mb-6 text-center text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Welcome back, {userEmail === 'demo@example.com' ? 'Demo User' : userEmail.split('@')[0]}!
+                  </h1>
+                  <p className="text-xl text-white text-center mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Ready to create your next memory palace?
+                  </p>
+                  <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Continue building your collection of memory palaces for better learning and retention.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                      onClick={() => navigate('/saved-rooms')}
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px]"
+                    >
+                      View My Palaces
+                    </button>
+                    <button
+                      onClick={() => navigate('/input')}
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px]"
+                    >
+                      Create New Palace
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-        {/* Features Section */}
+          </section>
+        ) : (
+          /* Original Marketing Content for Non-logged-in Users */
+          <section className="py-20 px-4 mt-[224px]">
+            <div className="container mx-auto max-w-6xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+                <div className="flex-1 text-center md:text-left">
+                  <h1 className="text-5xl md:text-6xl mb-6 text-center text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Want to boost your memory? <br /> You've come to the right palace.
+                  </h1>
+                  <p className="text-xl text-white text-center mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    AI-powered memory palace creation for better learning and retention.
+                  </p>
+                  <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    Transform how you remember using the ancient method of <em>loci</em> (Latin for "places," pronounced <strong>low·sai</strong>)
+                  </p>
+
+                  {/* What is a Memory Palace? Accordion */}
+                  <div className="mb-8 max-w-xl mx-auto">
+                    <button
+                      onClick={() => setIsInfoExpanded(!isInfoExpanded)}
+                      className="w-full bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-4 transition-all duration-300 flex items-center justify-between group relative"
+                      aria-expanded={isInfoExpanded}
+                      aria-controls="memory-palace-info"
+                    >
+                      <h3 className="text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] flex-1 text-center">
+                        What is a Memory Palace?
+                      </h3>
+                      <svg
+                        className={`w-6 h-6 text-white transition-transform duration-300 absolute right-4 ${isInfoExpanded ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isInfoExpanded && (
+                      <div
+                        id="memory-palace-info"
+                        className="mt-2 bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white animate-fade-in"
+                      >
+                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          A <strong>memory palace</strong> is an ancient memory technique that transforms abstract information into vivid, memorable images placed in a spatial environment. Instead of trying to memorize lists or facts, you create a mental journey through a room where each location holds a visual reminder.
+                        </p>
+                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          <strong>Here's how the app works:</strong>
+                        </p>
+                        <ol className="list-decimal list-inside mb-4 space-y-3 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ml-2">
+                          <li>Choose a room type (throne room, bedchamber, dungeon) and familiarize yourself with it</li>
+                          <li>Select specific locations in that room as "anchor points"</li>
+                          <li>Associate each item you want to remember with an anchor point</li>
+                          <li>AI generates vivid, memorable images for each association</li>
+                          <li>To recall, mentally walk through the room and visualize the images at each location</li>
+                        </ol>
+                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          This technique works because our brains are naturally excellent at remembering spatial relationships and visual imagery. By connecting information to physical locations, you tap into one of the most powerful memory systems we have.
+                        </p>
+                        <div className="flex flex-wrap gap-4 justify-center mt-6">
+                          <button
+                            onClick={() => {
+                              setIsInfoExpanded(false);
+                              setShowUserGuide(true);
+                            }}
+                            className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-primary-dark transition-colors font-semibold"
+                          >
+                            📖 Read User Guide
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsInfoExpanded(false);
+                              setShowAbout(true);
+                            }}
+                            className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-semibold"
+                          >
+                            ℹ️ Learn More
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                      onClick={handleDemoClick}
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
+                    >
+                      Try Demo
+                    </button>
+                    <button
+                      onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
+                    >
+                      Get Started
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+        {/* Features Section - Only show for non-logged-in users */}
+        {!isLoggedIn && (
         <section className="py-0 px-0 section-overlay">
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
             Powerful Features for Better Memory
           </h2>
           <div className="flex flex-col gap-20 w-full pl-4 pr-4 md:pl-8 md:pr-8 max-w-5xl mx-auto">
             {/* Memorable - Bigger */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
-                <img
-                  src="/images/memorable.png"
-                  alt="Memorable"
-                  className="absolute inset-0 w-full h-full object-cover z-0 scale-105"
-                />
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
-                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
-                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
+            <div
+              ref={featureRefs[0]}
+              className={`w-full feature-card-container ${visibleFeatures[0] ? 'feature-visible' : 'feature-hidden'}`}
+              style={{ transitionDelay: '0ms' }}
+            >
+              <div className="p-2">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                  <img
+                    src="/images/memorable.png"
+                    alt="Memorable"
+                    className="absolute inset-0 w-full h-full object-cover z-0 scale-105 feature-image"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Throne Room */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
-                <img
-                  src="/images/throne_clicks.png"
-                  alt="Throne Room"
-                  className="absolute inset-0 w-full h-full object-cover z-0"
-                />
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
-                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Interactive Memory Palaces</h3>
-                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
+            <div
+              ref={featureRefs[1]}
+              className={`w-full feature-card-container ${visibleFeatures[1] ? 'feature-visible' : 'feature-hidden'}`}
+              style={{ transitionDelay: '150ms' }}
+            >
+              <div className="p-2">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                  <img
+                    src="/images/throne_clicks.png"
+                    alt="Throne Room"
+                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Interactive Memory Palaces</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Saved Rooms */}
-            <div className="w-full">
-              <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-shadow overflow-hidden">
-                <img
-                  src="/images/saved_rooms.png"
-                  alt="Saved Rooms"
-                  className="absolute inset-0 w-full h-full object-cover z-0"
-                />
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
-                  <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Personalized Learning</h3>
-                  <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save, organize, and review your memory palaces at your own pace.</p>
+            <div
+              ref={featureRefs[2]}
+              className={`w-full feature-card-container ${visibleFeatures[2] ? 'feature-visible' : 'feature-hidden'}`}
+              style={{ transitionDelay: '300ms' }}
+            >
+              <div className="p-2">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                  <img
+                    src="/images/saved_rooms.png"
+                    alt="Saved Rooms"
+                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Personalized Learning</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save, organize, and review your memory palaces at your own pace.</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
+        )}
         <div className="mb-16" />
-        {/* Upcoming Features Section */}
-        <section className="py-10 px-4">
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Personal Accounts</div>
-                <div className="text-sm text-blue-800">Create your own account to save and access your memory palaces across all your devices.</div>
-              </div>
-              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Smarter Images</div>
-                <div className="text-sm text-blue-800">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
-              </div>
-              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Create Your Own Rooms</div>
-                <div className="text-sm text-blue-800">Design layouts that match your real spaces for a more personal memory journey.</div>
-              </div>
-              <div className="bg-amber-200 rounded-lg shadow p-5 flex flex-col items-center text-center">
-                <div className="font-medium mb-1 text-blue-900">Upload Photos of Real Rooms</div>
-                <div className="text-sm text-blue-800">Anchor memories to your own room photos for maximum familiarity.</div>
-              </div>
-            </div>
-          </div>
-        </section>
         {/* Use Cases Section */}
-        {/* <section className="py-20 px-4 bg-background gradient-use-cases">
+        <section className="py-20 px-4">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="loci-header text-4xl text-center mb-16">
+            <h2 className="loci-header text-4xl text-center mb-16 !text-white">
               Perfect For
             </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {useCases.map((useCase, index) => (
-                <div key={index} className="loci-container p-6 feature-card group">
-                  <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                    {useCase.icon}
-                  </div>
-                  <h3 className="loci-header text-xl mb-3">{useCase.title}</h3>
+                <div
+                  key={index}
+                  className="loci-container p-6 feature-card group bg-primary text-center text-white hover:scale-105 transition-transform duration-300 cursor-pointer"
+                >
+                  <h3 className="loci-header text-xl mb-3 text-center !text-white">{useCase.title}</h3>
                   <p className="text-text-light">{useCase.description}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section> */}
-        {/* CTA Section */}
+        </section>
+        {/* CTA Section - Show for non-logged-in users and demo users */}
+        {(!isLoggedIn || userEmail === 'demo@example.com') && (
         <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
-            {/* <p className="text-xl text-text-light mb-8">
-              Join thousands of learners who have transformed their memory with Loci.
-            </p> */}
-            {/* <button
+          <h2 className="loci-header text-4xl mb-6 !text-white">
+                Start Building Your Memory Palace Today
+              </h2>
+            <button
               onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
-              className="btn-loci text-lg px-8 py-4"
+              className="btn-loci-secondary text-lg px-8 py-4 rounded-lg hover:scale-105 transition-transform duration-200 mb-12"
             >
               Create Free Account
-            </button> */}
+            </button>
           </div>
         </section>
+        )}
+        {/* Upcoming Features moved to footer */}
         {/* Footer */}
-        <footer className="py-16 px-4 bg-primary text-white">
+        <footer className="px-4 bg-primary text-white">
           <div className="container mx-auto max-w-6xl">
             {/* Main Footer Content */}
             <div className="flex flex-col items-center mb-12">
               {/* Brand Section */}
-              <h2 className="loci-header text-4xl mb-6 !text-white">
-                Start Building Your Memory Palace Today
-              </h2>
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <h3 className="text-3xl font-bold loci-header">low·sAI</h3>
@@ -299,17 +500,44 @@ const LandingPage = () => {
                 </p> */}
               </div>
 
+              {/* Upcoming Features Section - Only show for non-logged-in users */}
+              {!isLoggedIn && (
+              <div className="w-full">
+                <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
+                <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
+                  <div className="rounded-lg p-4 text-center">
+                    <div className="font-medium mb-2 text-white">Smarter Images</div>
+                    <div className="text-sm text-gray-200">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
+                  </div>
+                  <div className="rounded-lg p-4 text-center">
+                    <div className="font-medium mb-2 text-white">Create Your Own Rooms</div>
+                    <div className="text-sm text-gray-200">Design layouts that match your real spaces for a more personal memory journey.</div>
+                  </div>
+                  <div className="rounded-lg p-4 text-center">
+                    <div className="font-medium mb-2 text-white">Upload Photos of Real Rooms</div>
+                    <div className="text-sm text-gray-200">Anchor memories to your own room photos for maximum familiarity.</div>
+                  </div>
+                </div>
+              </div>
+              )}
+
               {/* Navigation Links */}
-              <div className="flex flex-wrap justify-center gap-8">
-                <a href="/#/user-guide" className="text-gray-300 hover:text-white transition-colors duration-300">
+              <div className="flex flex-wrap justify-center gap-8 mt-16">
+                <button
+                  onClick={() => setShowUserGuide(true)}
+                  className="text-gray-300 hover:text-white transition-colors duration-300"
+                >
                   User Guide
-                </a>
+                </button>
                 <a href="mailto:support@low-sai.com" className="text-gray-300 hover:text-white transition-colors duration-300">
                   Support
                 </a>
-                <a href="/#/about" className="text-gray-300 hover:text-white transition-colors duration-300">
+                <button
+                  onClick={() => setShowAbout(true)}
+                  className="text-gray-300 hover:text-white transition-colors duration-300"
+                >
                   About
-                </a>
+                </button>
                 <a href="mailto:contact@low-sai.com" className="text-gray-300 hover:text-white transition-colors duration-300">
                   Contact
                 </a>
@@ -337,12 +565,22 @@ const LandingPage = () => {
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           mode={authMode}
+          setMode={setAuthMode}
           onSubmit={handleAuthSubmit}
           error={authError}
           isLoading={isLoading}
           formData={formData}
           setFormData={setFormData}
         />
+        <UserGuide
+          isOpen={showUserGuide}
+          onClose={() => setShowUserGuide(false)}
+        />
+        <About
+          isOpen={showAbout}
+          onClose={() => setShowAbout(false)}
+        />
+        {/* Demo Intro Modal */}
       </div>
     </>
   );
