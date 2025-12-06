@@ -246,6 +246,14 @@ This application implements several security measures:
 - Secure password hashing with bcrypt
 - Environment variable protection
 
+## Privacy & Telemetry
+
+This application respects user privacy and does not collect or send personal data to external services.
+
+- **Privacy Policy**: [PRIVACY_POLICY](PRIVACY_POLICY.md)
+- **Privacy & Telemetry**: [PRIVACY_TELEMETRY](PRIVACY_TELEMETRY.md)
+- **Cookie Policy**: [COOKIE_POLICY](COOKIE_POLICY.md)
+
 ## License
 
 This project is licensed under the Apache License, Version 2.0.

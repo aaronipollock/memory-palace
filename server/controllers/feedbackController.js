@@ -30,20 +30,10 @@ const submitFeedback = async (req, res) => {
   try {
     const { rating, feedback, email, timestamp, userAgent, url } = req.body;
 
-    // Debug logging
-    console.log('Feedback submission received:', {
-      rating,
-      feedback: feedback ? feedback.substring(0, 50) + '...' : 'none',
-      email: email || 'none',
-      timestamp,
-      userAgent: userAgent ? userAgent.substring(0, 50) + '...' : 'none',
-      url,
-      bodyKeys: Object.keys(req.body)
-    });
+    // Process feedback submission
 
     // Validate required fields
     if (!rating || rating < 1 || rating > 5) {
-      console.log('Rating validation failed:', { rating, type: typeof rating });
       return res.status(400).json({
         error: 'Rating is required and must be between 1 and 5',
       });
@@ -78,23 +68,11 @@ This feedback was submitted from the Low·sAI Memory Palace application.
           text: emailContent,
           html: emailContent.replace(/\n/g, '<br>'),
         });
-        console.log('Feedback email sent successfully');
       } catch (emailError) {
         console.error('Failed to send feedback email:', emailError.message);
         // Continue processing even if email fails
       }
-    } else {
-      console.log('Email configuration not available, feedback logged only');
     }
-
-    // Log feedback for analytics (optional)
-    console.log('Feedback received:', {
-      rating,
-      hasFeedback: !!feedback,
-      hasEmail: !!email,
-      timestamp,
-      url,
-    });
 
     res.status(200).json({
       message: process.env.EMAIL_USER && process.env.EMAIL_PASS
@@ -107,7 +85,6 @@ This feedback was submitted from the Low·sAI Memory Palace application.
 
     // In development, still return success even if email fails
     if (process.env.NODE_ENV === 'development') {
-      console.log('Development mode: Email not sent, but feedback logged');
       return res.status(200).json({
         message: 'Feedback submitted successfully (development mode)',
       });

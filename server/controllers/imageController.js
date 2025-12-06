@@ -16,14 +16,14 @@ const generatePlaceholderImage = (association) => {
     const svg = `
         <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
             <rect width="512" height="512" fill="#4E8DED"/>
-            <rect x="50" y="50" width="412" height="412" fill="#2B4C7E" stroke="#B8860B" stroke-width="4"/>
+            <rect x="50" y="50" width="412" height="412" fill="#2B4C7E" stroke="#7C3AED" stroke-width="4"/>
             <text x="256" y="200" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">
                 ${association.anchor}
             </text>
-            <text x="256" y="250" font-family="Arial, sans-serif" font-size="20" fill="#B8860B" text-anchor="middle">
+            <text x="256" y="250" font-family="Arial, sans-serif" font-size="20" fill="#7C3AED" text-anchor="middle">
                 ${association.memorableItem}
             </text>
-            <text x="256" y="400" font-family="Arial, sans-serif" font-size="16" fill="#B8860B" text-anchor="middle">
+            <text x="256" y="400" font-family="Arial, sans-serif" font-size="16" fill="#7C3AED" text-anchor="middle">
                 Placeholder Image
             </text>
         </svg>
@@ -73,8 +73,6 @@ const generateOptimizedImage = async (originalPath, optimizedPath) => {
 exports.generateImages = async (req, res) => {
     try {
         const { prompt, association } = req.body;
-        console.log('Received prompt:', prompt);
-        console.log('Using API key:', API_KEY ? `${API_KEY.substring(0, 10)}...` : 'Not found');
 
         // Enhanced parameters for better tapestry, dais, and anchor point generation
         const isTapestryPrompt = prompt.toLowerCase().includes('tapestry');
@@ -82,15 +80,6 @@ exports.generateImages = async (req, res) => {
         const needsEnhancedParams = isTapestryPrompt || isDaisPrompt;
         const cfgScale = needsEnhancedParams ? 8 : 7; // Higher CFG for complex architectural elements
         const steps = needsEnhancedParams ? 35 : 30; // More steps for complex architectural elements
-
-        console.log('Sending request to Stability AI with data:', {
-            text_prompts: [{ text: prompt, weight: 1 }],
-            cfg_scale: cfgScale,
-            height: 1024,
-            width: 1024,
-            steps: steps,
-            samples: 1
-        });
 
         try {
             // Generate image using Stability AI API
@@ -127,12 +116,6 @@ exports.generateImages = async (req, res) => {
                 mimeType: 'image/png',
                 filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`
             };
-            console.log('Sending response to frontend:', {
-                success: responseData.success,
-                hasImageData: !!responseData.imageData,
-                imageDataLength: responseData.imageData ? responseData.imageData.length : 0,
-                filename: responseData.filename
-            });
             res.json(responseData);
 
         } catch (apiError) {
@@ -141,7 +124,6 @@ exports.generateImages = async (req, res) => {
             // If API key is missing, invalid, or insufficient balance, generate a placeholder image instead of failing
             if (apiError.response?.status === 401 || apiError.response?.status === 403 ||
                 (apiError.response?.data?.name === 'insufficient_balance')) {
-                console.log('API key issue or insufficient balance, generating placeholder image');
 
                 // Generate a simple placeholder image (base64 encoded)
                 const placeholderImage = generatePlaceholderImage(association);

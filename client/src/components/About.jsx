@@ -1,14 +1,56 @@
-import React from 'react';
-import NavBar from './NavBar';
+import React, { useEffect, useRef } from 'react';
 
-const About = () => {
+const About = ({ isOpen, onClose }) => {
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
   return (
-    <div className="min-h-screen bg-primary">
-      <NavBar />
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl p-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-6">About Low·sAI</h1>
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header with X button */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h1 className="text-3xl font-bold text-gray-800">About Low·sAI</h1>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-3xl leading-none w-8 h-8 flex items-center justify-center"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
 
+        {/* Scrollable content */}
+        <div className="overflow-y-auto flex-1 p-6">
           <div className="prose prose-lg max-w-none">
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-700 mb-4">Our Mission</h2>
@@ -137,7 +179,7 @@ const About = () => {
               </p>
               <a
                 href="/#/"
-                className="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+                className="inline-block bg-primary text-white font-semibold px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors duration-300 shadow-lg hover:shadow-xl"
                 style={{ color: 'white' }}
               >
                 Try Demo Now

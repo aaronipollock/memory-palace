@@ -84,21 +84,8 @@ app.use('/api', csrfProtection);
 const roomController = require('./controllers/roomController');
 app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, roomController.generateRoom);
 
-// Serve React app in production with security headers
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the React app
-  app.use(express.static(path.join(__dirname, '../client/build'), {
-    setHeaders: (res, path) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('Cache-Control', 'public, max-age=31536000');
-    }
-  }));
-
-  // Handle any requests that don't match the ones above
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-  });
-}
+// Note: The React frontend is deployed as a separate static service on Render,
+// so this API service does not serve the client build.
 
 // Global error handling middleware
 app.use((err, req, res, next) => {

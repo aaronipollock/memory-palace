@@ -179,25 +179,25 @@ Type: Analytics</code></pre>
 
       <p><strong>Chrome:</strong></p>
       <ol>
-        <li>Go to Settings > Privacy and security > Cookies and other site data</li>
+        <li>Go to Settings &gt; Privacy and security &gt; Cookies and other site data</li>
         <li>Choose your preferred cookie settings</li>
       </ol>
 
       <p><strong>Firefox:</strong></p>
       <ol>
-        <li>Go to Options > Privacy & Security</li>
+        <li>Go to Options &gt; Privacy &amp; Security</li>
         <li>Under Cookies and Site Data, choose your settings</li>
       </ol>
 
       <p><strong>Safari:</strong></p>
       <ol>
-        <li>Go to Preferences > Privacy</li>
+        <li>Go to Preferences &gt; Privacy</li>
         <li>Choose your cookie preferences</li>
       </ol>
 
       <p><strong>Edge:</strong></p>
       <ol>
-        <li>Go to Settings > Cookies and site permissions</li>
+        <li>Go to Settings &gt; Cookies and site permissions</li>
         <li>Manage your cookie preferences</li>
       </ol>
 

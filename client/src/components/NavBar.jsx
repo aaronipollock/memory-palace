@@ -141,7 +141,7 @@ const NavBar = ({ onLoginClick }) => {
                                 className={`px-4 py-2 bg-primary text-white rounded transition-colors duration-200 ${
                                     isLoggingOut
                                         ? 'opacity-50 cursor-not-allowed'
-                                        : 'hover:bg-[#B8860B]'
+                                        : 'hover:bg-[#7C3AED]'
                                 }`}
                             >
                                 Log Out

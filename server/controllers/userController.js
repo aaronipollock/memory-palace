@@ -36,9 +36,9 @@ exports.updateProfile = async (req, res) => {
       const { firstName, lastName, preferences, username, email } = req.body;
 
       // Prevent updates to protected fields
-      if (username || email) {
+      if (email) {
         return res.status(400).json({
-          error: 'Username and email cannot be changed from this route',
+          error: 'Email cannot be changed from this route',
           code: 'IMMUTABLE_FIELDS'
         });
       }
@@ -50,6 +50,30 @@ exports.updateProfile = async (req, res) => {
 
       if (firstName !== undefined) user.firstName = firstName;
       if (lastName !== undefined) user.lastName = lastName;
+
+      // Handle username update with uniqueness check
+      if (username !== undefined) {
+        const trimmedUsername = username ? username.trim().toLowerCase() : null;
+
+        // If setting a username, check if it's taken by another user
+        if (trimmedUsername) {
+          const existingUser = await User.findOne({
+            username: trimmedUsername,
+            _id: { $ne: userId } // Exclude current user
+          });
+
+          if (existingUser) {
+            return res.status(400).json({
+              error: 'Username already taken',
+              code: 'USERNAME_EXISTS'
+            });
+          }
+          user.username = trimmedUsername;
+        } else {
+          // Allow clearing username (setting to null)
+          user.username = undefined;
+        }
+      }
 
       if (preferences) {
         if (preferences.room !== undefined) {

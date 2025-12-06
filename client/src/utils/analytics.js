@@ -6,7 +6,7 @@ class Analytics {
     this.events = [];
     this.userId = null;
     this.sessionId = this.generateSessionId();
-    this.isEnabled = process.env.NODE_ENV === 'production';
+    this.isEnabled = false; // DISABLED BY DEFAULT - No external telemetry
   }
 
   // Generate unique session ID
@@ -91,15 +91,15 @@ class Analytics {
 
   // Send to external analytics service (placeholder)
   sendToExternalService(event) {
-    // TODO: Implement external analytics service
-    // Examples:
-    // - Google Analytics 4
-    // - Mixpanel
-    // - Amplitude
-    // - PostHog
+    // External analytics service integration can be added here
+    // NOTE: This is currently disabled for privacy compliance
+    // To enable external analytics, explicit user consent is required
 
-    // For now, just log to console in production
-    console.log('📊 Production Analytics:', event);
+    // For now, just log to console in development
+    // Vite uses import.meta.env.MODE instead of process.env.NODE_ENV
+    if (import.meta.env.MODE === 'development') {
+      console.log('📊 Analytics Event (Local Only):', event);
+    }
   }
 
   // Get analytics data for debugging

@@ -1,7 +1,26 @@
-const API_CONFIG = {
-  // Use environment variable if available, otherwise fallback to development
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5001',
+// Debug: Log environment variables (only in development)
+if (import.meta.env.MODE === 'development') {
+  console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+  console.log('MODE:', import.meta.env.MODE);
+}
 
+// Use environment variable if available, otherwise fallback to development
+// Vite uses import.meta.env instead of process.env
+// In production, default to the Render API URL if env var is missing
+let BASE_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.MODE === 'production'
+    ? 'https://memory-palace-api.onrender.com'
+    : 'http://localhost:5001');
+
+// Ensure we never use the frontend URL as the API URL
+if (BASE_URL && (BASE_URL.includes('memory-palace-frontend') || BASE_URL.includes('low-sai.com'))) {
+  console.error('ERROR: API URL is set to frontend URL! Using fallback.');
+  BASE_URL = 'https://memory-palace-api.onrender.com';
+  console.log('Using fallback API URL:', BASE_URL);
+}
+
+const API_CONFIG = {
+  BASE_URL: BASE_URL,
   // API endpoints
   ENDPOINTS: {
     AUTH: {

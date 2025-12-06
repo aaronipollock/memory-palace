@@ -28,5 +28,5 @@ services:
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: client/build
     envVars:
-      - key: REACT_APP_API_URL
+      - key: VITE_API_URL
         value: https://memory-palace-api.onrender.com

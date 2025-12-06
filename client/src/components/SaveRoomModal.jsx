@@ -114,7 +114,7 @@ const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType, exis
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                            className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                         >
                             Cancel
                         </button>
@@ -122,7 +122,7 @@ const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType, exis
                             type="submit"
                             className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                         >
-                            {existingRoomName ? 'Update Room' : 'Save Room'}
+                            {existingRoomName ? 'Update Palace' : 'Save Palace'}
                         </button>
                     </div>
                 </form>

@@ -153,18 +153,18 @@ const UserDashboard = () => {
         try {
             const response = await apiClient.delete(`/api/memory-palaces/${palaceToDelete._id}`);
 
-                if (!response.ok) {
-                    const data = await response.json();
-                    const errorObj = new Error(data.message || 'Failed to delete memory palace');
-                    errorObj.response = { data, status: response.status };
-                    throw errorObj;
-                }
+            if (!response.ok) {
+                const data = await response.json();
+                const errorObj = new Error(data.message || 'Failed to delete memory palace');
+                errorObj.response = { data, status: response.status };
+                throw errorObj;
+            }
 
-                setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
-                showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
-            } catch (err) {
-                setError(err);
-                showError('Failed to delete memory palace. Please try again.');
+            setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
+            showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
+        } catch (err) {
+            setError(err);
+            showError('Failed to delete memory palace. Please try again.');
         }
         setDeleteModalOpen(false);
         setPalaceToDelete(null);
@@ -194,8 +194,8 @@ const UserDashboard = () => {
             // Continue with logout even if API call fails
         } finally {
             // Always clear local storage and navigate
-        localStorage.removeItem('token');
-        navigate('/');
+            localStorage.removeItem('token');
+            navigate('/');
         }
     };
 
@@ -216,14 +216,14 @@ const UserDashboard = () => {
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-center min-h-[400px]">
                         <LoadingSpinner size="lg" text="Loading your memory palaces..." />
-            </div>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#DAA520]/60 via-[#FFD700]/40 to-white">
+        <div className="min-h-screen bg-gradient-to-b from-[#7C3AED]/60 via-[#8B5CF6]/40 to-white">
             <NavBar onLogout={handleLogout} />
             <div className="container mx-auto px-4 py-8">
                 {/* Profile Header Section */}
@@ -247,13 +247,13 @@ const UserDashboard = () => {
                         <div className="flex space-x-4">
                             <button
                                 onClick={() => navigate('/input')}
-                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                             >
                                 Create New Palace
                             </button>
                             <button
                                 onClick={() => setShowProfileSettings(true)}
-                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                             >
                                 Profile Settings
                             </button>
@@ -340,8 +340,8 @@ const UserDashboard = () => {
                                         <div key={index} className="border-t pt-2">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
-                                            <p className="font-medium">{assoc.memorableItem}</p>
-                                            <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
+                                                    <p className="font-medium">{assoc.memorableItem}</p>
+                                                    <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
                                                 </div>
                                                 {assoc.hasAcceptedImage && (
                                                     <div className="ml-2">

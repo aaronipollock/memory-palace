@@ -52,14 +52,31 @@ const securityConfig = {
   // CORS configuration
   corsOptions: {
     origin: process.env.NODE_ENV === 'production'
-      ? [
-          'https://memory-palace-frontend.onrender.com',
-          'https://low-sai.onrender.com',
-          'https://low-sai.com',
-          'https://www.low-sai.com',
-          process.env.FRONTEND_URL
-        ].filter(Boolean)
-      : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+      ? function (origin, callback) {
+          // Allow requests with no origin (like mobile apps or curl requests)
+          if (!origin) return callback(null, true);
+
+          const allowedOrigins = [
+            'https://memory-palace-frontend.onrender.com',
+            'https://low-sai.onrender.com',
+            'https://low-sai.com',
+            'https://www.low-sai.com',
+            process.env.FRONTEND_URL
+          ].filter(Boolean);
+
+          // Also allow any *.onrender.com subdomain for flexibility during development
+          if (origin.endsWith('.onrender.com')) {
+            return callback(null, true);
+          }
+
+          if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            console.log('CORS blocked origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+          }
+        }
+      : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [

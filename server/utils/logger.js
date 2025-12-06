@@ -154,13 +154,8 @@ class Logger {
 
   // Send to external logging service (placeholder)
   sendToExternalService(logEntry) {
-    // TODO: Implement external logging service
-    // Examples:
-    // - Winston with file/cloud transport
-    // - Bunyan
-    // - Loggly
-    // - Papertrail
-    // - AWS CloudWatch
+    // External logging service integration can be added here
+
 
     // For now, just log to console in production
     console.log('📊 Production Log:', logEntry);

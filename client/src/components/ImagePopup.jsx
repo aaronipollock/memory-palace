@@ -129,7 +129,7 @@ const ImagePopup = ({
             <div className="flex justify-center space-x-4 mt-6">
               <button
                 onClick={onReject}
-                className="btn-loci bg-secondary text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                className="btn-loci bg-primary text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                 aria-describedby="reject-help"
               >
                 Reject
@@ -139,7 +139,7 @@ const ImagePopup = ({
               </div>
               <button
                 onClick={onAccept}
-                className="btn-loci focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                className="btn-loci bg-primary text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                 aria-describedby="accept-help"
               >
                 Accept
