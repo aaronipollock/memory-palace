@@ -163,16 +163,64 @@ const UploadRoomPhoto = () => {
         setError(null);
 
         try {
-            // 📖 API CALL EXPLANATION:
-            // We're sending the image as a base64 data URL
-            // The API will receive imageUrl as a string
-            // Later, we could improve this to upload the file first
-            // and get a URL, but base64 works for now
+            // 📖 STEP 1: UPLOAD THE IMAGE FILE
+            // First, we upload the file to get a URL
+            // This avoids storing huge base64 strings in the database
 
+            // Validate file is selected
+            if (!selectedFile) {
+                throw new Error('No file selected');
+            }
+
+            console.log('Uploading file:', {
+                name: selectedFile.name,
+                type: selectedFile.type,
+                size: selectedFile.size,
+                lastModified: selectedFile.lastModified
+            });
+
+            const formDataToUpload = new FormData();
+            formDataToUpload.append('image', selectedFile);
+
+            // Verify FormData has the file (for debugging)
+            for (const [key, value] of formDataToUpload.entries()) {
+                console.log('FormData entry:', key, value instanceof File ? `File: ${value.name}` : value);
+            }
+
+            // Upload the image file
+            // NOTE: Don't set Content-Type header - browser will set it automatically with boundary
+            const uploadResponse = await fetch(`${getApiUrl('')}/api/upload-image`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+                    // Don't set Content-Type - browser will set it automatically for FormData
+                },
+                credentials: 'include',
+                body: formDataToUpload
+            });
+
+            console.log('Upload response status:', uploadResponse.status);
+
+            if (!uploadResponse.ok) {
+                const errorData = await uploadResponse.json();
+                console.error('Upload error:', errorData);
+                throw new Error(errorData.error || 'Failed to upload image');
+            }
+
+            const uploadData = await uploadResponse.json();
+            const imageUrl = uploadData.originalUrl || uploadData.optimizedUrl;
+
+            if (!imageUrl) {
+                throw new Error('No image URL returned from upload');
+            }
+
+            // 📖 STEP 2: CREATE THE CUSTOM ROOM WITH THE URL
+            // Now we create the room using the URL (which is < 500 characters)
             const response = await apiClient.post('/api/custom-rooms', {
                 name: formData.name.trim(),
                 description: formData.description.trim(),
-                imageUrl: imagePreview, // Send base64 string as imageUrl
+                imageUrl: imageUrl, // Use the URL from the upload
                 anchorPoints: [] // Start with no anchor points
             });
 

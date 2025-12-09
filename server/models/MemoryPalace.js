@@ -8,7 +8,16 @@ const memoryPalaceSchema = new mongoose.Schema({
     roomType: {
         type: String,
         required: true,
-        enum: ['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen']
+        enum: ['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen', 'custom']
+    },
+    customRoomId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CustomRoom',
+        required: false
+    },
+    customRoomImageUrl: {
+        type: String,
+        required: false
     },
     associations: [{
         anchor: {

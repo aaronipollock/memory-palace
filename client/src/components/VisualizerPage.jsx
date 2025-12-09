@@ -87,7 +87,15 @@ const VisualizerPage = () => {
 
   // Get the current palace data from localStorage
   const currentPalace = JSON.parse(localStorage.getItem('currentPalace') || '{}');
-  const { roomType = 'throne room', associations = [], acceptedImages: palaceAcceptedImages = {}, name: palaceName = '', _id: palaceId = null } = currentPalace;
+  const {
+    roomType = 'throne room',
+    associations = [],
+    acceptedImages: palaceAcceptedImages = {},
+    name: palaceName = '',
+    _id: palaceId = null,
+    customRoomImageUrl = null,
+    customRoomId = null
+  } = currentPalace;
 
 
 
@@ -137,11 +145,52 @@ const VisualizerPage = () => {
     }
   }, [acceptedImages, palaceAcceptedImages, associations]);
 
+  // State for custom room anchor points
+  const [customRoomAnchorPoints, setCustomRoomAnchorPoints] = useState([]);
+
+  // Fetch custom room data if customRoomId is present
+  useEffect(() => {
+    const fetchCustomRoom = async () => {
+      if (customRoomId) {
+        try {
+          const response = await apiClient.get(`/api/custom-rooms/${customRoomId}`);
+          if (response.ok) {
+            const roomData = await response.json();
+            setCustomRoomAnchorPoints(roomData.anchorPoints || []);
+          }
+        } catch (err) {
+          console.error('Error fetching custom room:', err);
+        }
+      } else {
+        setCustomRoomAnchorPoints([]);
+      }
+    };
+    fetchCustomRoom();
+  }, [customRoomId]);
+
   // Get the appropriate room image
-  const roomImage = ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
+  // If a custom room is selected, use its image URL, otherwise use the predefined room image
+  const roomImage = customRoomImageUrl || ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
 
   // Get the appropriate anchor positions for this room
-  const anchorPositions = ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS["throne room"];
+  // For custom rooms, convert anchor points (x, y percentages) to the format used by the visualizer
+  const anchorPositions = useMemo(() => {
+    if (customRoomId && customRoomAnchorPoints.length > 0) {
+      // Convert custom room anchor points to the visualizer format
+      const positions = {};
+      customRoomAnchorPoints.forEach((point) => {
+        positions[point.name] = {
+          top: `${point.y}%`,
+          left: `${point.x}%`,
+          width: '40px',
+          height: '40px'
+        };
+      });
+      return positions;
+    }
+    // Use predefined positions for standard rooms
+    return ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS["throne room"];
+  }, [customRoomId, customRoomAnchorPoints, roomType]);
 
   // Check if all images have been accepted (only for visible associations)
   const visibleAssociations = associations.filter(
@@ -194,6 +243,14 @@ const VisualizerPage = () => {
         }
       };
 
+      // Only include custom room fields if they have values
+      if (customRoomId) {
+        palaceData.customRoomId = customRoomId;
+      }
+      if (customRoomImageUrl) {
+        palaceData.customRoomImageUrl = customRoomImageUrl;
+      }
+
 
 
       let response;
@@ -226,7 +283,9 @@ const VisualizerPage = () => {
         roomType: savedPalace.roomType,
         associations: savedPalace.associations,
         completionStatus: savedPalace.completionStatus,
-        acceptedImages: {} // Don't store full image data in localStorage
+        acceptedImages: {}, // Don't store full image data in localStorage
+        customRoomId: savedPalace.customRoomId || null,
+        customRoomImageUrl: savedPalace.customRoomImageUrl || null
       };
       localStorage.setItem('currentPalace', JSON.stringify(palaceDataForStorage));
 
@@ -253,7 +312,9 @@ const VisualizerPage = () => {
       // localStorage.removeItem('acceptedImages');
     } catch (err) {
       console.error('Error saving palace:', err);
-      showError('Failed to save memory palace. Please try again.');
+      // Show the actual error message from the backend if available
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to save memory palace. Please try again.';
+      showError(errorMessage);
     }
   };
 

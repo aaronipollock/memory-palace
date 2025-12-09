@@ -13,8 +13,15 @@ const NavBar = ({ onLoginClick }) => {
         const checkLoginStatus = () => {
             const token = localStorage.getItem('token');
             const loggedIn = !!token;
-            console.log('NavBar: Checking login status', { token: token ? 'exists' : 'null', loggedIn });
-            setIsLoggedIn(loggedIn);
+
+            // Only update state if it actually changed (prevents unnecessary re-renders)
+            setIsLoggedIn(prevLoggedIn => {
+                if (prevLoggedIn !== loggedIn) {
+                    console.log('NavBar: Login status changed', { loggedIn });
+                    return loggedIn;
+                }
+                return prevLoggedIn; // No change, return previous value
+            });
         };
 
         // Check immediately
@@ -30,8 +37,9 @@ const NavBar = ({ onLoginClick }) => {
         window.addEventListener('login', handleStorageChange);
         window.addEventListener('logout', handleStorageChange);
 
-        // Also check periodically (in case token is set from another tab)
-        const interval = setInterval(checkLoginStatus, 1000);
+        // Check periodically (in case token is set from another tab)
+        // Reduced frequency to 2 seconds to minimize re-renders
+        const interval = setInterval(checkLoginStatus, 2000);
 
         return () => {
             window.removeEventListener('storage', handleStorageChange);

@@ -35,6 +35,9 @@ const InputPage = ({ setIsLoading, isLoading }) => {
     const [roomType, setRoomType] = useState(() =>
         localStorage.getItem('roomType') || 'throne room'
     );
+    const [customRoomId, setCustomRoomId] = useState(null);
+    const [customRooms, setCustomRooms] = useState([]);
+    const [selectedCustomRoom, setSelectedCustomRoom] = useState(null);
     const [memorables, setMemorables] = useState('');
     const [artStyle, setArtStyle] = useState(() =>
         localStorage.getItem('artStyle') || 'Random'
@@ -42,14 +45,59 @@ const InputPage = ({ setIsLoading, isLoading }) => {
     const [error, setError] = useState(null);
     const { showSuccess, showInfo } = useToast();
 
+    // Fetch custom rooms on mount
+    useEffect(() => {
+        const fetchCustomRooms = async () => {
+            try {
+                const response = await apiClient.get('/api/custom-rooms');
+                if (response.ok) {
+                    const data = await response.json();
+                    setCustomRooms(data);
+                }
+            } catch (err) {
+                console.error('Error fetching custom rooms:', err);
+            }
+        };
+        fetchCustomRooms();
+    }, []);
+
     // Get the anchor points for the current room type
-    const currentAnchorPoints = Object.keys(ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS["throne room"]);
+    // If a custom room is selected, use its anchor points
+    const currentAnchorPoints = selectedCustomRoom && selectedCustomRoom.anchorPoints
+        ? selectedCustomRoom.anchorPoints.map(ap => ap.name)
+        : Object.keys(ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS["throne room"]);
+
+    // Handle room type change
+    const handleRoomTypeChange = (e) => {
+        const value = e.target.value;
+
+        // Check if it's a custom room (format: "custom:roomId")
+        if (value.startsWith('custom:')) {
+            const roomId = value.replace('custom:', '');
+            const customRoom = customRooms.find(r => r._id === roomId);
+            if (customRoom) {
+                setSelectedCustomRoom(customRoom);
+                setCustomRoomId(roomId);
+                setRoomType('custom');
+            }
+        } else {
+            // Standard room type
+            setSelectedCustomRoom(null);
+            setCustomRoomId(null);
+            setRoomType(value);
+        }
+    };
 
     // Save to localStorage whenever values change
     useEffect(() => {
         localStorage.setItem('roomType', roomType);
         localStorage.setItem('artStyle', artStyle);
-    }, [roomType, artStyle]);
+        if (customRoomId) {
+            localStorage.setItem('customRoomId', customRoomId);
+        } else {
+            localStorage.removeItem('customRoomId');
+        }
+    }, [roomType, artStyle, customRoomId]);
 
     const handleProceedToVisualizer = async () => {
         const memorablesList = memorables.split('\n')
@@ -75,7 +123,9 @@ const InputPage = ({ setIsLoading, isLoading }) => {
         const palaceData = {
             roomType,
             associations,
-            artStyle
+            artStyle,
+            customRoomId: customRoomId || null,
+            customRoomImageUrl: selectedCustomRoom?.imageUrl || null
         };
         localStorage.setItem('currentPalace', JSON.stringify(palaceData));
 
@@ -125,18 +175,36 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                             <label htmlFor="room-type" className="text-primary font-bold whitespace-nowrap">Room Type:</label>
                             <select
                                 id="room-type"
-                                value={roomType}
-                                onChange={(e) => setRoomType(e.target.value)}
+                                value={customRoomId ? `custom:${customRoomId}` : roomType}
+                                onChange={handleRoomTypeChange}
                                 className="flex-1 p-2 border-2 border-accent1 rounded-lg bg-white text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                                style={{ maxWidth: '100%' }}
                                 required
                                 aria-describedby="room-type-help"
                             >
                                 <option value="">Select a room type...</option>
+                                {/* Standard room types */}
                                 {ROOM_TYPES.map((type) => (
                                     <option key={type} value={type}>
                                         {type.charAt(0).toUpperCase() + type.slice(1)}
                                     </option>
                                 ))}
+                                {/* Custom rooms */}
+                                {customRooms.length > 0 && (
+                                    <optgroup label="Custom Rooms">
+                                        {customRooms.map((room) => {
+                                            const maxLength = 50;
+                                            const displayName = room.name.length > maxLength
+                                                ? `${room.name.substring(0, maxLength)}...`
+                                                : room.name;
+                                            return (
+                                                <option key={room._id} value={`custom:${room._id}`}>
+                                                    {displayName} ({room.anchorPoints?.length || 0} anchors)
+                                                </option>
+                                            );
+                                        })}
+                                    </optgroup>
+                                )}
                             </select>
                         </div>
                         <div id="room-type-help" className="sr-only">
@@ -175,7 +243,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label htmlFor="anchor-points" className="block text-gray-800 font-bold mb-2">
-                                Demo Anchor Points:
+                                {selectedCustomRoom ? 'Anchor Points:' : 'Demo Anchor Points:'}
                             </label>
                             <div
                                 id="anchor-points"

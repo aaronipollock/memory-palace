@@ -11,6 +11,7 @@ import CookiePolicy from './components/CookiePolicy';
 import UserGuide from './components/UserGuide';
 import About from './components/About';
 import UploadRoomPhoto from './components/UploadRoomPhoto';
+import AnchorPointEditor from './components/AnchorPointEditor';
 import { ToastProvider } from './context/ToastContext';
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
                         <Route path="/visualizer" element={<VisualizerPage />} />
                         <Route path="/saved-rooms" element={<SavedRooms />} />
                         <Route path="/custom-rooms/upload" element={<UploadRoomPhoto />} />
+                        <Route path="/custom-rooms/:id/edit" element={<AnchorPointEditor />} />
                         <Route path="/terms" element={<TermsOfService />} />
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/cookies" element={<CookiePolicy />} />

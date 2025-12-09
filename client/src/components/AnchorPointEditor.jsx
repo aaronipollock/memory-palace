@@ -1,0 +1,468 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import NavBar from './NavBar';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
+import { useToast } from '../context/ToastContext';
+import { SecureAPIClient } from '../utils/security';
+import { getApiUrl } from '../config/api';
+
+const apiClient = new SecureAPIClient(getApiUrl(''));
+
+/**
+ * 🎓 COMPONENT 2: Anchor Point Editor
+ *
+ * WHAT THIS COMPONENT DOES:
+ * - Displays the uploaded room image
+ * - Allows users to click on the image to place anchor points
+ * - Shows existing anchor points as markers
+ * - Allows editing/deleting anchor points
+ * - Saves anchor points to the database
+ *
+ * KEY CONCEPTS:
+ * 1. useParams - Get room ID from URL
+ * 2. Image click handling - Calculate click position
+ * 3. Coordinate conversion - Convert click position to percentage
+ * 4. CRUD operations - Create, read, update, delete anchor points
+ */
+
+const AnchorPointEditor = () => {
+    const { id } = useParams(); // Get room ID from URL
+    const navigate = useNavigate();
+    const imageRef = useRef(null);
+    const [room, setRoom] = useState(null);
+    const [anchorPoints, setAnchorPoints] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState(null);
+    const [editingPoint, setEditingPoint] = useState(null);
+    const [pointName, setPointName] = useState('');
+    const [pointDescription, setPointDescription] = useState('');
+    const { showSuccess, showError } = useToast();
+
+    // Load room data when component mounts
+    useEffect(() => {
+        loadRoom();
+    }, [id]);
+
+    /**
+     * 📖 FUNCTION: loadRoom
+     *
+     * WHAT IT DOES:
+     * - Fetches the custom room from the API
+     * - Sets the room data and anchor points
+     */
+    const loadRoom = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const response = await apiClient.get(`/api/custom-rooms/${id}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Room not found');
+                }
+                if (response.status === 403) {
+                    throw new Error('You do not have permission to edit this room');
+                }
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to load room');
+            }
+
+            const roomData = await response.json();
+            setRoom(roomData);
+            setAnchorPoints(roomData.anchorPoints || []);
+        } catch (err) {
+            console.error('Error loading room:', err);
+            setError(err.message || 'Failed to load room');
+            showError(err.message || 'Failed to load room');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    /**
+     * 📖 FUNCTION: handleImageClick
+     *
+     * WHAT IT DOES:
+     * - Called when user clicks on the image
+     * - Calculates the click position as a percentage
+     * - Opens a modal to name the anchor point
+     *
+     * HOW IT WORKS:
+     * 1. Get the image element and its position
+     * 2. Calculate click position relative to image
+     * 3. Convert to percentage (0-100)
+     * 4. Open edit modal for new point
+     */
+    const handleImageClick = (e) => {
+        if (!imageRef.current) return;
+
+        const rect = imageRef.current.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+        // Create new anchor point
+        setEditingPoint({
+            x: Math.round(x * 100) / 100, // Round to 2 decimal places
+            y: Math.round(y * 100) / 100,
+            name: '',
+            description: ''
+        });
+        setPointName('');
+        setPointDescription('');
+    };
+
+    /**
+     * 📖 FUNCTION: handleSavePoint
+     *
+     * WHAT IT DOES:
+     * - Saves a new anchor point or updates an existing one
+     * - Updates the room in the database
+     */
+    const handleSavePoint = async () => {
+        if (!pointName.trim()) {
+            setError('Please enter a name for the anchor point');
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            setError(null);
+
+            let updatedPoints;
+            if (editingPoint && editingPoint._id) {
+                // Update existing point
+                updatedPoints = anchorPoints.map(p =>
+                    p._id === editingPoint._id
+                        ? { ...p, name: pointName.trim(), description: pointDescription.trim() }
+                        : p
+                );
+            } else {
+                // Add new point
+                const newPoint = {
+                    name: pointName.trim(),
+                    description: pointDescription.trim(),
+                    x: editingPoint.x,
+                    y: editingPoint.y
+                };
+                updatedPoints = [...anchorPoints, newPoint];
+            }
+
+            // Update room with new anchor points
+            const response = await apiClient.put(`/api/custom-rooms/${id}`, {
+                anchorPoints: updatedPoints
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save anchor point');
+            }
+
+            const updatedRoom = await response.json();
+            setAnchorPoints(updatedRoom.anchorPoints || []);
+            setEditingPoint(null);
+            setPointName('');
+            setPointDescription('');
+            showSuccess('Anchor point saved successfully!');
+        } catch (err) {
+            console.error('Error saving anchor point:', err);
+            setError(err.message || 'Failed to save anchor point');
+            showError(err.message || 'Failed to save anchor point');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    /**
+     * 📖 FUNCTION: handleDeletePoint
+     *
+     * WHAT IT DOES:
+     * - Deletes an anchor point
+     * - Updates the room in the database
+     */
+    const handleDeletePoint = async (pointToDelete) => {
+        if (!window.confirm('Are you sure you want to delete this anchor point?')) {
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            setError(null);
+
+            // Filter out the point to delete (match by _id if available, or by all properties)
+            const updatedPoints = anchorPoints.filter(p => {
+                if (pointToDelete._id && p._id) {
+                    return p._id.toString() !== pointToDelete._id.toString();
+                }
+                // If no _id, match by all properties
+                return !(p.x === pointToDelete.x && p.y === pointToDelete.y && p.name === pointToDelete.name);
+            });
+
+            const response = await apiClient.put(`/api/custom-rooms/${id}`, {
+                anchorPoints: updatedPoints
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete anchor point');
+            }
+
+            const updatedRoom = await response.json();
+            setAnchorPoints(updatedRoom.anchorPoints || []);
+            showSuccess('Anchor point deleted successfully!');
+        } catch (err) {
+            console.error('Error deleting anchor point:', err);
+            setError(err.message || 'Failed to delete anchor point');
+            showError(err.message || 'Failed to delete anchor point');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    /**
+     * 📖 FUNCTION: handleEditPoint
+     *
+     * WHAT IT DOES:
+     * - Opens the edit modal for an existing anchor point
+     */
+    const handleEditPoint = (point) => {
+        setEditingPoint(point);
+        setPointName(point.name);
+        setPointDescription(point.description || '');
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <NavBar />
+                <div className="container mx-auto px-4 py-8">
+                    <LoadingSpinner />
+                </div>
+            </div>
+        );
+    }
+
+    if (error && !room) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <NavBar />
+                <div className="container mx-auto px-4 py-8">
+                    <ErrorMessage error={new Error(error)} />
+                    <button
+                        onClick={() => navigate('/custom-rooms/upload')}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                        Back to Upload
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (!room) {
+        return null;
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <NavBar />
+
+            <div className="container mx-auto px-4 py-8 max-w-6xl">
+                <div className="mb-6">
+                    <h1 className="text-3xl font-bold mb-2">{room.name}</h1>
+                    {room.description && (
+                        <p className="text-gray-600">{room.description}</p>
+                    )}
+                </div>
+
+                {error && <ErrorMessage error={new Error(error)} />}
+
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div className="mb-4">
+                        <h2 className="text-xl font-semibold mb-2">Click on the image to place anchor points</h2>
+                        <p className="text-sm text-gray-600">
+                            Anchor points mark locations where you'll place memorable items in your memory palace.
+                        </p>
+                    </div>
+
+                    {/* Image with click handler */}
+                    <div className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100" style={{ minHeight: '400px' }}>
+                        <img
+                            ref={imageRef}
+                            src={room.imageUrl}
+                            alt={room.name}
+                            className="w-full h-auto cursor-crosshair"
+                            onClick={handleImageClick}
+                            style={{ display: 'block' }}
+                        />
+
+                        {/* Render anchor points as markers */}
+                        {anchorPoints.map((point, index) => (
+                            <div
+                                key={point._id || index}
+                                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                                style={{
+                                    left: `${point.x}%`,
+                                    top: `${point.y}%`
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditPoint(point);
+                                }}
+                            >
+                                {/* Marker dot */}
+                                <div className="w-6 h-6 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">{index + 1}</span>
+                                </div>
+
+                                {/* Tooltip on hover */}
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                    {point.name}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Anchor Points List */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-xl font-semibold mb-4">Anchor Points ({anchorPoints.length})</h2>
+
+                    {anchorPoints.length === 0 ? (
+                        <p className="text-gray-500">No anchor points yet. Click on the image above to add one.</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {anchorPoints.map((point, index) => (
+                                <div
+                                    key={point._id || index}
+                                    className="flex items-center justify-between p-3 border border-gray-200 rounded hover:bg-gray-50"
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
+                                            {index + 1}
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold">{point.name}</div>
+                                            {point.description && (
+                                                <div className="text-sm text-gray-600">{point.description}</div>
+                                            )}
+                                            <div className="text-xs text-gray-400">
+                                                Position: ({point.x.toFixed(1)}%, {point.y.toFixed(1)}%)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <button
+                                            onClick={() => handleEditPoint(point)}
+                                            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeletePoint(point)}
+                                            className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Edit/Add Modal */}
+                {editingPoint && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                            <h3 className="text-xl font-semibold mb-4">
+                                {editingPoint._id ? 'Edit' : 'Add'} Anchor Point
+                            </h3>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={pointName}
+                                    onChange={(e) => setPointName(e.target.value)}
+                                    placeholder="e.g., Door, Window, Desk"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description (Optional)
+                                </label>
+                                <textarea
+                                    value={pointDescription}
+                                    onChange={(e) => setPointDescription(e.target.value)}
+                                    placeholder="Add a description..."
+                                    rows="3"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+
+                            {!editingPoint._id && (
+                                <div className="mb-4 text-sm text-gray-600">
+                                    Position: ({editingPoint.x.toFixed(1)}%, {editingPoint.y.toFixed(1)}%)
+                                </div>
+                            )}
+
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={() => {
+                                        setEditingPoint(null);
+                                        setPointName('');
+                                        setPointDescription('');
+                                    }}
+                                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                    disabled={isSaving}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSavePoint}
+                                    disabled={isSaving || !pointName.trim()}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                    {isSaving ? (
+                                        <span className="flex items-center gap-2">
+                                            <LoadingSpinner size="small" />
+                                            Saving...
+                                        </span>
+                                    ) : (
+                                        'Save'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="mt-6 flex justify-end space-x-4">
+                    <button
+                        onClick={() => navigate('/custom-rooms/upload')}
+                        className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                        Create Another Room
+                    </button>
+                    <button
+                        onClick={() => navigate('/saved-rooms')}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                        View All Rooms
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default AnchorPointEditor;

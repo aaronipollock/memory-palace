@@ -28,8 +28,23 @@ setupSecurityMiddleware(app);
 app.use(cookieParser());
 
 // Body parser with increased limit for large image data
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Skip body parsing for multipart/form-data (let multer handle it)
+const jsonParser = express.json({ limit: '50mb' });
+const urlencodedParser = express.urlencoded({ limit: '50mb', extended: true });
+
+app.use((req, res, next) => {
+    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+        return next(); // Skip body parsing for multipart/form-data
+    }
+    jsonParser(req, res, next);
+});
+
+app.use((req, res, next) => {
+    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+        return next(); // Skip body parsing for multipart/form-data
+    }
+    urlencodedParser(req, res, next);
+});
 
 // Input sanitization and XSS protection
 app.use(sanitizeInput);

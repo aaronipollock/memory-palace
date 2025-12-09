@@ -164,7 +164,7 @@ const memoryPalaceValidation = {
       .withMessage('Palace name must be between 1 and 100 characters'),
 
     body('roomType')
-      .isIn(['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen'])
+      .isIn(['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen', 'custom'])
       .withMessage('Invalid room type'),
 
     body('associations')
@@ -198,6 +198,11 @@ const memoryPalaceValidation = {
       .isLength({ min: 1, max: 100 })
       .withMessage('Palace name must be between 1 and 100 characters'),
 
+    body('roomType')
+      .optional()
+      .isIn(['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen', 'custom'])
+      .withMessage('Invalid room type'),
+
     handleValidationErrors
   ]
 };
@@ -225,7 +230,7 @@ const imageGenerationValidation = {
 
     body('roomType')
       .optional()
-      .isIn(['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen'])
+      .isIn(['throne room', 'bedchamber', 'dungeon', 'great hall', 'chapel', 'kitchen', 'custom'])
       .withMessage('Invalid room type'),
 
     body('artStyle')
@@ -316,6 +321,11 @@ const feedbackValidation = {
 
 // Sanitization middleware
 const sanitizeInput = (req, res, next) => {
+  // Skip sanitization for multipart/form-data (let multer handle it first)
+  if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+    return next();
+  }
+
   // Sanitize all string inputs
   if (req.body) {
     Object.keys(req.body).forEach(key => {

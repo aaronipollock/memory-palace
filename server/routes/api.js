@@ -1,16 +1,48 @@
 const express = require('express');
 const imageController = require('../controllers/imageController');
 const roomController = require('../controllers/roomController');
+const { authenticateToken } = require('../middleware/auth');
 const router = express.Router();
 const axios = require('axios');
+const multer = require('multer');
+const path = require('path');
+const os = require('os');
 require('dotenv').config();
 const embeddingService = require('../services/embeddingService');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        // Use system temp directory (works on all platforms)
+        cb(null, os.tmpdir());
+    },
+    filename: (req, file, cb) => {
+        // Generate unique filename
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'room-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        // Only allow image files
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'), false);
+        }
+    }
+});
 
 router.post('/generate-images', imageController.generateImages);
 router.post('/generate-room', roomController.generateRoom);
 
-// Add additional image routes
-router.post('/upload-image', imageController.uploadImage);
+// Add additional image routes with authentication and multer middleware
+router.post('/upload-image', authenticateToken, upload.single('image'), imageController.uploadImage);
 router.get('/image-info/:filename', imageController.getImageInfo);
 
 // Improved word concreteness endpoint with better error handling

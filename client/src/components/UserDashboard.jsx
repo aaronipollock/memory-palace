@@ -4,8 +4,10 @@ import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 import ProfileSettingsModal from './ProfileSettingsModal';
+import PalacePreview from './PalacePreview';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
+import { ROOM_IMAGES } from '../constants/roomData';
 
 import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
@@ -15,11 +17,13 @@ const UserDashboard = () => {
     const [stats, setStats] = useState(null);
     const [showProfileSettings, setShowProfileSettings] = useState(false);
     const [palaces, setPalaces] = useState([]);
+    const [customRooms, setCustomRooms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [userEmail, setUserEmail] = useState(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [palaceToDelete, setPalaceToDelete] = useState(null);
+    const [customRoomToDelete, setCustomRoomToDelete] = useState(null);
     const navigate = useNavigate();
     const { showSuccess, showError, showInfo } = useToast();
 
@@ -36,6 +40,7 @@ const UserDashboard = () => {
             const payload = JSON.parse(atob(token.split('.')[1]));
             setUserEmail(payload.email);
             fetchPalaces();
+            fetchCustomRooms();
         } catch (err) {
             console.error('Error decoding token:', err);
             const tokenError = new Error('Invalid authentication token');
@@ -105,6 +110,19 @@ const UserDashboard = () => {
         }
     };
 
+    const fetchCustomRooms = async () => {
+        try {
+            const response = await apiClient.get('/api/custom-rooms');
+            if (response.ok) {
+                const data = await response.json();
+                setCustomRooms(data);
+            }
+        } catch (err) {
+            console.error('Error fetching custom rooms:', err);
+            // Don't set error state - custom rooms are optional
+        }
+    };
+
     const handlePalaceClick = (palace) => {
         // Store only essential palace data in localStorage to avoid quota issues
         const palaceDataForStorage = {
@@ -113,7 +131,9 @@ const UserDashboard = () => {
             roomType: palace.roomType,
             associations: palace.associations,
             completionStatus: palace.completionStatus,
-            acceptedImages: palace.acceptedImages || {} // Keep accepted images for loading
+            acceptedImages: palace.acceptedImages || {}, // Keep accepted images for loading
+            customRoomId: palace.customRoomId || null,
+            customRoomImageUrl: palace.customRoomImageUrl || null
         };
 
         // If acceptedImages contains base64 data, convert to paths only
@@ -146,33 +166,61 @@ const UserDashboard = () => {
     const handleDeleteClick = (e, palace) => {
         e.stopPropagation();
         setPalaceToDelete(palace);
+        setCustomRoomToDelete(null);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteCustomRoomClick = (e, room) => {
+        e.stopPropagation();
+        setCustomRoomToDelete(room);
+        setPalaceToDelete(null);
         setDeleteModalOpen(true);
     };
 
     const handleConfirmDelete = async () => {
         try {
-            const response = await apiClient.delete(`/api/memory-palaces/${palaceToDelete._id}`);
+            if (customRoomToDelete) {
+                // Delete custom room
+                const response = await apiClient.delete(`/api/custom-rooms/${customRoomToDelete._id}`);
 
-            if (!response.ok) {
-                const data = await response.json();
-                const errorObj = new Error(data.message || 'Failed to delete memory palace');
-                errorObj.response = { data, status: response.status };
-                throw errorObj;
+                if (!response.ok) {
+                    const data = await response.json();
+                    const errorObj = new Error(data.error || 'Failed to delete custom room');
+                    errorObj.response = { data, status: response.status };
+                    throw errorObj;
+                }
+
+                setCustomRooms(customRooms.filter(r => r._id !== customRoomToDelete._id));
+                showSuccess(`Custom room "${customRoomToDelete.name}" deleted successfully!`);
+            } else if (palaceToDelete) {
+                // Delete memory palace
+                const response = await apiClient.delete(`/api/memory-palaces/${palaceToDelete._id}`);
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    const errorObj = new Error(data.message || 'Failed to delete memory palace');
+                    errorObj.response = { data, status: response.status };
+                    throw errorObj;
+                }
+
+                setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
+                showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
             }
-
-            setPalaces(palaces.filter(p => p._id !== palaceToDelete._id));
-            showSuccess(`Memory palace "${palaceToDelete.name}" deleted successfully!`);
         } catch (err) {
             setError(err);
-            showError('Failed to delete memory palace. Please try again.');
+            showError(customRoomToDelete
+                ? 'Failed to delete custom room. Please try again.'
+                : 'Failed to delete memory palace. Please try again.');
         }
         setDeleteModalOpen(false);
         setPalaceToDelete(null);
+        setCustomRoomToDelete(null);
     };
 
     const handleCancelDelete = () => {
         setDeleteModalOpen(false);
         setPalaceToDelete(null);
+        setCustomRoomToDelete(null);
     };
 
     const handleLogout = async () => {
@@ -265,6 +313,47 @@ const UserDashboard = () => {
                     {userEmail === 'demo@example.com' ? 'Demo Memory Palaces' : 'Your Memory Palaces'}
                 </h2>
 
+                {/* Custom Rooms Section */}
+                {customRooms.length > 0 && (
+                    <div className="mb-8">
+                        <h3 className="text-2xl font-bold mb-4 text-center">Your Custom Rooms</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                            {customRooms.map((room) => (
+                                <div
+                                    key={room._id}
+                                    onClick={() => navigate(`/custom-rooms/${room._id}/edit`)}
+                                    className="bg-white/90 p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-300 relative"
+                                >
+                                    <button
+                                        onClick={(e) => handleDeleteCustomRoomClick(e, room)}
+                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-2 z-10"
+                                        title="Delete custom room"
+                                    >
+                                        ×
+                                    </button>
+                                    <div className="mb-4">
+                                        <img
+                                            src={room.imageUrl}
+                                            alt={room.name}
+                                            className="w-full h-48 object-cover rounded-lg"
+                                            onError={(e) => {
+                                                e.target.src = '/images/placeholder.png';
+                                            }}
+                                        />
+                                    </div>
+                                    <h3 className="text-xl font-semibold mb-2">{room.name}</h3>
+                                    {room.description && (
+                                        <p className="text-gray-600 text-sm mb-2">{room.description}</p>
+                                    )}
+                                    <p className="text-gray-500 text-sm">
+                                        {room.anchorPoints?.length || 0} anchor point{room.anchorPoints?.length !== 1 ? 's' : ''}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {error && (
                     <div className="mb-6">
                         <ErrorMessage
@@ -275,7 +364,7 @@ const UserDashboard = () => {
                     </div>
                 )}
 
-                {palaces.length === 0 ? (
+                {(palaces.length === 0 && customRooms.length === 0) ? (
                     <div className="text-center text-gray-600 mt-8">
                         <p className="text-lg mb-4">No memory palaces found.</p>
                         {userEmail !== 'demo@example.com' && (
@@ -288,8 +377,10 @@ const UserDashboard = () => {
                         )}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {palaces.map((palace) => (
+                    <>
+                        {palaces.length > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {palaces.map((palace) => (
                             <div
                                 key={palace._id || palace.name}
                                 onClick={() => handlePalaceClick(palace)}
@@ -297,13 +388,19 @@ const UserDashboard = () => {
                             >
                                 <button
                                     onClick={(e) => handleDeleteClick(e, palace)}
-                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-2"
+                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-2 z-10"
                                     title="Delete memory palace"
                                 >
                                     ×
                                 </button>
+
+                                {/* Room Image with Preview */}
+                                <div className="mb-4">
+                                    <PalacePreview palace={palace} />
+                                </div>
+
                                 <h2 className="text-xl font-semibold mb-2">{palace.name}</h2>
-                                <p className="text-gray-600 mb-4">Room Type: {palace.roomType || 'Throne Room'}</p>
+                                <p className="text-gray-600 mb-4">Room Type: {palace.roomType === 'custom' ? 'Custom Room' : (palace.roomType || 'Throne Room')}</p>
 
                                 {/* Completion Status */}
                                 {palace.completionStatus && (
@@ -356,16 +453,20 @@ const UserDashboard = () => {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 {/* Delete Confirmation Modal */}
                 {deleteModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                            <h3 className="text-xl font-semibold mb-4">Delete Memory Palace</h3>
+                            <h3 className="text-xl font-semibold mb-4">
+                                {customRoomToDelete ? 'Delete Custom Room' : 'Delete Memory Palace'}
+                            </h3>
                             <p className="text-gray-600 mb-6">
-                                Are you sure you want to delete "{palaceToDelete?.name}"? This action cannot be undone.
+                                Are you sure you want to delete "{customRoomToDelete?.name || palaceToDelete?.name}"? This action cannot be undone.
                             </p>
                             <div className="flex justify-end space-x-4">
                                 <button

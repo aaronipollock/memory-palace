@@ -144,7 +144,10 @@ router.post('/', memoryPalaceValidation.create, async (req, res) => {
         res.status(201).json(palace);
     } catch (error) {
         console.error('Error creating memory palace:', error);
-        res.status(500).json({ error: 'Failed to create memory palace' });
+        // Return more detailed error message
+        const errorMessage = error.message || 'Failed to create memory palace';
+        const statusCode = error.name === 'ValidationError' ? 400 : 500;
+        res.status(statusCode).json({ error: errorMessage, details: error.errors });
     }
 });
 
@@ -180,7 +183,10 @@ router.put('/:id', memoryPalaceValidation.update, async (req, res) => {
         res.json(updatedPalace);
     } catch (error) {
         console.error('Error updating memory palace:', error);
-        res.status(500).json({ error: 'Failed to update memory palace' });
+        // Return more detailed error message
+        const errorMessage = error.message || 'Failed to update memory palace';
+        const statusCode = error.name === 'ValidationError' ? 400 : 500;
+        res.status(statusCode).json({ error: errorMessage, details: error.errors });
     }
 });
 

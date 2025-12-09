@@ -154,10 +154,17 @@ exports.generateImages = async (req, res) => {
 // Upload and optimize an existing image
 exports.uploadImage = async (req, res) => {
     try {
+
         if (!req.file) {
             return res.status(400).json({
                 success: false,
-                error: 'No file uploaded'
+                error: 'No file uploaded',
+                debug: {
+                    hasFile: !!req.file,
+                    hasFiles: !!req.files,
+                    contentType: req.headers['content-type'],
+                    bodyKeys: Object.keys(req.body || {})
+                }
             });
         }
 
