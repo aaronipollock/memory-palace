@@ -97,38 +97,32 @@ const NavBar = ({ onLoginClick }) => {
                     </div>
 
                     {/* Navigation Links */}
-                    <div className="flex items-center space-x-2 md:space-x-4" style={{ minWidth: '300px', backgroundColor: 'rgba(255,0,0,0.1)' }}>
-                        {/* Debug: Show login status */}
-                        <span style={{ fontSize: '10px', color: 'red', marginRight: '10px' }}>
-                            {isLoggedIn ? 'LOGGED IN' : 'NOT LOGGED IN'}
-                        </span>
+                    <div className="flex items-center space-x-2 md:space-x-4">
                         {isLoggedIn ? (
                             <>
                                 <button
                                     onClick={() => navigate('/input')}
                                     className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
-                                    style={{ whiteSpace: 'nowrap', backgroundColor: 'rgba(0,255,0,0.2)' }}
+                                    style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Create Palace
                                 </button>
                                 <button
                                     onClick={() => navigate('/custom-rooms/upload')}
                                     className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
-                                    style={{ whiteSpace: 'nowrap', backgroundColor: 'rgba(0,255,0,0.2)' }}
+                                    style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Create Custom Room
                                 </button>
                                 <button
                                     onClick={() => navigate('/saved-rooms')}
                                     className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
-                                    style={{ whiteSpace: 'nowrap', backgroundColor: 'rgba(0,255,0,0.2)' }}
+                                    style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Saved Rooms
                                 </button>
                             </>
-                        ) : (
-                            <span style={{ color: 'red' }}>No links - not logged in</span>
-                        )}
+                        ) : null}
                     </div>
 
 
@@ -148,18 +142,12 @@ const NavBar = ({ onLoginClick }) => {
                             </button>
                         ) : (
                             <>
-                                {/* <button
+                                <button
                                     onClick={onLoginClick}
-                                    className="loci-nav-link !text-white"
+                                    className="px-4 py-2 bg-primary text-white rounded transition-colors duration-200 hover:bg-[#7C3AED]"
                                 >
                                     Log In
                                 </button>
-                                <button
-                                    onClick={onSignUpClick}
-                                    className="btn-loci"
-                                >
-                                    Sign Up
-                                </button> */}
                             </>
                         )}
                     </div>
