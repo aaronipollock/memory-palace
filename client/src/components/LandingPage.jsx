@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import AuthModal from './AuthModal';
-import LoadingSpinner from './LoadingSpinner';
 import UserGuide from './UserGuide';
 import About from './About';
-import { SecureAPIClient, CSRFManager, TokenManager } from '../utils/security';
+import { CSRFManager } from '../utils/security';
 import './LandingPage.css';
 import { getApiUrl } from '../config/api';
 
@@ -32,48 +31,83 @@ const LandingPage = () => {
   const [showAbout, setShowAbout] = useState(false);
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
 
-  // Check authentication status on component mount and listen for changes
+  const decodeJwtPayload = (jwt) => {
+    const parts = jwt?.split('.');
+    if (!parts || parts.length < 2) return null;
+
+    try {
+      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4) base64 += '=';
+
+      const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+      const json = new TextDecoder().decode(bytes);
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  };
+
+  const logoutTimerRef = useRef(null);
+
   useEffect(() => {
     const checkAuthStatus = () => {
+      // clear any previously scheduled logout
+      if (logoutTimerRef.current) {
+        clearTimeout(logoutTimerRef.current);
+        logoutTimerRef.current = null;
+      }
+
       const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          setUserEmail(payload.email);
-          setIsLoggedIn(true);
-        } catch (err) {
-          console.error('Error decoding token:', err);
-          localStorage.removeItem('token');
-          setUserEmail('');
-          setIsLoggedIn(false);
-        }
+
+      if (!token) {
+        setUserEmail('');
+        setIsLoggedIn(false);
+        return;
+      }
+
+      const payload = decodeJwtPayload(token);
+      const now = Math.floor(Date.now() / 1000);
+
+      if (payload?.email && payload?.exp && payload.exp > now) {
+        setUserEmail(payload.email);
+        setIsLoggedIn(true);
+
+        const MAX_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24h
+
+        const msUntilExp = (payload.exp - now) * 1000;
+        const delay = Math.min(msUntilExp + 500, MAX_TIMEOUT_MS);
+
+        logoutTimerRef.current = setTimeout(
+          checkAuthStatus,
+          delay
+        );
       } else {
+        localStorage.removeItem('token');
         setUserEmail('');
         setIsLoggedIn(false);
       }
     };
 
-    // Check immediately
     checkAuthStatus();
 
-    // Listen for storage changes (logout events)
     const handleStorageChange = (e) => {
-      if (e.key === 'token') {
-        checkAuthStatus();
-      }
+      if (e.key === 'token') checkAuthStatus();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-
-    // Also listen for custom logout events
     const handleLogout = () => {
+      if (logoutTimerRef.current) {
+        clearTimeout(logoutTimerRef.current);
+        logoutTimerRef.current = null;
+      }
       setUserEmail('');
       setIsLoggedIn(false);
     };
 
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('logout', handleLogout);
 
     return () => {
+      if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('logout', handleLogout);
     };
@@ -117,33 +151,15 @@ const LandingPage = () => {
     };
   }, [isLoggedIn]);
 
-  const features = [
-    {
-      title: "AI-Powered Memory Creation",
-      description: "Transform any information into vivid, memorable images with AI technology.",
-      icon: "🎨"
-    },
-    {
-      title: "Interactive Memory Palaces",
-      description: "Build and explore your own memory palaces with interactive points and visual anchors.",
-      icon: "🏰"
-    },
-    {
-      title: "Personalized Learning",
-      description: "Save, organize, and review your memory palaces at your own pace.",
-      icon: "📚"
-    }
-  ];
-
   const useCases = [
     {
       title: "Students",
-      description: "Master complex subjects through visual memory techniques.",
+      description: "Improve retrieval through structured cues.",
       icon: "🎓"
     },
     {
       title: "Professionals",
-      description: "Remember presentations, procedures, and key information with ease.",
+      description: "Encode presentations, procedures, and key information into spatial anchors.",
       icon: "💼"
     },
     {
@@ -216,7 +232,7 @@ const LandingPage = () => {
               const data = await response.json();
               localStorage.setItem('token', data.accessToken);
               if (data.csrfToken) {
-                  localStorage.setItem('csrfToken', data.csrfToken);
+                CSRFManager.setCSRFToken(data.csrfToken);
               }
               console.log('Token stored in localStorage:', localStorage.getItem('token'));
               navigate('/saved-rooms');
@@ -253,7 +269,7 @@ const LandingPage = () => {
                     Ready to create your next memory palace?
                   </p>
                   <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                    Continue building your collection of memory palaces for better learning and retention.
+                    Continue building and revisiting your memory palaces.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
@@ -280,13 +296,13 @@ const LandingPage = () => {
               <div className="flex flex-col md:flex-row items-center justify-between gap-12">
                 <div className="flex-1 text-center md:text-left">
                   <h1 className="text-5xl md:text-6xl mb-6 text-center text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                    Want to boost your memory? <br /> You've come to the right palace.
+                    Structured memory encoding,<br /> supported by AI.
                   </h1>
                   <p className="text-xl text-white text-center mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                    AI-powered memory palace creation for better learning and retention.
+                    An open-source tool for building and revisiting spatial memory structures, or "memory palaces".
                   </p>
                   <p className="text-lg text-white text-center mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                    Transform how you remember using the ancient method of <em>loci</em> (Latin for "places," pronounced <strong>low·sai</strong>)
+                    Based on the ancient method of <em>loci</em> (Latin for "places," pronounced <strong>low·sai</strong>)
                   </p>
 
                   {/* What is a Memory Palace? Accordion */}
@@ -310,47 +326,57 @@ const LandingPage = () => {
                       </svg>
                     </button>
                     {isInfoExpanded && (
-                      <div
-                        id="memory-palace-info"
-                        className="mt-2 bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white animate-fade-in"
-                      >
-                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                          A <strong>memory palace</strong> is an ancient memory technique that transforms abstract information into vivid, memorable images placed in a spatial environment. Instead of trying to memorize lists or facts, you create a mental journey through a room where each location holds a visual reminder.
-                        </p>
-                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                          <strong>Here's how the app works:</strong>
-                        </p>
-                        <ol className="list-decimal list-inside mb-4 space-y-3 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ml-2">
-                          <li>Choose a room type (throne room, bedchamber, dungeon) and familiarize yourself with it</li>
-                          <li>Select specific locations in that room as "anchor points"</li>
-                          <li>Associate each item you want to remember with an anchor point</li>
-                          <li>AI generates vivid, memorable images for each association</li>
-                          <li>To recall, mentally walk through the room and visualize the images at each location</li>
-                        </ol>
-                        <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                          This technique works because our brains are naturally excellent at remembering spatial relationships and visual imagery. By connecting information to physical locations, you tap into one of the most powerful memory systems we have.
-                        </p>
-                        <div className="flex flex-wrap gap-4 justify-center mt-6">
-                          <button
-                            onClick={() => {
-                              setIsInfoExpanded(false);
-                              setShowUserGuide(true);
-                            }}
-                            className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-primary-dark transition-colors font-semibold"
-                          >
-                            📖 Read User Guide
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsInfoExpanded(false);
-                              setShowAbout(true);
-                            }}
-                            className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-semibold"
-                          >
-                            ℹ️ Learn More
-                          </button>
-                        </div>
-                      </div>
+                     <div
+                     id="memory-palace-info"
+                     className="mt-2 bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white animate-fade-in"
+                   >
+                     <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                       A <strong>memory palace</strong> is a structured encoding technique that links information to specific locations in a familiar physical space.
+                       Instead of storing ideas as isolated facts, you attach them to spatial cues you already know well.
+                     </p>
+
+                     <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                       The technique has been used for centuries, from classical rhetoric to modern competitive memory training,
+                       because spatial memory tends to be more stable than abstract recall.
+                     </p>
+
+                     <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                       <strong>In Low·sAI, the process looks like this:</strong>
+                     </p>
+
+                     <ol className="list-decimal list-inside mb-4 space-y-3 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ml-2">
+                       <li>Select or define a room you can easily visualize</li>
+                       <li>Choose specific locations within that room as anchors</li>
+                       <li>Associate each concept with a visual cue placed at an anchor</li>
+                       <li>Review by mentally moving through the space in a consistent order</li>
+                     </ol>
+
+                     <p className="mb-4 text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                       Low·sAI focuses on making this encoding process explicit and repeatable,
+                       using software to support structure rather than replace user intent.
+                     </p>
+
+                     <div className="flex flex-wrap gap-4 justify-center mt-6">
+                       <button
+                         onClick={() => {
+                           setIsInfoExpanded(false);
+                           setShowUserGuide(true);
+                         }}
+                         className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-primary-dark transition-colors font-semibold"
+                       >
+                         📖 Read User Guide
+                       </button>
+                       <button
+                         onClick={() => {
+                           setIsInfoExpanded(false);
+                           setShowAbout(true);
+                         }}
+                         className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-semibold"
+                       >
+                         ℹ️ Learn More
+                       </button>
+                     </div>
+                   </div>
                     )}
                   </div>
 
@@ -377,7 +403,7 @@ const LandingPage = () => {
         {!isLoggedIn && (
         <section className="py-0 px-0 section-overlay">
           <h2 className="loci-header text-4xl text-center mb-16 !text-white">
-            Powerful Features for Better Memory
+            Core workflow
           </h2>
           <div className="flex flex-col gap-20 w-full pl-4 pr-4 md:pl-8 md:pr-8 max-w-5xl mx-auto">
             {/* Memorable - Bigger */}
@@ -395,8 +421,8 @@ const LandingPage = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
-                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-Powered Memory Creation</h3>
-                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Transform any information into vivid, memorable images with AI technology.</p>
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Encoding-first image generation</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Generate visual cues to support associations you define (not replace them).</p>
                   </div>
                 </div>
               </div>
@@ -417,8 +443,8 @@ const LandingPage = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
-                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Interactive Memory Palaces</h3>
-                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Build and explore your own memory palaces with interactive points and visual anchors.</p>
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Spatial anchors and repeatable review</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Place cues at consistent locations and revisit them in a fixed order.</p>
                   </div>
                 </div>
               </div>
@@ -439,8 +465,8 @@ const LandingPage = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
-                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Personalized Learning</h3>
-                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save, organize, and review your memory palaces at your own pace.</p>
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save and iterate</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Store palaces and refine them over time as your understanding changes.</p>
                   </div>
                 </div>
               </div>
@@ -453,7 +479,7 @@ const LandingPage = () => {
         <section className="py-20 px-4">
           <div className="container mx-auto max-w-6xl">
             <h2 className="loci-header text-4xl text-center mb-16 !text-white">
-              Perfect For
+              Built For
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {useCases.map((useCase, index) => (
@@ -472,15 +498,16 @@ const LandingPage = () => {
         {(!isLoggedIn || userEmail === 'demo@example.com') && (
         <section className="py-20 px-4 section-overlay">
           <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="loci-header text-4xl mb-6 !text-white">
-                Start Building Your Memory Palace Today
-              </h2>
+          <h2 className="loci-header text-4xl mb-6 !text-white">Create your first palace</h2>
             <button
               onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
               className="btn-loci-secondary text-lg px-8 py-4 rounded-lg hover:scale-105 transition-transform duration-200 mb-12"
             >
-              Create Free Account
+              Free Account
             </button>
+            <p className="text-sm text-white/80">
+              Free to use • Open source • No credit card
+            </p>
           </div>
         </section>
         )}
@@ -503,19 +530,20 @@ const LandingPage = () => {
               {/* Upcoming Features Section - Only show for non-logged-in users */}
               {!isLoggedIn && (
               <div className="w-full">
-                <h3 className="text-2xl font-semibold text-white mb-6 text-center">Upcoming Features</h3>
+                <h3 className="text-2xl font-semibold text-white mb-6 text-center">In Progress</h3>
                 <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
                   <div className="rounded-lg p-4 text-center">
-                    <div className="font-medium mb-2 text-white">Smarter Images</div>
-                    <div className="text-sm text-gray-200">Our language model (LLM) will help generate even more memorable, personalized images for your items.</div>
+                    <div className="font-medium mb-2 text-white">Use Your Own Spaces</div>
+                    <div className="text-sm text-gray-200">Upload photos of familiar rooms and use them as stable spatial anchors for your memory palaces.</div>
                   </div>
                   <div className="rounded-lg p-4 text-center">
-                    <div className="font-medium mb-2 text-white">Create Your Own Rooms</div>
-                    <div className="text-sm text-gray-200">Design layouts that match your real spaces for a more personal memory journey.</div>
+                    <div className="font-medium mb-2 text-white">Custom Room Layouts</div>
+                    <div className="text-sm text-gray-200">Define your own room structures to match how you already think about physical spaces.</div>
                   </div>
                   <div className="rounded-lg p-4 text-center">
-                    <div className="font-medium mb-2 text-white">Upload Photos of Real Rooms</div>
-                    <div className="text-sm text-gray-200">Anchor memories to your own room photos for maximum familiarity.</div>
+                    <div className="font-medium mb-2 text-white">Encoding Suggestions</div>
+                    <div className="text-sm text-gray-200">Optional prompts suggest figurative associations to support stronger encoding, while keeping you in control.
+                    </div>
                   </div>
                 </div>
               </div>
