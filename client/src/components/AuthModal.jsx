@@ -9,7 +9,9 @@ import {
   getFieldIcon
 } from '../utils/validation';
 
-const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData, setFormData }) => {
+const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData: initialFormData, setFormData }) => {
+  // Use local state to prevent parent re-renders on every keystroke
+  const [localFormData, setLocalFormData] = useState(initialFormData);
   const [touched, setTouched] = useState({ email: false, password: false, confirmPassword: false });
   const [validation, setValidation] = useState({
     isValid: false,
@@ -22,12 +24,27 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
   });
   const modalRef = useRef(null);
   const firstInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
 
-  // Validate form whenever formData changes
+  // Sync with parent state only on blur (not on every keystroke to prevent focus loss)
+  const syncWithParent = () => {
+    if (setFormData) {
+      setFormData(localFormData);
+    }
+  };
+
+  // Sync local state with prop when modal opens or prop changes externally
   useEffect(() => {
-    const validationResult = validateAuthForm(formData, mode);
+    if (isOpen) {
+      setLocalFormData(initialFormData);
+    }
+  }, [isOpen, initialFormData]);
+
+  // Validate form whenever localFormData changes
+  useEffect(() => {
+    const validationResult = validateAuthForm(localFormData, mode);
     setValidation(validationResult);
-  }, [formData, mode]);
+  }, [localFormData, mode]);
 
   // Focus trap and Escape key support
   useEffect(() => {
@@ -72,7 +89,8 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
     // Sanitize input
     const sanitizedValue = InputSanitizer.sanitizeString(value);
 
-    setFormData(prev => ({
+    // Update local state only (prevents parent re-render on every keystroke)
+    setLocalFormData(prev => ({
       ...prev,
       [name]: sanitizedValue
     }));
@@ -83,6 +101,8 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
       ...prev,
       [fieldName]: true
     }));
+    // Sync with parent state on blur
+    syncWithParent();
   };
 
   const handleSubmit = (e) => {
@@ -93,7 +113,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
 
     // Additional security validation
     if (mode === 'signup') {
-      const passwordValidation = PasswordValidator.validate(formData.password);
+      const passwordValidation = PasswordValidator.validate(localFormData.password);
       if (!passwordValidation.isValid) {
         // Update validation state with password errors
         setValidation(prev => ({
@@ -110,7 +130,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
 
     if (validation.isValid) {
       // Sanitize all form data before submission
-      const sanitizedFormData = InputSanitizer.sanitizeObject(formData);
+      const sanitizedFormData = InputSanitizer.sanitizeObject(localFormData);
       onSubmit(sanitizedFormData);
     }
   };
@@ -163,13 +183,13 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                 type="email"
                 id="email"
                 name="email"
-                value={formData.email}
+                value={localFormData.email}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur('email')}
                 className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
                   getFieldStyling(
                     validation.isValidations.email,
-                    formData.email,
+                    localFormData.email,
                     touched.email
                   )
                 }`}
@@ -179,11 +199,11 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                 maxLength={254}
                 ref={firstInputRef}
               />
-              {touched.email && formData.email && (
+              {touched.email && localFormData.email && (
                 <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
                   validation.isValidations.email ? 'text-green-500' : 'text-red-500'
                 }`}>
-                  {getFieldIcon(validation.isValidations.email, formData.email, touched.email)}
+                  {getFieldIcon(validation.isValidations.email, localFormData.email, touched.email)}
                 </span>
               )}
             </div>
@@ -201,13 +221,13 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                 type="password"
                 id="password"
                 name="password"
-                value={formData.password}
+                value={localFormData.password}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur('password')}
                 className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
                   getFieldStyling(
                     validation.isValidations.password,
-                    formData.password,
+                    localFormData.password,
                     touched.password
                   )
                 }`}
@@ -215,19 +235,20 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                 autoComplete="new-password"
                 disabled={isLoading}
                 maxLength={128}
+                ref={passwordInputRef}
               />
-              {touched.password && formData.password && (
+              {touched.password && localFormData.password && (
                 <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
                   validation.isValidations.password ? 'text-green-500' : 'text-red-500'
                 }`}>
-                  {getFieldIcon(validation.isValidations.password, formData.password, touched.password)}
+                  {getFieldIcon(validation.isValidations.password, localFormData.password, touched.password)}
                 </span>
               )}
             </div>
             {touched.password && validation.errors.password && (
               <p className="text-red-500 text-xs mt-1">{validation.errors.password}</p>
             )}
-            {mode === 'signup' && formData.password && (
+            {mode === 'signup' && localFormData.password && (
               <PasswordStrength
                 strength={validation.passwordStrength}
                 label={validation.passwordStrengthLabel}
@@ -247,25 +268,25 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                   type="password"
                   id="confirmPassword"
                   name="confirmPassword"
-                  value={formData.confirmPassword}
+                  value={localFormData.confirmPassword}
                   onChange={handleInputChange}
                   onBlur={() => handleBlur('confirmPassword')}
                   className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
-                    getFieldStyling(
-                      validation.isValidations.confirmPassword,
-                      formData.confirmPassword,
-                      touched.confirmPassword
-                    )
-                  }`}
+                  getFieldStyling(
+                    validation.isValidations.confirmPassword,
+                    localFormData.confirmPassword,
+                    touched.confirmPassword
+                  )
+                }`}
                   required
                   disabled={isLoading}
                   maxLength={128}
                 />
-                {touched.confirmPassword && formData.confirmPassword && (
+                {touched.confirmPassword && localFormData.confirmPassword && (
                   <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
                     validation.isValidations.confirmPassword ? 'text-green-500' : 'text-red-500'
                   }`}>
-                    {getFieldIcon(validation.isValidations.confirmPassword, formData.confirmPassword, touched.confirmPassword)}
+                    {getFieldIcon(validation.isValidations.confirmPassword, localFormData.confirmPassword, touched.confirmPassword)}
                   </span>
                 )}
               </div>

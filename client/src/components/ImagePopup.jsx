@@ -132,10 +132,10 @@ const ImagePopup = ({
                 className="btn-loci bg-primary text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                 aria-describedby="reject-help"
               >
-                Reject
+                Make it Stranger
               </button>
               <div id="reject-help" className="sr-only">
-                Click to generate a new image for this anchor point.
+                Click to generate a stranger, more memorable image for this anchor point.
               </div>
               <button
                 onClick={onAccept}

@@ -1,5 +1,5 @@
 import { SecureAPIClient, InputSanitizer } from '../utils/security';
-import { generatePrompt } from '../utils/promptGenerator';
+import { generatePrompt, generateStrangerPrompt } from '../utils/promptGenerator';
 
 // Initialize secure API client
 import { getApiUrl } from '../config/api';
@@ -77,6 +77,61 @@ export const generateImage = async (association, setCurrentPrompt) => {
     return data;
   } catch (error) {
     console.error('Image generation error:', error);
+
+    // Enhance the error with context if it doesn't have response data
+    if (!error.response) {
+      error.context = 'image-generation';
+    }
+
+    throw error;
+  }
+};
+
+/**
+ * Generates a STRANGER version of an image (for "Make it Stranger" button)
+ * Uses more extreme prompts to create more memorable, bizarre images
+ */
+export const generateStrangerImage = async (association, setCurrentPrompt) => {
+  try {
+    // Sanitize input
+    const sanitizedAssociation = InputSanitizer.sanitizeObject(association);
+
+    // Ensure we have the required data
+    if (!sanitizedAssociation || !sanitizedAssociation.memorableItem) {
+      const error = new Error('Invalid association data: missing memorable item');
+      error.response = { status: 400 };
+      throw error;
+    }
+
+    // Generate the stranger prompt
+    const promptResult = await generateStrangerPrompt(sanitizedAssociation, setCurrentPrompt);
+
+    if (!promptResult || !promptResult.fullPrompt) {
+      console.error('Failed to generate stranger prompt:', promptResult);
+      // Fallback to regular prompt if stranger prompt fails
+      return generateImage(association, setCurrentPrompt);
+    }
+
+    console.log('Sending STRANGER prompt to API:', promptResult.fullPrompt);
+
+    // Make API request with stranger prompt
+    const response = await apiClient.post('/api/generate-images', {
+      prompt: promptResult.fullPrompt,
+      association: sanitizedAssociation
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const error = new Error(errorData.error || 'Failed to generate stranger image');
+      error.response = { status: response.status, data: errorData };
+      throw error;
+    }
+
+    const data = await response.json();
+    console.log('Backend stranger image generation response:', data);
+    return data;
+  } catch (error) {
+    console.error('Stranger image generation error:', error);
 
     // Enhance the error with context if it doesn't have response data
     if (!error.response) {

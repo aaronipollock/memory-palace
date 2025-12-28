@@ -179,15 +179,24 @@ exports.logout = async (req, res) => {
             domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : 'localhost'
         });
 
-        // If this is the demo user, reset demo palaces
+        // If this is the demo user, reset demo palaces and delete custom rooms
         if (email === 'demo@example.com') {
             try {
                 // Use the smart reset function that reuses existing AI images
                 const { smartResetDemoPalaces } = require('../scripts/smartResetDemoPalaces');
                 await smartResetDemoPalaces();
                 console.log('Demo palaces reset on logout (smart)');
+
+                // Delete all custom rooms for demo user
+                const CustomRoom = require('../models/CustomRoom');
+                const User = require('../models/User');
+                const demoUser = await User.findOne({ email: 'demo@example.com' });
+                if (demoUser) {
+                    const deleteResult = await CustomRoom.deleteMany({ userId: demoUser._id });
+                    console.log(`Deleted ${deleteResult.deletedCount} custom rooms for demo user on logout`);
+                }
             } catch (resetError) {
-                console.error('Error resetting demo palaces:', resetError);
+                console.error('Error resetting demo data:', resetError);
                 // Don't fail the logout if reset fails
             }
         }

@@ -31,9 +31,9 @@ const ART_STYLES = [
 
 const InputPage = ({ setIsLoading, isLoading }) => {
     const navigate = useNavigate();
-    // Initialize state from localStorage or use default values
+    // Initialize state from localStorage or use empty string (no room selected)
     const [roomType, setRoomType] = useState(() =>
-        localStorage.getItem('roomType') || 'throne room'
+        localStorage.getItem('roomType') || ''
     );
     const [customRoomId, setCustomRoomId] = useState(null);
     const [customRooms, setCustomRooms] = useState([]);
@@ -63,9 +63,12 @@ const InputPage = ({ setIsLoading, isLoading }) => {
 
     // Get the anchor points for the current room type
     // If a custom room is selected, use its anchor points
-    const currentAnchorPoints = selectedCustomRoom && selectedCustomRoom.anchorPoints
+    // Only show anchor points if a room type has been selected
+    const currentAnchorPoints = !roomType && !selectedCustomRoom
+        ? []
+        : selectedCustomRoom && selectedCustomRoom.anchorPoints
         ? selectedCustomRoom.anchorPoints.map(ap => ap.name)
-        : Object.keys(ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS["throne room"]);
+        : Object.keys(ROOM_ANCHOR_POSITIONS[roomType] || []);
 
     // Handle room type change
     const handleRoomTypeChange = (e) => {
@@ -163,10 +166,10 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                     <div className="bg-white rounded-lg p-6 mb-8 text-text">
                         <p className="mb-4">To create your memory palace, follow these steps:</p>
                         <ol className="list-decimal pl-6 space-y-2">
-                            <li><strong className="text-primary">Room Type:</strong> Choose the type of room for your memory palace.</li>
+                            <li><strong className="text-primary">Room Type:</strong> Choose a standard room type or select a custom room you've created.</li>
                             <li><strong className="text-primary">Art Style:</strong> Select your preferred art style for the generated images.</li>
-                            <li><strong className="text-primary">Anchor Points:</strong> In Demo Mode, we've chosen these features for you.</li>
-                            <li><strong className="text-primary">Memorables:</strong> List the items or concepts you want to remember.</li>
+                            <li><strong className="text-primary">Anchor Points:</strong> For custom rooms, these are the anchor points you defined when creating the room. For standard rooms, we've chosen these features for you.</li>
+                            <li><strong className="text-primary">Memorables:</strong> List the items or concepts you want to remember (one per line).</li>
                         </ol>
                     </div>
 
@@ -241,21 +244,35 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                         Examples: "hourglass (time)", "two-dollar bill (Thomas Jefferson)", "eagle (freedom)", "scales (justice)"
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label htmlFor="anchor-points" className="block text-gray-800 font-bold mb-2">
-                                {selectedCustomRoom ? 'Anchor Points:' : 'Demo Anchor Points:'}
-                            </label>
-                            <div
-                                id="anchor-points"
-                                className="border p-3 w-full h-60 bg-white text-text rounded-lg whitespace-pre-wrap leading-tight overflow-auto"
-                                style={{ fontFamily: 'inherit', lineHeight: 1.2, margin: 0 }}
-                                role="textbox"
-                                aria-readonly="true"
-                                aria-label="Demo anchor points for the selected room type"
-                            >
-                                {currentAnchorPoints.join('\n')}
+                        {roomType || selectedCustomRoom ? (
+                            <div className="space-y-2">
+                                <label htmlFor="anchor-points" className="block text-gray-800 font-bold mb-2">
+                                    {selectedCustomRoom ? 'Anchor Points:' : 'Demo Anchor Points:'}
+                                </label>
+                                <div
+                                    id="anchor-points"
+                                    className="border p-3 w-full h-60 bg-white text-text rounded-lg whitespace-pre-wrap leading-tight overflow-auto"
+                                    style={{ fontFamily: 'inherit', lineHeight: 1.2, margin: 0 }}
+                                    role="textbox"
+                                    aria-readonly="true"
+                                    aria-label="Demo anchor points for the selected room type"
+                                >
+                                    {currentAnchorPoints.join('\n')}
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <label className="block text-gray-800 font-bold mb-2">
+                                    Demo Anchor Points:
+                                </label>
+                                <div
+                                    className="border p-3 w-full h-60 bg-gray-50 text-gray-400 rounded-lg flex items-center justify-center"
+                                    style={{ fontFamily: 'inherit', lineHeight: 1.2, margin: 0 }}
+                                >
+                                    Please select a room type to see anchor points
+                                </div>
+                            </div>
+                        )}
                         <div className="space-y-2">
                             <label htmlFor="memorables" className="block text-gray-800 font-bold">
                                 Memorables (one per line):

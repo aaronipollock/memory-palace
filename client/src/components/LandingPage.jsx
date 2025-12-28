@@ -450,7 +450,7 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Saved Rooms */}
+            {/* My Palaces */}
             <div
               ref={featureRefs[2]}
               className={`w-full feature-card-container ${visibleFeatures[2] ? 'feature-visible' : 'feature-hidden'}`}
@@ -460,7 +460,7 @@ const LandingPage = () => {
                 <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
                   <img
                     src="/images/saved_rooms.png"
-                    alt="Saved Rooms"
+                    alt="My Palaces"
                     className="absolute inset-0 w-full h-full object-cover z-0 feature-image"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>

@@ -16,6 +16,7 @@ const UserDashboard = () => {
     const [user, setUser] = useState(null);
     const [stats, setStats] = useState(null);
     const [showProfileSettings, setShowProfileSettings] = useState(false);
+    const [activeTab, setActiveTab] = useState('palaces'); // 'palaces' or 'custom-rooms'
     const [palaces, setPalaces] = useState([]);
     const [customRooms, setCustomRooms] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -318,84 +319,63 @@ const UserDashboard = () => {
                     </div>
                 </div>
 
-                <h2 className="text-3xl font-bold mb-6 text-center">
-                    {userEmail === 'demo@example.com' ? 'Demo Memory Palaces' : 'Your Memory Palaces'}
-                </h2>
-
-                {/* Custom Rooms Section */}
+                {/* Tabs */}
                 <div className="mb-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-2xl font-bold text-center flex-1">Your Custom Rooms</h3>
+                    <div className="flex justify-center gap-1">
                         <button
-                            onClick={() => setShowUploadModal(true)}
-                            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                            onClick={() => setActiveTab('palaces')}
+                            className={`px-6 py-3 text-lg font-medium transition-all duration-200 relative ${
+                                activeTab === 'palaces'
+                                    ? 'text-primary'
+                                    : 'text-gray-600 hover:text-primary'
+                            }`}
                         >
-                            + Create Custom Room
+                            {userEmail === 'demo@example.com' ? 'Demo Palaces' : 'Memory Palaces'}
+                            {activeTab === 'palaces' && (
+                                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t"></span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('custom-rooms')}
+                            className={`px-6 py-3 text-lg font-medium transition-all duration-200 relative ${
+                                activeTab === 'custom-rooms'
+                                    ? 'text-primary'
+                                    : 'text-gray-600 hover:text-primary'
+                            }`}
+                        >
+                            Custom Rooms
+                            {activeTab === 'custom-rooms' && (
+                                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t"></span>
+                            )}
                         </button>
                     </div>
-                    {customRooms.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {customRooms.map((room) => (
-                                <div
-                                    key={room._id}
-                                    onClick={() => navigate(`/custom-rooms/${room._id}/edit`)}
-                                    className="bg-white/90 p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-300 relative"
-                                >
-                                    <button
-                                        onClick={(e) => handleDeleteCustomRoomClick(e, room)}
-                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-2 z-10"
-                                        title="Delete custom room"
-                                    >
-                                        ×
-                                    </button>
-                                    <div className="mb-4">
-                                        <img
-                                            src={room.imageUrl}
-                                            alt={room.name}
-                                            className="w-full h-48 object-cover rounded-lg"
-                                            onError={(e) => {
-                                                e.target.src = '/images/placeholder.png';
-                                            }}
-                                        />
-                                    </div>
-                                    <h3 className="text-xl font-semibold mb-2">{room.name}</h3>
-                                    {room.description && (
-                                        <p className="text-gray-600 text-sm mb-2">{room.description}</p>
-                                    )}
-                                    <p className="text-gray-500 text-sm">
-                                        {room.anchorPoints?.length || 0} anchor point{room.anchorPoints?.length !== 1 ? 's' : ''}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
-                {error && (
-                    <div className="mb-6">
-                        <ErrorMessage
-                            error={error}
-                            context="palace-load"
-                            onRetry={handleRetryLoad}
-                        />
-                    </div>
-                )}
-
-                {(palaces.length === 0 && customRooms.length === 0) ? (
-                    <div className="text-center text-gray-600 mt-8">
-                        <p className="text-lg mb-4">No memory palaces found.</p>
-                        {userEmail !== 'demo@example.com' && (
-                            <button
-                                onClick={() => navigate('/input')}
-                                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
-                            >
-                                Create Your First Palace
-                            </button>
-                        )}
-                    </div>
-                ) : (
+                {/* Tab Content */}
+                {activeTab === 'palaces' ? (
                     <>
-                        {palaces.length > 0 && (
+                        {error && (
+                            <div className="mb-6">
+                                <ErrorMessage
+                                    error={error}
+                                    context="palace-load"
+                                    onRetry={handleRetryLoad}
+                                />
+                            </div>
+                        )}
+                        {palaces.length === 0 ? (
+                            <div className="text-center text-gray-600 mt-8">
+                                <p className="text-lg mb-4">No memory palaces found.</p>
+                                {userEmail !== 'demo@example.com' && (
+                                    <button
+                                        onClick={() => navigate('/input')}
+                                        className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                                    >
+                                        Create Your First Palace
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {palaces.map((palace) => (
                             <div
@@ -405,7 +385,7 @@ const UserDashboard = () => {
                             >
                                 <button
                                     onClick={(e) => handleDeleteClick(e, palace)}
-                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-2 z-10"
+                                    className="absolute top-1 right-1 text-red-500 hover:text-red-700 p-2 z-10"
                                     title="Delete memory palace"
                                 >
                                     ×
@@ -470,6 +450,71 @@ const UserDashboard = () => {
                                 </div>
                             </div>
                         ))}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {/* Custom Rooms Tab Content */}
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-2xl font-bold">Your Custom Rooms</h3>
+                            <button
+                                onClick={() => {
+                                    const event = new CustomEvent('openUploadModal');
+                                    window.dispatchEvent(event);
+                                }}
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                            >
+                                + Create Custom Room
+                            </button>
+                        </div>
+                        {customRooms.length === 0 ? (
+                            <div className="text-center text-gray-600 mt-8">
+                                <p className="text-lg mb-4">No custom rooms found.</p>
+                                <button
+                                    onClick={() => {
+                                        const event = new CustomEvent('openUploadModal');
+                                        window.dispatchEvent(event);
+                                    }}
+                                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                                >
+                                    Create Your First Custom Room
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {customRooms.map((room) => (
+                                    <div
+                                        key={room._id}
+                                        onClick={() => navigate(`/custom-rooms/${room._id}/edit`)}
+                                        className="bg-white/90 p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-300 relative"
+                                    >
+                                        <button
+                                            onClick={(e) => handleDeleteCustomRoomClick(e, room)}
+                                            className="absolute top-1 right-1 text-red-500 hover:text-red-700 p-2 z-10"
+                                            title="Delete custom room"
+                                        >
+                                            ×
+                                        </button>
+                                        <div className="mb-4">
+                                            <img
+                                                src={room.imageUrl}
+                                                alt={room.name}
+                                                className="w-full h-48 object-cover rounded-lg"
+                                                onError={(e) => {
+                                                    e.target.src = '/images/placeholder.png';
+                                                }}
+                                            />
+                                        </div>
+                                        <h3 className="text-xl font-semibold mb-2">{room.name}</h3>
+                                        {room.description && (
+                                            <p className="text-gray-600 text-sm mb-2">{room.description}</p>
+                                        )}
+                                        <p className="text-gray-500 text-sm">
+                                            {room.anchorPoints?.length || 0} anchor point{room.anchorPoints?.length !== 1 ? 's' : ''}
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </>

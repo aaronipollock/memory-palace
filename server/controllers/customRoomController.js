@@ -249,3 +249,24 @@ exports.deleteCustomRoom = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete custom room' });
     }
 };
+
+// DELETE all custom rooms for demo user (cleanup on logout/leave)
+exports.deleteAllDemoCustomRooms = async (req, res) => {
+    try {
+        // Only allow for demo users
+        if (req.user.email !== 'demo@example.com') {
+            return res.status(403).json({ error: 'Access denied. This endpoint is only for demo users.' });
+        }
+
+        // Delete all custom rooms for this user
+        const deleteResult = await CustomRoom.deleteMany({ userId: req.user.userId });
+
+        res.json({
+            message: 'All custom rooms deleted successfully',
+            deletedCount: deleteResult.deletedCount
+        });
+    } catch (error) {
+        console.error('Error deleting demo custom rooms:', error);
+        res.status(500).json({ error: 'Failed to delete custom rooms' });
+    }
+};

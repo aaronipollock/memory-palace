@@ -93,8 +93,8 @@ const NavBar = ({ onLoginClick }) => {
         <nav className="loci-nav" role="navigation" aria-label="Main Navigation">
             <div className="container mx-auto px-6">
                 <div className="flex justify-between items-center py-4">
-                    {/* Logo and Brand */}
-                    <div className="flex flex-col items-start">
+                    {/* Logo, Brand, and Navigation Links */}
+                    <div className="flex items-center space-x-8 md:space-x-12">
                         <button
                             className="text-5xl font-bold text-primary cursor-pointer loci-header trajan-font loci-italic focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                             onClick={() => navigate('/')}
@@ -102,18 +102,17 @@ const NavBar = ({ onLoginClick }) => {
                         >
                             Low·sAI
                         </button>
-                    </div>
 
-                    {/* Navigation Links */}
-                    <div className="flex items-center space-x-2 md:space-x-4">
-                        {isLoggedIn ? (
-                            <>
+                        {/* Navigation Links */}
+                        {isLoggedIn && (
+                            <div className="flex items-center space-x-6 md:space-x-8">
                                 <button
                                     onClick={() => navigate('/input')}
-                                    className="px-2 py-1 text-sm md:text-lg text-gray-600 hover:text-blue-600 transition-colors border border-transparent rounded"
+                                    className="relative text-base md:text-lg text-gray-700 hover:text-primary transition-colors duration-200 font-medium pb-1 group"
                                     style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Create Palace
+                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
                                 </button>
                                 <button
                                     onClick={() => {
@@ -121,20 +120,22 @@ const NavBar = ({ onLoginClick }) => {
                                         const event = new CustomEvent('openUploadModal');
                                         window.dispatchEvent(event);
                                     }}
-                                    className="px-2 py-1 text-sm md:text-lg text-gray-600 hover:text-blue-600 transition-colors border border-transparent rounded"
+                                    className="relative text-base md:text-lg text-gray-700 hover:text-primary transition-colors duration-200 font-medium pb-1 group"
                                     style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Create Custom Room
+                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
                                 </button>
                                 <button
                                     onClick={() => navigate('/saved-rooms')}
-                                    className="px-2 py-1 text-sm md:text-lg text-gray-600 hover:text-blue-600 transition-colors border border-transparent rounded"
+                                    className="relative text-base md:text-lg text-gray-700 hover:text-primary transition-colors duration-200 font-medium pb-1 group"
                                     style={{ whiteSpace: 'nowrap' }}
                                 >
-                                    Saved Rooms
+                                    My Palaces
+                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
                                 </button>
-                            </>
-                        ) : null}
+                            </div>
+                        )}
                     </div>
 
 

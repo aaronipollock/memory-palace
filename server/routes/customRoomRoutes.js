@@ -11,6 +11,10 @@ router.use(authenticateToken);
 // Route: GET /api/custom-rooms
 router.get('/', customRoomController.getCustomRooms);
 
+// DELETE all custom rooms for demo user (cleanup)
+// Route: DELETE /api/custom-rooms/cleanup
+router.delete('/cleanup', customRoomController.deleteAllDemoCustomRooms);
+
 // GET a single custom room by ID
 // Route: GET /api/custom-rooms/:id
 router.get('/:id', customRoomController.getCustomRoomById);

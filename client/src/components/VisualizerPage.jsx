@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROOM_IMAGES, ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
 import ImagePopup from './ImagePopup';
 import SaveRoomModal from './SaveRoomModal';
-// import { generateImage } from '../services/imageService';
+import { generateImage, generateStrangerImage } from '../services/imageService';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
@@ -12,48 +12,6 @@ import { SecureAPIClient } from '../utils/security';
 
 import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
-
-// Temporary inline generateImage function
-const generateImage = async (association, setCurrentPrompt) => {
-  try {
-    // Simple prompt generation
-    const verb = ['on', 'next to', 'inside', 'above', 'below', 'behind', 'in front of', 'around'][Math.floor(Math.random() * 8)];
-    const adjective = ['giant', 'tiny', 'glowing', 'colorful', 'transparent', 'bright', 'sparkling', 'floating'][Math.floor(Math.random() * 8)];
-    const artStyle = ['digital art', 'realistic', 'detailed illustration', 'high quality render'][Math.floor(Math.random() * 4)];
-
-    const concreteImage = association.memorableItem;
-    const description = `a ${adjective} ${concreteImage}, clearly visible and prominent`;
-    const core = `${description} ${verb} a ${association.anchor}`;
-    const fullPrompt = `${core}, ${artStyle}, centered composition, clear focus on the ${concreteImage}.`;
-    const displayPrompt = `${core}.`;
-
-    if (setCurrentPrompt) {
-      setCurrentPrompt(displayPrompt);
-    }
-
-    // Make API request with SecureAPIClient to include authentication
-
-    const response = await apiClient.post('/api/generate-images', {
-      prompt: fullPrompt,
-      association: association
-    });
-
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      const error = new Error(errorData.error || 'Failed to generate image');
-      error.response = { status: response.status, data: errorData };
-      throw error;
-    }
-
-    const data = await response.json();
-
-    return data;
-  } catch (error) {
-    console.error('Image generation error:', error);
-    throw error;
-  }
-};
 
 const VisualizerPage = () => {
   const navigate = useNavigate();
@@ -305,6 +263,12 @@ const VisualizerPage = () => {
       if (allImagesAccepted && !isUpdate) {
         setSavedPalaceName(roomData.name);
         setShowRecallModal(true);
+        // Navigation will happen when recall modal is closed
+      } else {
+        // Navigate to dashboard immediately if no recall modal
+        setTimeout(() => {
+          navigate('/saved-rooms');
+        }, 1000); // Small delay to let user see the success message
       }
 
       // Don't clear accepted images after save - let user continue working
@@ -407,14 +371,15 @@ const VisualizerPage = () => {
 
   const handleRejectImage = async () => {
     if (selectedAssociation) {
-      showInfo('Generating new image...');
+      showInfo('Making it stranger...');
       setIsLoading(true);
       setError(null);
       setGeneratedImage(null);
       setCurrentPrompt('');
 
       try {
-        const result = await generateImage(selectedAssociation, setCurrentPrompt);
+        // Use "Make it Stranger" instead of regular regenerate
+        const result = await generateStrangerImage(selectedAssociation, setCurrentPrompt);
         // Handle base64 image data from backend
         if (result.imageData) {
           setGeneratedImage(`data:image/png;base64,${result.imageData}`);
@@ -422,11 +387,11 @@ const VisualizerPage = () => {
           setGeneratedImage(result.optimizedUrl || result.imageUrl);
         }
         setCurrentPrompt(result.prompt);
-        showSuccess('New image generated!');
+        showSuccess('Stranger image generated!');
       } catch (err) {
         console.error('Image generation error:', err);
         setError(err);
-        showError('Failed to generate new image. Please try again.');
+        showError('Failed to generate stranger image. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -582,7 +547,13 @@ const VisualizerPage = () => {
             <div className="bg-white rounded-lg p-8 shadow-lg max-w-2xl w-full relative">
               <button
                 className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
-                onClick={() => setShowRecallModal(false)}
+                onClick={() => {
+                  setShowRecallModal(false);
+                  // Navigate to dashboard after closing recall modal
+                  setTimeout(() => {
+                    navigate('/saved-rooms');
+                  }, 300);
+                }}
                 aria-label="Close recall instructions"
               >
                 &times;
@@ -615,7 +586,13 @@ const VisualizerPage = () => {
               </div>
               <div className="flex justify-end">
                 <button
-                  onClick={() => setShowRecallModal(false)}
+                  onClick={() => {
+                    setShowRecallModal(false);
+                    // Navigate to dashboard after closing recall modal
+                    setTimeout(() => {
+                      navigate('/saved-rooms');
+                    }, 300);
+                  }}
                   className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
                 >
                   Got it!

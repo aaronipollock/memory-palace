@@ -14,6 +14,7 @@ import UploadRoomPhotoPage from './components/UploadRoomPhotoPage';
 import AnchorPointEditor from './components/AnchorPointEditor';
 import UploadRoomPhoto from './components/UploadRoomPhoto';
 import { ToastProvider } from './context/ToastContext';
+import { getApiUrl } from './config/api';
 
 function AppContent() {
     const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +28,57 @@ function AppContent() {
         window.addEventListener('openUploadModal', handleOpenModal);
         return () => {
             window.removeEventListener('openUploadModal', handleOpenModal);
+        };
+    }, []);
+
+    // Cleanup demo custom rooms when user leaves the site
+    useEffect(() => {
+        const cleanupDemoCustomRooms = () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                // Check if user is demo user
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.email !== 'demo@example.com') return;
+
+                // Use fetch with keepalive for reliable cleanup on page unload
+                // Note: This is fire-and-forget, we don't await it
+                fetch(getApiUrl('/api/custom-rooms/cleanup'), {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    keepalive: true // Allows request to continue after page unloads
+                }).catch(() => {
+                    // Silently fail - this is cleanup, not critical
+                });
+            } catch (error) {
+                // Silently fail - this is cleanup, not critical
+                console.debug('Cleanup error (non-critical):', error);
+            }
+        };
+
+        // Handle page visibility change (more reliable than beforeunload)
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                cleanupDemoCustomRooms();
+            }
+        };
+
+        // Handle beforeunload as backup
+        const handleBeforeUnload = () => {
+            cleanupDemoCustomRooms();
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, []);
 
