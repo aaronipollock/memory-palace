@@ -110,21 +110,25 @@ const NavBar = ({ onLoginClick }) => {
                             <>
                                 <button
                                     onClick={() => navigate('/input')}
-                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    className="px-2 py-1 text-sm md:text-lg text-gray-600 hover:text-blue-600 transition-colors border border-transparent rounded"
                                     style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Create Palace
                                 </button>
                                 <button
-                                    onClick={() => navigate('/custom-rooms/upload')}
-                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    onClick={() => {
+                                        // Dispatch global event to open modal (handled by App.jsx)
+                                        const event = new CustomEvent('openUploadModal');
+                                        window.dispatchEvent(event);
+                                    }}
+                                    className="px-2 py-1 text-sm md:text-lg text-gray-600 hover:text-blue-600 transition-colors border border-transparent rounded"
                                     style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Create Custom Room
                                 </button>
                                 <button
                                     onClick={() => navigate('/saved-rooms')}
-                                    className="px-2 py-1 text-sm md:text-base text-gray-700 hover:text-blue-600 transition-colors border border-transparent hover:border-gray-300 rounded"
+                                    className="px-2 py-1 text-sm md:text-lg text-gray-600 hover:text-blue-600 transition-colors border border-transparent rounded"
                                     style={{ whiteSpace: 'nowrap' }}
                                 >
                                     Saved Rooms

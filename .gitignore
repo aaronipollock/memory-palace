@@ -7,6 +7,9 @@
 
 # Dependencies
 node_modules/
+# macOS duplicate folders/files
+node_modules */
+package-lock *.json
 
 # Build files
 /build

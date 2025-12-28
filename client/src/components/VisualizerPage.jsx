@@ -469,21 +469,21 @@ const VisualizerPage = () => {
           <div className="flex gap-3">
             <button
               type="button"
-              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
               onClick={() => navigate('/saved-rooms')}
             >
               ← Back to Dashboard
             </button>
             <button
               type="button"
-              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
               onClick={() => navigate('/input')}
             >
               + New Palace
             </button>
           </div>
           <button
-            className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-primary-dark transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+            className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
             onClick={() => setShowInstructionsModal(true)}
             aria-describedby="instructions-help"
           >
@@ -691,7 +691,7 @@ const VisualizerPage = () => {
           <div className="absolute bottom-6 right-6 z-20">
             <button
               onClick={() => setIsSaveModalOpen(true)}
-              className="group relative px-6 py-3 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 bg-primary hover:bg-primary-dark text-white"
+              className="group relative px-6 py-3 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 bg-primary hover:bg-[#7C3AED] text-white"
               aria-describedby="save-room-help"
             >
               <div className="flex items-center space-x-2">

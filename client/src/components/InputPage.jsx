@@ -4,7 +4,7 @@ import { ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
-import { getContextualErrorMessage } from '../utils/errorHandler';
+// import { getContextualErrorMessage } from '../utils/errorHandler';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
 import { getApiUrl } from '../config/api';

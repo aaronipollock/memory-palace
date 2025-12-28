@@ -7,7 +7,7 @@ import ProfileSettingsModal from './ProfileSettingsModal';
 import PalacePreview from './PalacePreview';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
-import { ROOM_IMAGES } from '../constants/roomData';
+// import { ROOM_IMAGES } from '../constants/roomData';
 
 import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
@@ -48,6 +48,15 @@ const UserDashboard = () => {
             setError(tokenError);
             setLoading(false);
         }
+
+        // Listen for global event to refresh custom rooms (when modal creates a new room)
+        const handleRefresh = () => {
+            fetchCustomRooms();
+        };
+        window.addEventListener('refreshCustomRooms', handleRefresh);
+        return () => {
+            window.removeEventListener('refreshCustomRooms', handleRefresh);
+        };
     }, [navigate]);
 
     // Fetch user profile data
@@ -314,10 +323,18 @@ const UserDashboard = () => {
                 </h2>
 
                 {/* Custom Rooms Section */}
-                {customRooms.length > 0 && (
-                    <div className="mb-8">
-                        <h3 className="text-2xl font-bold mb-4 text-center">Your Custom Rooms</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="mb-8">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-2xl font-bold text-center flex-1">Your Custom Rooms</h3>
+                        <button
+                            onClick={() => setShowUploadModal(true)}
+                            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                        >
+                            + Create Custom Room
+                        </button>
+                    </div>
+                    {customRooms.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {customRooms.map((room) => (
                                 <div
                                     key={room._id}
@@ -351,8 +368,8 @@ const UserDashboard = () => {
                                 </div>
                             ))}
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 {error && (
                     <div className="mb-6">
@@ -493,6 +510,7 @@ const UserDashboard = () => {
                 user={user}
                 onProfileUpdate={handleProfileUpdate}
             />
+
         </div>
     );
 };

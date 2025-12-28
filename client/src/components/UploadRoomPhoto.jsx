@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
-import ErrorMessage from './ErrorMessage';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
 import { getApiUrl } from '../config/api';
@@ -10,7 +8,7 @@ import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
 /**
- * 🎓 COMPONENT 1: Upload Room Photo
+ * 🎓 COMPONENT: Upload Room Photo Modal
  *
  * WHAT THIS COMPONENT DOES:
  * - Lets users upload a photo of a real room
@@ -23,9 +21,10 @@ const apiClient = new SecureAPIClient(getApiUrl(''));
  * 2. Image preview using base64
  * 3. Form state management
  * 4. API calls to create room
+ * 5. Modal with focus trap and keyboard navigation
  */
 
-const UploadRoomPhoto = () => {
+const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
     // 🎯 STATE MANAGEMENT
     // These variables store data that can change (React calls this "state")
 
@@ -53,6 +52,60 @@ const UploadRoomPhoto = () => {
 
     // Toast notifications (success/error messages)
     const { showSuccess, showError } = useToast();
+
+    // Modal refs for focus trap
+    const modalRef = useRef(null);
+    const firstInputRef = useRef(null);
+
+    // Reset form when modal opens/closes
+    useEffect(() => {
+        if (!isOpen) {
+            // Reset form when modal closes
+            setSelectedFile(null);
+            setImagePreview(null);
+            setFormData({ name: '', description: '' });
+            setError(null);
+        }
+    }, [isOpen]);
+
+    // Focus trap and Escape key support
+    useEffect(() => {
+        if (!isOpen) return;
+        const focusableElements = modalRef.current?.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusableElements || focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        function handleKeyDown(e) {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            }
+        }
+        document.addEventListener('keydown', handleKeyDown);
+        // Focus the first input
+        if (firstInputRef.current) {
+            setTimeout(() => firstInputRef.current.focus(), 100);
+        }
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onClose]);
 
     /**
      * 📖 FUNCTION: handleFileChange
@@ -234,6 +287,14 @@ const UploadRoomPhoto = () => {
             // Show success message
             showSuccess('Room created successfully!');
 
+            // Call onSuccess callback if provided (to refresh custom rooms list)
+            if (onSuccess) {
+                onSuccess(room);
+            }
+
+            // Close modal
+            onClose();
+
             // Navigate to anchor point editor
             // We pass the room ID in the URL
             navigate(`/custom-rooms/${room._id}/edit`);
@@ -250,22 +311,50 @@ const UploadRoomPhoto = () => {
     /**
      * 📖 THE JSX (WHAT GETS RENDERED):
      *
-     * This is what the user sees on the page
-     * - NavBar at the top
+     * This is what the user sees in the modal
+     * - Modal overlay with backdrop
      * - Form with file input, name, description
      * - Image preview
      * - Submit button
      * - Loading spinner (when saving)
      * - Error message (if something goes wrong)
      */
+    if (!isOpen) return null;
+
     return (
-        <div className="min-h-screen bg-gray-50">
-            <NavBar />
+        <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto p-4"
+            onClick={(e) => {
+                // Close modal when clicking backdrop
+                if (e.target === e.currentTarget) {
+                    onClose();
+                }
+            }}
+        >
+            <div
+                className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto m-auto"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="upload-room-modal-title"
+                ref={modalRef}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold" id="upload-room-modal-title">
+                            Create Custom Room
+                        </h2>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                            aria-label="Close modal"
+                        >
+                            ×
+                        </button>
+                    </div>
 
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
-                <h1 className="text-3xl font-bold mb-6">Create Custom Room</h1>
-
-                <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+                    <form onSubmit={handleSubmit}>
                     {/* FILE INPUT SECTION */}
                     <div className="mb-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -306,11 +395,11 @@ const UploadRoomPhoto = () => {
                                 - Browser automatically displays it
                                 - max-w-full ensures it doesn't overflow
                             */}
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 inline-block">
                                 <img
                                     src={imagePreview}
                                     alt="Room preview"
-                                    className="max-w-full h-auto rounded-lg"
+                                    className="max-w-full h-auto rounded-lg block"
                                     style={{ maxHeight: '400px' }}
                                 />
                             </div>
@@ -331,6 +420,7 @@ const UploadRoomPhoto = () => {
                             placeholder="e.g., My Bedroom, Kitchen, Office"
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
+                            ref={firstInputRef}
                         />
                     </div>
 
@@ -357,32 +447,33 @@ const UploadRoomPhoto = () => {
                         </div>
                     )}
 
-                    {/* SUBMIT BUTTON */}
-                    <div className="flex justify-end gap-4">
-                        <button
-                            type="button"
-                            onClick={() => navigate('/custom-rooms')}
-                            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                            disabled={isLoading}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isLoading || !selectedFile || !formData.name.trim()}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        >
-                            {isLoading ? (
-                                <span className="flex items-center gap-2">
-                                    <LoadingSpinner size="small" />
-                                    Creating...
-                                </span>
-                            ) : (
-                                'Create Room'
-                            )}
-                        </button>
-                    </div>
-                </form>
+                        {/* SUBMIT BUTTON */}
+                        <div className="flex justify-end gap-4 mt-6">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                disabled={isLoading}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isLoading || !selectedFile || !formData.name.trim()}
+                                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <LoadingSpinner size="small" />
+                                        Creating...
+                                    </span>
+                                ) : (
+                                    'Create Room'
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

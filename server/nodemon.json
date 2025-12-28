@@ -1,0 +1,20 @@
+{
+  "ignore": [
+    "node_modules/**/*",
+    "public/**/*",
+    "*.log",
+    ".git",
+    "*.test.js",
+    "*.spec.js",
+    "data/**/*",
+    "scripts/**/*"
+  ],
+  "ext": "js,json",
+  "delay": 500,
+  "verbose": true,
+  "restartable": "rs",
+  "legacyWatch": true,
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

@@ -266,7 +266,7 @@ const AnchorPointEditor = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-purple-300">
             <NavBar />
 
             <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -449,13 +449,13 @@ const AnchorPointEditor = () => {
                 <div className="mt-6 flex justify-end space-x-4">
                     <button
                         onClick={() => navigate('/custom-rooms/upload')}
-                        className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        className="px-6 py-2 bg-primary border border-gray-300 rounded-md text-white hover:bg-secondary"
                     >
                         Create Another Room
                     </button>
                     <button
                         onClick={() => navigate('/saved-rooms')}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        className="px-6 py-2 bg-primary text-white rounded-md hover:bg-secondary"
                     >
                         View All Rooms
                     </button>
