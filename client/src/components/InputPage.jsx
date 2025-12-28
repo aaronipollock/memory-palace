@@ -35,7 +35,9 @@ const InputPage = ({ setIsLoading, isLoading }) => {
     const [roomType, setRoomType] = useState(() =>
         localStorage.getItem('roomType') || ''
     );
-    const [customRoomId, setCustomRoomId] = useState(null);
+    const [customRoomId, setCustomRoomId] = useState(() =>
+        localStorage.getItem('customRoomId') || null
+    );
     const [customRooms, setCustomRooms] = useState([]);
     const [selectedCustomRoom, setSelectedCustomRoom] = useState(null);
     const [memorables, setMemorables] = useState('');
@@ -60,6 +62,21 @@ const InputPage = ({ setIsLoading, isLoading }) => {
         };
         fetchCustomRooms();
     }, []);
+
+    // Auto-select custom room if customRoomId is in localStorage (from AnchorPointEditor)
+    useEffect(() => {
+        const storedCustomRoomId = localStorage.getItem('customRoomId');
+        const storedRoomType = localStorage.getItem('roomType');
+
+        if (storedCustomRoomId && storedRoomType === 'custom' && customRooms.length > 0) {
+            const customRoom = customRooms.find(r => r._id === storedCustomRoomId);
+            if (customRoom) {
+                setSelectedCustomRoom(customRoom);
+                setCustomRoomId(storedCustomRoomId);
+                setRoomType('custom');
+            }
+        }
+    }, [customRooms]);
 
     // Get the anchor points for the current room type
     // If a custom room is selected, use its anchor points
@@ -178,7 +195,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                             <label htmlFor="room-type" className="text-primary font-bold whitespace-nowrap">Room Type:</label>
                             <select
                                 id="room-type"
-                                value={customRoomId ? `custom:${customRoomId}` : roomType}
+                                value={selectedCustomRoom ? `custom:${customRoomId}` : (roomType || '')}
                                 onChange={handleRoomTypeChange}
                                 className="flex-1 p-2 border-2 border-accent1 rounded-lg bg-white text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                                 style={{ maxWidth: '100%' }}

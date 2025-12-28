@@ -447,15 +447,46 @@ const VisualizerPage = () => {
               + New Palace
             </button>
           </div>
-          <button
-            className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
-            onClick={() => setShowInstructionsModal(true)}
-            aria-describedby="instructions-help"
-          >
-            How to Use
-          </button>
-          <div id="instructions-help" className="sr-only">
-            Click to view instructions on how to use your memory palace.
+          <div className="flex gap-3 items-center">
+            {/* Save Palace Button - moved here to avoid covering anchor points */}
+            <button
+              onClick={() => setIsSaveModalOpen(true)}
+              className="group relative px-6 py-2 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 bg-primary hover:bg-[#7C3AED] text-white"
+              aria-describedby="save-room-help"
+            >
+              <div className="flex items-center space-x-2">
+                {/* Text */}
+                <span className="font-semibold">
+                  {allImagesAccepted ? 'Save Palace' : 'Save Progress'}
+                </span>
+
+                {/* Pulse animation for incomplete palaces */}
+                {!allImagesAccepted && (
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                )}
+              </div>
+
+              {/* Hover effect */}
+              <div className={`absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                allImagesAccepted ? 'bg-primary/20' : 'bg-secondary/20'
+              }`}></div>
+            </button>
+            <div id="save-room-help" className="sr-only">
+              {allImagesAccepted
+                ? 'Click to save your completed memory palace with a name.'
+                : `Click to save your memory palace progress. ${acceptedCount} of ${totalCount} images accepted.`
+              }
+            </div>
+            <button
+              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+              onClick={() => setShowInstructionsModal(true)}
+              aria-describedby="instructions-help"
+            >
+              How to Use
+            </button>
+            <div id="instructions-help" className="sr-only">
+              Click to view instructions on how to use your memory palace.
+            </div>
           </div>
         </div>
         {/* Instructions Modal */}
@@ -623,6 +654,9 @@ const VisualizerPage = () => {
 
             // Check if this anchor has an accepted image
             const hasAcceptedImage = isImageAccepted(assoc);
+            // Get the display number (1-based index for visible associations only)
+            const visibleIndex = visibleAssociations.findIndex(v => v.anchor === assoc.anchor && v.memorableItem === assoc.memorableItem);
+            const displayNumber = visibleIndex >= 0 ? visibleIndex + 1 : index + 1;
 
             return (
               <button
@@ -638,64 +672,32 @@ const VisualizerPage = () => {
                 }}
                 onClick={(e) => handleClick(assoc, e)}
                 disabled={isLoading}
-                aria-label={`${assoc.anchor} anchor point${hasAcceptedImage ? ' - image accepted' : ' - click to generate image'}`}
+                aria-label={`${assoc.anchor} anchor point ${displayNumber}${hasAcceptedImage ? ' - image accepted' : ' - click to generate image'}`}
                 aria-describedby={`anchor-${index}-desc`}
               >
-                <div className={`w-full h-full flex items-center justify-center text-white text-lg font-bold transition-all duration-200 ${
+                <div className={`w-full h-full flex items-center justify-center rounded transition-all duration-200 ${
                   hasAcceptedImage
-                    ? 'bg-secondary bg-opacity-90'
-                    : 'bg-primary bg-opacity-90'
+                    ? 'bg-secondary bg-opacity-80'
+                    : 'bg-primary bg-opacity-80'
                 }`}>
                   {isLoading && selectedAssociation?.anchor === assoc.anchor ? (
                     <LoadingSpinner size="sm" text="" />
-                  ) : hasAcceptedImage ? (
-                    '✓'
                   ) : (
-                    '?'
+                    <span className="text-xl font-bold text-white drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]">
+                      {displayNumber}
+                    </span>
                   )}
                 </div>
                 <div id={`anchor-${index}-desc`} className="sr-only">
                   {hasAcceptedImage
-                    ? `Image for ${assoc.memorableItem} at ${assoc.anchor} has been accepted.`
-                    : `Click to generate an image for ${assoc.memorableItem} at ${assoc.anchor}.`
+                    ? `Anchor point ${displayNumber}: Image for ${assoc.memorableItem} at ${assoc.anchor} has been accepted.`
+                    : `Anchor point ${displayNumber}: Click to generate an image for ${assoc.memorableItem} at ${assoc.anchor}.`
                   }
                 </div>
               </button>
             );
           })}
 
-          {/* Save Palace Button - bottom right of image container */}
-          <div className="absolute bottom-6 right-6 z-20">
-            <button
-              onClick={() => setIsSaveModalOpen(true)}
-              className="group relative px-6 py-3 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 bg-primary hover:bg-[#7C3AED] text-white"
-              aria-describedby="save-room-help"
-            >
-              <div className="flex items-center space-x-2">
-                {/* Text */}
-                <span className="font-semibold">
-                  {allImagesAccepted ? 'Save Palace' : 'Save Progress'}
-                </span>
-
-                {/* Pulse animation for incomplete palaces */}
-                {!allImagesAccepted && (
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                )}
-              </div>
-
-              {/* Hover effect */}
-              <div className={`absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                allImagesAccepted ? 'bg-primary/20' : 'bg-secondary/20'
-              }`}></div>
-            </button>
-
-            <div id="save-room-help" className="sr-only">
-              {allImagesAccepted
-                ? 'Click to save your completed memory palace with a name.'
-                : `Click to save your memory palace progress. ${acceptedCount} of ${totalCount} images accepted.`
-              }
-            </div>
-          </div>
 
           {/* Image Popup */}
           {selectedAssociation && (

@@ -106,15 +106,32 @@ const UserDashboard = () => {
                     return;
                 }
                 const data = await response.json();
-                const errorObj = new Error(data.message || 'Failed to fetch memory palaces');
+                const errorObj = new Error(data.message || data.error || 'Failed to fetch memory palaces');
                 errorObj.response = { data, status: response.status };
-                throw errorObj;
+
+                // For rate limiting (429), show error but don't clear existing data
+                if (response.status === 429) {
+                    setError(errorObj);
+                    // Don't modify palaces array - keep whatever we have (or empty if first load)
+                    // The data is still on the server, just temporarily unavailable
+                } else {
+                    throw errorObj;
+                }
+                return;
             }
 
             const data = await response.json();
             setPalaces(data);
+            setError(null); // Clear any previous errors on success
         } catch (err) {
+            // Always set error so user knows what happened
             setError(err);
+            // For rate limit errors, the data is still on the server - just temporarily unavailable
+            // Don't clear existing data if we have it
+            if (err.response?.status === 429 && palaces.length > 0) {
+                // Keep existing data visible even with rate limit error
+                console.warn('Rate limited - keeping existing palace data visible');
+            }
         } finally {
             setLoading(false);
         }
@@ -126,10 +143,20 @@ const UserDashboard = () => {
             if (response.ok) {
                 const data = await response.json();
                 setCustomRooms(data);
+            } else if (response.status === 429) {
+                // For rate limiting, keep existing custom rooms if any
+                console.warn('Rate limited when fetching custom rooms, keeping existing data');
             }
         } catch (err) {
             console.error('Error fetching custom rooms:', err);
             // Don't set error state - custom rooms are optional
+            // Keep existing custom rooms if rate limited
+            if (err.response?.status !== 429) {
+                // Only clear if it's not a rate limit error
+                if (customRooms.length === 0) {
+                    setCustomRooms([]);
+                }
+            }
         }
     };
 
@@ -261,6 +288,7 @@ const UserDashboard = () => {
         setError(null);
         setLoading(true);
         fetchPalaces();
+        fetchCustomRooms();
     };
 
     const handleProfileUpdate = (updatedUser) => {
@@ -429,25 +457,45 @@ const UserDashboard = () => {
                                   </div>
                                 )}
 
-                                <div className="space-y-2">
-                                    {palace.associations && palace.associations.map((assoc, index) => (
-                                        <div key={index} className="border-t pt-2">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex-1">
-                                                    <p className="font-medium">{assoc.memorableItem}</p>
-                                                    <p className="text-sm text-gray-500">Anchor: {assoc.anchor}</p>
-                                                </div>
-                                                {assoc.hasAcceptedImage && (
-                                                    <div className="ml-2">
-                                                        <span className="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full text-xs">
-                                                            ✓
-                                                        </span>
+                                {/* Associations Accordion */}
+                                {palace.associations && palace.associations.length > 0 && (
+                                    <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+                                        <details className="group">
+                                            <summary className="cursor-pointer list-none flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
+                                                <span className="font-medium text-sm text-gray-700">
+                                                    View Associations ({palace.associations.length})
+                                                </span>
+                                                <svg
+                                                    className="w-5 h-5 text-gray-500 transition-transform duration-200 group-open:rotate-180"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </summary>
+                                            <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                                                {palace.associations.map((assoc, index) => (
+                                                    <div key={index} className="border-t pt-2 px-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex-1">
+                                                                <p className="font-medium text-sm">{assoc.memorableItem || `Item ${index + 1}`}</p>
+                                                                <p className="text-xs text-gray-500">Anchor: {assoc.anchor}</p>
+                                                            </div>
+                                                            {assoc.hasAcceptedImage && (
+                                                                <div className="ml-2">
+                                                                    <span className="inline-flex items-center justify-center w-5 h-5 bg-green-100 text-green-600 rounded-full text-xs">
+                                                                        ✓
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                )}
+                                                ))}
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                        </details>
+                                    </div>
+                                )}
                             </div>
                         ))}
                             </div>

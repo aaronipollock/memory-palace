@@ -38,6 +38,10 @@ const AnchorPointEditor = () => {
     const [editingPoint, setEditingPoint] = useState(null);
     const [pointName, setPointName] = useState('');
     const [pointDescription, setPointDescription] = useState('');
+    const [editingRoom, setEditingRoom] = useState(false);
+    const [roomName, setRoomName] = useState('');
+    const [roomDescription, setRoomDescription] = useState('');
+    const [isSavingRoom, setIsSavingRoom] = useState(false);
     const { showSuccess, showError } = useToast();
 
     // Load room data when component mounts
@@ -72,6 +76,8 @@ const AnchorPointEditor = () => {
 
             const roomData = await response.json();
             setRoom(roomData);
+            setRoomName(roomData.name);
+            setRoomDescription(roomData.description || '');
             setAnchorPoints(roomData.anchorPoints || []);
         } catch (err) {
             console.error('Error loading room:', err);
@@ -233,6 +239,45 @@ const AnchorPointEditor = () => {
         setPointDescription(point.description || '');
     };
 
+    /**
+     * 📖 FUNCTION: handleSaveRoomMetadata
+     *
+     * WHAT IT DOES:
+     * - Saves changes to room name and description
+     */
+    const handleSaveRoomMetadata = async () => {
+        if (!roomName.trim()) {
+            setError('Room name is required');
+            return;
+        }
+
+        try {
+            setIsSavingRoom(true);
+            setError(null);
+
+            const response = await apiClient.put(`/api/custom-rooms/${id}`, {
+                name: roomName.trim(),
+                description: roomDescription.trim()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update room');
+            }
+
+            const updatedRoom = await response.json();
+            setRoom(updatedRoom);
+            setEditingRoom(false);
+            showSuccess('Room updated successfully!');
+        } catch (err) {
+            console.error('Error updating room:', err);
+            setError(err.message || 'Failed to update room');
+            showError(err.message || 'Failed to update room');
+        } finally {
+            setIsSavingRoom(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-gray-50">
@@ -252,7 +297,7 @@ const AnchorPointEditor = () => {
                     <ErrorMessage error={new Error(error)} />
                     <button
                         onClick={() => navigate('/custom-rooms/upload')}
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-[#7C3AED]"
                     >
                         Back to Upload
                     </button>
@@ -270,11 +315,24 @@ const AnchorPointEditor = () => {
             <NavBar />
 
             <div className="container mx-auto px-4 py-8 max-w-6xl">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold mb-2">{room.name}</h1>
-                    {room.description && (
-                        <p className="text-gray-600">{room.description}</p>
-                    )}
+                <div className="mb-6 flex items-start justify-between">
+                    <div className="flex-1">
+                        <h1 className="text-3xl font-bold mb-2">{room.name}</h1>
+                        {room.description && (
+                            <p className="text-gray-600">{room.description}</p>
+                        )}
+                    </div>
+                    <button
+                        onClick={() => {
+                            setEditingRoom(true);
+                            setRoomName(room.name);
+                            setRoomDescription(room.description || '');
+                        }}
+                        className="px-4 py-2 bg-primary text-white rounded-md hover:bg-[#7C3AED] transition-colors ml-4"
+                        title="Edit room details"
+                    >
+                        Edit Room
+                    </button>
                 </div>
 
                 {error && <ErrorMessage error={new Error(error)} />}
@@ -326,12 +384,50 @@ const AnchorPointEditor = () => {
                     </div>
                 </div>
 
+                {/* Empty State Message - appears above list when no anchor points */}
+                {anchorPoints.length === 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div className="text-gray-600">
+                            <p className="mb-2 font-medium">No anchor points yet. Click on the image above to add one.</p>
+                            <p className="text-sm text-gray-500 italic">
+                                Tip: Place anchor points at distinct, memorable locations in your room.
+                                You'll use these to associate items you want to remember.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Next Steps Section - appears above list when anchor points exist */}
+                {anchorPoints.length > 0 && (
+                    <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                            Ready to Create Your Memory Palace?
+                        </h3>
+                        <p className="text-blue-800 mb-4">
+                            You've placed {anchorPoints.length} anchor point{anchorPoints.length !== 1 ? 's' : ''}.
+                            Now you can create a memory palace using this room! The room will be automatically selected
+                            and your anchor points will be ready to use.
+                        </p>
+                        <button
+                            onClick={() => {
+                                // Set the custom room ID in localStorage so InputPage will auto-select it
+                                localStorage.setItem('customRoomId', id);
+                                localStorage.setItem('roomType', 'custom');
+                                navigate('/input');
+                            }}
+                            className="px-6 py-3 bg-primary text-white rounded-md hover:bg-secondary font-medium transition-colors shadow-md hover:shadow-lg"
+                        >
+                            Create Memory Palace with This Room →
+                        </button>
+                    </div>
+                )}
+
                 {/* Anchor Points List */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <h2 className="text-xl font-semibold mb-4">Anchor Points ({anchorPoints.length})</h2>
 
                     {anchorPoints.length === 0 ? (
-                        <p className="text-gray-500">No anchor points yet. Click on the image above to add one.</p>
+                        <p className="text-gray-500">Click on the image above to add your first anchor point.</p>
                     ) : (
                         <div className="space-y-2">
                             {anchorPoints.map((point, index) => (
@@ -373,6 +469,70 @@ const AnchorPointEditor = () => {
                     )}
                 </div>
 
+                {/* Edit Room Metadata Modal */}
+                {editingRoom && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                            <h3 className="text-xl font-semibold mb-4">Edit Room Details</h3>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Room Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={roomName}
+                                    onChange={(e) => setRoomName(e.target.value)}
+                                    placeholder="e.g., My Living Room"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description (Optional)
+                                </label>
+                                <textarea
+                                    value={roomDescription}
+                                    onChange={(e) => setRoomDescription(e.target.value)}
+                                    placeholder="Add a description..."
+                                    rows="3"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+                                />
+                            </div>
+
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={() => {
+                                        setEditingRoom(false);
+                                        setRoomName(room.name);
+                                        setRoomDescription(room.description || '');
+                                    }}
+                                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                    disabled={isSavingRoom}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveRoomMetadata}
+                                    disabled={isSavingRoom || !roomName.trim()}
+                                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-[#7C3AED] disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                    {isSavingRoom ? (
+                                        <span className="flex items-center gap-2">
+                                            <LoadingSpinner size="small" />
+                                            Saving...
+                                        </span>
+                                    ) : (
+                                        'Save Changes'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Edit/Add Modal */}
                 {editingPoint && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -390,7 +550,7 @@ const AnchorPointEditor = () => {
                                     value={pointName}
                                     onChange={(e) => setPointName(e.target.value)}
                                     placeholder="e.g., Door, Window, Desk"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
                                     autoFocus
                                 />
                             </div>
@@ -404,7 +564,7 @@ const AnchorPointEditor = () => {
                                     onChange={(e) => setPointDescription(e.target.value)}
                                     placeholder="Add a description..."
                                     rows="3"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
                                 />
                             </div>
 
@@ -429,7 +589,7 @@ const AnchorPointEditor = () => {
                                 <button
                                     onClick={handleSavePoint}
                                     disabled={isSaving || !pointName.trim()}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-[#7C3AED] disabled:bg-gray-400 disabled:cursor-not-allowed"
                                 >
                                     {isSaving ? (
                                         <span className="flex items-center gap-2">

@@ -6,59 +6,62 @@ const ACTION_VERBS = [
 ];
 
 const DESCRIPTIVE_ADJECTIVES = [
-  'absurdly oversized', 'grotesquely tiny', 'violently glowing', 'shockingly colorful',
-  'impossibly transparent', 'blindingly bright', 'manically sparkling', 'defying gravity',
-  'monstrously large', 'ridiculously small', 'electrically charged', 'surreally distorted',
-  'nightmarishly exaggerated', 'comically absurd', 'terrifyingly vivid', 'hilariously oversized'
+  'absurdly oversized', 'comically tiny', 'brilliantly glowing', 'vibrantly colorful',
+  'impossibly transparent', 'blindingly bright', 'magically sparkling', 'defying gravity',
+  'gigantically large', 'ridiculously small', 'electrically charged', 'playfully distorted',
+  'wildly exaggerated', 'comically absurd', 'strikingly vivid', 'hilariously oversized',
+  'dramatically enlarged', 'whimsically small', 'radiantly glowing', 'spectacularly colorful'
 ];
 
 const ART_STYLES = [
   'surreal symbolic art',
   'exaggerated cartoon style',
-  'bizarre fantasy illustration',
+  'whimsical fantasy illustration',
   'absurdist symbolic imagery',
-  'grotesque surrealism',
+  'playful surrealism',
   'exaggerated caricature style',
-  'nightmarish fantasy art',
-  'comically distorted illustration'
+  'fantastical art',
+  'comically distorted illustration',
+  'vibrant pop art style',
+  'dramatic illustration'
 ];
 
-// Fusion/transformation patterns to boost memorability - biased toward absurdity
+// Fusion/transformation patterns to boost memorability - biased toward playful absurdity
 const FUSION_PATTERNS = [
-  // Absurd transformations
-  ({ mem, anchor }) => `${anchor} screaming in terror as it transforms into a grotesque ${mem}, mid-morph with exaggerated features`,
+  // Playful transformations
+  ({ mem, anchor }) => `${anchor} magically transforming into a ${mem}, mid-morph with exaggerated, whimsical features`,
   // Impossible interactions
-  ({ mem, anchor }) => `a colossal ${mem} devouring the ${anchor} whole, with exaggerated expressions of shock and absurdity`,
+  ({ mem, anchor }) => `a colossal ${mem} playfully interacting with the ${anchor}, with exaggerated expressions of surprise and delight`,
   // Surreal combinations
-  ({ mem, anchor }) => `${anchor} made entirely of writhing, living ${mem} that pulse and move in impossible ways`,
+  ({ mem, anchor }) => `${anchor} made entirely of animated ${mem} that dance and move in impossible, joyful ways`,
   // Emotional absurdity
-  ({ mem, anchor }) => `${mem} having an emotional breakdown while fused with the ${anchor}, with exaggerated tears and dramatic expressions`,
+  ({ mem, anchor }) => `${mem} having a dramatic, comical reaction while fused with the ${anchor}, with exaggerated expressions and theatrical poses`,
   // Impossible physics
-  ({ mem, anchor }) => `${mem} defying all physics by growing out of the ${anchor} like a bizarre plant, with impossible proportions`,
-  // Nightmarish fusion
-  ({ mem, anchor }) => `the ${anchor} bleeding ${mem} from every surface, creating a surreal and disturbing image`,
+  ({ mem, anchor }) => `${mem} defying all physics by growing out of the ${anchor} like a magical plant, with impossible but delightful proportions`,
+  // Playful fusion
+  ({ mem, anchor }) => `the ${anchor} overflowing with ${mem} in a spectacular, colorful cascade, creating a vibrant and memorable image`,
   // Comical exaggeration
-  ({ mem, anchor }) => `${mem} wearing the ${anchor} as a ridiculous hat, with absurd proportions and exaggerated comedy`,
+  ({ mem, anchor }) => `${mem} wearing the ${anchor} as a whimsical hat, with absurd proportions and exaggerated comedy`,
   // Symbolic absurdity
-  ({ mem, anchor }) => `${anchor} giving birth to a swarm of ${mem}, creating a bizarre and memorable symbolic image`,
+  ({ mem, anchor }) => `${anchor} magically producing a swarm of ${mem}, creating a playful and memorable symbolic image`,
   // Emotional salience
-  ({ mem, anchor }) => `${mem} in a passionate embrace with the ${anchor}, with exaggerated romantic or dramatic emotions`,
-  // Grotesque exaggeration
-  ({ mem, anchor }) => `the ${anchor} vomiting a torrent of ${mem}, creating a shocking and unforgettable image`
+  ({ mem, anchor }) => `${mem} in a dramatic, theatrical embrace with the ${anchor}, with exaggerated romantic or comedic emotions`,
+  // Playful exaggeration
+  ({ mem, anchor }) => `the ${anchor} playfully launching a torrent of ${mem} into the air, creating a spectacular and unforgettable image`
 ];
 
-// Exaggerations to force vividness - more absurd and memorable
+// Exaggerations to force vividness - playful and memorable
 const EXAGGERATIONS = [
   'absurdly colossal scale, 10x normal size',
-  'a chaotic swarm of thousands forming one impossible shape',
-  'defying all physics and gravity in impossible ways',
-  'extreme contrast with violently bright highlights and deep black shadows',
-  'dramatic lighting creating a nightmarish silhouette',
-  'exaggerated proportions that are physically impossible',
-  'surreal distortion that makes the image unforgettable',
-  'emotional intensity with exaggerated facial expressions',
-  'symbolic exaggeration that creates strong visual impact',
-  'absurdly detailed textures that create sensory overload'
+  'a spectacular swarm of hundreds forming one impossible, delightful shape',
+  'defying all physics and gravity in impossible, magical ways',
+  'extreme contrast with brilliantly bright highlights and rich colorful shadows',
+  'dramatic lighting creating a striking, memorable silhouette',
+  'exaggerated proportions that are physically impossible but visually delightful',
+  'surreal distortion that makes the image unforgettable and playful',
+  'emotional intensity with exaggerated, theatrical facial expressions',
+  'symbolic exaggeration that creates strong visual impact and memorability',
+  'absurdly detailed textures that create rich visual interest'
 ];
 
 // Sensory texture/color pairs - more vivid and contrasting
@@ -148,7 +151,7 @@ const generatePrompt = async (association, setCurrentPrompt) => {
   const fusion = pickRandom(FUSION_PATTERNS)({ mem, anchor: anchorContext });
 
   const displayPrompt = `${adjective} ${mem} + ${association.anchor}: ${fusion}.`;
-  const fullPrompt = `Create a bizarre, exaggerated, and unforgettable image of ${fusion}. Style: ${artStyle}, avoiding polished or realistic rendering. Composition: ${framing}. Mood: absurd, surreal, emotionally charged, and impossible to forget. Exaggeration: ${exaggeration}. Sensory details: ${sensory}. Make it strange, symbolic, and memorable - prioritize memorability over aesthetic beauty. Constraint: single focal subject, simple background, no text, maximum visual impact through absurdity and exaggeration.`;
+  const fullPrompt = `Create a playful, exaggerated, and unforgettable image of ${fusion}. Style: ${artStyle}, avoiding polished or realistic rendering. Composition: ${framing}. Mood: whimsical, surreal, emotionally engaging, and impossible to forget. Exaggeration: ${exaggeration}. Sensory details: ${sensory}. Make it memorable, symbolic, and striking - prioritize memorability through playful absurdity, exaggeration, and vibrant colors. Use bright, vivid colors and dramatic lighting. Constraint: single focal subject, simple background, no text, maximum visual impact through playful absurdity and exaggeration.`;
 
   if (setCurrentPrompt) setCurrentPrompt(displayPrompt);
 
@@ -157,21 +160,22 @@ const generatePrompt = async (association, setCurrentPrompt) => {
 
 // Generate an even STRANGER version of a prompt (for "Make it Stranger" button)
 const generateStrangerPrompt = async (association, setCurrentPrompt) => {
-  // Use the most extreme options
+  // Use the most extreme but playful options
   const extremeAdjectives = [
-    'nightmarishly grotesque', 'absurdly impossible', 'terrifyingly surreal',
-    'hilariously distorted', 'monstrously exaggerated', 'shockingly bizarre'
+    'wildly impossible', 'absurdly exaggerated', 'spectacularly surreal',
+    'hilariously distorted', 'dramatically oversized', 'shockingly vibrant'
   ];
   const extremeStyles = [
-    'nightmarish surrealism', 'grotesque caricature', 'absurdist symbolism',
-    'distorted fantasy art', 'comical nightmare style'
+    'extreme surrealism', 'exaggerated caricature', 'absurdist symbolism',
+    'distorted fantasy art', 'comical pop art style', 'vibrant surreal illustration'
   ];
   const extremeExaggerations = [
     'impossibly exaggerated to 100x normal size',
-    'defying all known physics and reality',
-    'emotionally charged to the point of absurdity',
-    'surreal distortion that creates visual shock',
-    'symbolic exaggeration that is impossible to forget'
+    'defying all known physics and reality in magical ways',
+    'emotionally charged to the point of theatrical absurdity',
+    'surreal distortion that creates unforgettable visual impact',
+    'symbolic exaggeration that is impossible to forget',
+    'dramatically vibrant colors creating maximum visual impact'
   ];
 
   const adjective = pickRandom(extremeAdjectives);
@@ -184,21 +188,21 @@ const generateStrangerPrompt = async (association, setCurrentPrompt) => {
   const anchor = association.anchor.toLowerCase();
   const anchorContext = ANCHOR_CONTEXT[anchor] || `${anchor}`;
 
-  // Use the most absurd fusion patterns
+  // Use the most absurd but playful fusion patterns
   const extremeFusions = [
-    ({ mem, anchor }) => `${anchor} having a complete emotional breakdown while violently transforming into a grotesque ${mem}, with exaggerated tears, screaming, and impossible proportions`,
-    ({ mem, anchor }) => `a nightmarishly colossal ${mem} devouring the ${anchor} whole while both scream in terror, creating an unforgettable absurd image`,
-    ({ mem, anchor }) => `${anchor} made entirely of writhing, living ${mem} that pulse, scream, and move in impossible ways, defying all physics`,
-    ({ mem, anchor }) => `${mem} in a passionate, absurd embrace with the ${anchor}, with exaggerated romantic drama and impossible physics`,
-    ({ mem, anchor }) => `the ${anchor} vomiting a torrent of ${mem} while both cry and laugh simultaneously, creating a shocking surreal image`,
-    ({ mem, anchor }) => `${mem} wearing the ${anchor} as a ridiculous hat while both have exaggerated expressions of shock and comedy`,
-    ({ mem, anchor }) => `${anchor} giving birth to a swarm of ${mem} in a bizarre and nightmarish symbolic image that is impossible to forget`
+    ({ mem, anchor }) => `${anchor} having a complete theatrical transformation into a ${mem}, with exaggerated, comical expressions and impossible proportions`,
+    ({ mem, anchor }) => `a spectacularly colossal ${mem} playfully interacting with the ${anchor} in an impossible way, creating an unforgettable absurd image`,
+    ({ mem, anchor }) => `${anchor} made entirely of animated ${mem} that dance, pulse, and move in impossible, joyful ways, defying all physics`,
+    ({ mem, anchor }) => `${mem} in a passionate, theatrical embrace with the ${anchor}, with exaggerated dramatic emotions and impossible physics`,
+    ({ mem, anchor }) => `the ${anchor} spectacularly launching a torrent of ${mem} into the air while both have exaggerated expressions of surprise and delight`,
+    ({ mem, anchor }) => `${mem} wearing the ${anchor} as a whimsical hat while both have exaggerated expressions of shock and comedy`,
+    ({ mem, anchor }) => `${anchor} magically producing a spectacular swarm of ${mem} in a vibrant and unforgettable symbolic image`
   ];
 
   const fusion = pickRandom(extremeFusions)({ mem, anchor: anchorContext });
 
   const displayPrompt = `${adjective} ${mem} + ${association.anchor}: ${fusion}.`;
-  const fullPrompt = `Create an EXTREMELY bizarre, nightmarishly exaggerated, and absolutely unforgettable image of ${fusion}. Style: ${artStyle}, completely avoiding polished, realistic, or beautiful rendering. Composition: ${framing}. Mood: ABSURD, SURREAL, EMOTIONALLY CHARGED, and IMPOSSIBLE TO FORGET. Exaggeration: ${exaggeration}. Sensory details: ${sensory}. Make it EXTREMELY strange, symbolic, and memorable - prioritize maximum memorability through absurdity, exaggeration, and emotional impact over ANY aesthetic beauty. Make it WEIRD. Make it IMPOSSIBLE to forget. Constraint: single focal subject, simple background, no text, MAXIMUM visual impact through extreme absurdity and exaggeration.`;
+  const fullPrompt = `Create an EXTREMELY playful, wildly exaggerated, and absolutely unforgettable image of ${fusion}. Style: ${artStyle}, completely avoiding polished, realistic, or beautiful rendering. Composition: ${framing}. Mood: WHIMSICAL, SURREAL, EMOTIONALLY ENGAGING, and IMPOSSIBLE TO FORGET. Exaggeration: ${exaggeration}. Sensory details: ${sensory}. Make it EXTREMELY memorable, symbolic, and striking - prioritize maximum memorability through playful absurdity, exaggeration, vibrant colors, and emotional impact. Use bright, vivid, saturated colors and dramatic lighting. Make it WEIRD but delightful. Make it IMPOSSIBLE to forget. Constraint: single focal subject, simple background, no text, MAXIMUM visual impact through extreme playful absurdity and exaggeration.`;
 
   if (setCurrentPrompt) setCurrentPrompt(displayPrompt);
 

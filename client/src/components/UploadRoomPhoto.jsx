@@ -460,7 +460,7 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
                             <button
                                 type="submit"
                                 disabled={isLoading || !selectedFile || !formData.name.trim()}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                className="px-6 py-2 bg-primary text-white rounded-md hover:bg-[#7C3AED] disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? (
                                     <span className="flex items-center gap-2">

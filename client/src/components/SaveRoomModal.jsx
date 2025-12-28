@@ -114,7 +114,7 @@ const SaveRoomModal = ({ isOpen, onClose, onSave, acceptedImages, roomType, exis
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                         >
                             Cancel
                         </button>
