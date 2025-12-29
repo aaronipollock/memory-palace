@@ -42,6 +42,7 @@ const AnchorPointEditor = () => {
     const [roomName, setRoomName] = useState('');
     const [roomDescription, setRoomDescription] = useState('');
     const [isSavingRoom, setIsSavingRoom] = useState(false);
+    const [draggedIndex, setDraggedIndex] = useState(null);
     const { showSuccess, showError } = useToast();
 
     // Load room data when component mounts
@@ -240,6 +241,119 @@ const AnchorPointEditor = () => {
     };
 
     /**
+     * 📖 FUNCTION: handleDragStart
+     *
+     * WHAT IT DOES:
+     * - Initiates drag operation for reordering anchor points
+     */
+    const handleDragStart = (e, index) => {
+        // Only allow dragging from the row itself, not from buttons
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            e.preventDefault();
+            return;
+        }
+
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index.toString());
+        // Use currentTarget to style the entire row
+        e.currentTarget.style.opacity = '0.5';
+    };
+
+    /**
+     * 📖 FUNCTION: handleDragOver
+     *
+     * WHAT IT DOES:
+     * - Allows drop by preventing default behavior
+     */
+    const handleDragOver = (e, index) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+
+        // Visual feedback: highlight the drop target
+        if (draggedIndex !== null && draggedIndex !== index) {
+            e.currentTarget.classList.add('bg-blue-50', 'border-blue-300');
+        }
+    };
+
+    /**
+     * 📖 FUNCTION: handleDrop
+     *
+     * WHAT IT DOES:
+     * - Handles dropping an anchor point in a new position
+     * - Reorders the anchor points array
+     * - Saves the new order to the backend
+     */
+    const handleDrop = async (e, dropIndex) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Remove visual feedback
+        e.currentTarget.classList.remove('bg-blue-50', 'border-blue-300');
+
+        if (draggedIndex === null || draggedIndex === dropIndex) {
+            setDraggedIndex(null);
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            setError(null);
+
+            // Reorder the anchor points array
+            const newAnchorPoints = [...anchorPoints];
+            const [draggedItem] = newAnchorPoints.splice(draggedIndex, 1);
+            newAnchorPoints.splice(dropIndex, 0, draggedItem);
+
+            // Update room with reordered anchor points
+            const response = await apiClient.put(`/api/custom-rooms/${id}`, {
+                anchorPoints: newAnchorPoints
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to reorder anchor points');
+            }
+
+            const updatedRoom = await response.json();
+            setAnchorPoints(updatedRoom.anchorPoints || []);
+            showSuccess('Anchor points reordered successfully!');
+        } catch (err) {
+            console.error('Error reordering anchor points:', err);
+            setError(err.message || 'Failed to reorder anchor points');
+            showError(err.message || 'Failed to reorder anchor points');
+        } finally {
+            setIsSaving(false);
+            setDraggedIndex(null);
+        }
+    };
+
+    /**
+     * 📖 FUNCTION: handleDragEnd
+     *
+     * WHAT IT DOES:
+     * - Cleans up drag state after drag operation ends
+     */
+    const handleDragEnd = (e) => {
+        // Reset opacity on the row
+        e.currentTarget.style.opacity = '1';
+        // Remove any visual feedback classes
+        e.currentTarget.classList.remove('bg-blue-50', 'border-blue-300');
+        setDraggedIndex(null);
+    };
+
+    /**
+     * 📖 FUNCTION: handleDragLeave
+     *
+     * WHAT IT DOES:
+     * - Removes visual feedback when dragging leaves an item
+     */
+    const handleDragLeave = (e) => {
+        e.currentTarget.classList.remove('bg-blue-50', 'border-blue-300');
+    };
+
+    /**
      * 📖 FUNCTION: handleSaveRoomMetadata
      *
      * WHAT IT DOES:
@@ -424,7 +538,27 @@ const AnchorPointEditor = () => {
 
                 {/* Anchor Points List */}
                 <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-semibold mb-4">Anchor Points ({anchorPoints.length})</h2>
+                    <div className="mb-4">
+                        <h2 className="text-xl font-semibold mb-2">Anchor Points ({anchorPoints.length})</h2>
+                        {anchorPoints.length > 1 && (
+                            <div className="flex items-center gap-2 text-sm text-primary font-medium bg-primary/10 px-3 py-2 rounded-md border border-primary/20">
+                                <svg
+                                    className="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 8h16M4 16h16"
+                                    />
+                                </svg>
+                                <span>Drag items in this list to reorder them</span>
+                            </div>
+                        )}
+                    </div>
 
                     {anchorPoints.length === 0 ? (
                         <p className="text-gray-500">Click on the image above to add your first anchor point.</p>
@@ -433,14 +567,38 @@ const AnchorPointEditor = () => {
                             {anchorPoints.map((point, index) => (
                                 <div
                                     key={point._id || index}
-                                    className="flex items-center justify-between p-3 border border-gray-200 rounded hover:bg-gray-50"
+                                    draggable={!isSaving}
+                                    onDragStart={(e) => handleDragStart(e, index)}
+                                    onDragOver={(e) => handleDragOver(e, index)}
+                                    onDrop={(e) => handleDrop(e, index)}
+                                    onDragEnd={handleDragEnd}
+                                    onDragLeave={handleDragLeave}
+                                    className={`flex items-center justify-between p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:shadow-md transition-all ${
+                                        draggedIndex === index ? 'opacity-50 cursor-grabbing border-primary' : 'cursor-grab'
+                                    } ${isSaving ? 'pointer-events-none opacity-50' : ''}`}
                                 >
-                                    <div className="flex items-center space-x-3">
-                                        <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">
+                                    <div className="flex items-center space-x-3 flex-1">
+                                        {/* Prominent drag handle icon */}
+                                        <div className="text-primary hover:text-[#7C3AED] flex-shrink-0 cursor-grab active:cursor-grabbing">
+                                            <svg
+                                                className="w-6 h-6"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M4 6h16M4 12h16M4 18h16"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 shadow-md">
                                             {index + 1}
                                         </div>
-                                        <div>
-                                            <div className="font-semibold">{point.name}</div>
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-gray-900">{point.name}</div>
                                             {point.description && (
                                                 <div className="text-sm text-gray-600">{point.description}</div>
                                             )}
@@ -449,16 +607,26 @@ const AnchorPointEditor = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex space-x-2">
+                                    <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
                                         <button
-                                            onClick={() => handleEditPoint(point)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEditPoint(point);
+                                            }}
+                                            draggable={false}
                                             className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                            disabled={isSaving}
                                         >
                                             Edit
                                         </button>
                                         <button
-                                            onClick={() => handleDeletePoint(point)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeletePoint(point);
+                                            }}
+                                            draggable={false}
                                             className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                            disabled={isSaving}
                                         >
                                             Delete
                                         </button>
