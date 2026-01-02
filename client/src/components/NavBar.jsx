@@ -93,8 +93,8 @@ const NavBar = ({ onLoginClick }) => {
         <nav className="loci-nav" role="navigation" aria-label="Main Navigation">
             <div className="container mx-auto px-6">
                 <div className="flex justify-between items-center py-4">
-                    {/* Logo, Brand, and Navigation Links */}
-                    <div className="flex items-center space-x-8 md:space-x-12">
+                    {/* Logo and Brand */}
+                    <div className="flex items-center">
                         <button
                             className="text-5xl font-bold text-primary cursor-pointer loci-header trajan-font loci-italic focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
                             onClick={() => navigate('/')}
@@ -102,7 +102,10 @@ const NavBar = ({ onLoginClick }) => {
                         >
                             Low·sAI
                         </button>
+                    </div>
 
+                    {/* Navigation Links and Auth Buttons */}
+                    <div className="flex items-center space-x-4">
                         {/* Navigation Links */}
                         {isLoggedIn && (
                             <div className="flex items-center space-x-6 md:space-x-8">
@@ -136,11 +139,6 @@ const NavBar = ({ onLoginClick }) => {
                                 </button>
                             </div>
                         )}
-                    </div>
-
-
-                    {/* Auth Buttons or Logout Link */}
-                    <div className="flex items-center space-x-4">
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}

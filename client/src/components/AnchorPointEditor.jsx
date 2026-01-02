@@ -454,9 +454,25 @@ const AnchorPointEditor = () => {
                 <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                     <div className="mb-4">
                         <h2 className="text-xl font-semibold mb-2">Click on the image to place anchor points</h2>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 mb-3">
                             Anchor points mark locations where you'll place memorable items in your memory palace.
                         </p>
+
+                        {/* Tips for anchor point placement */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <h3 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Tips for Better Anchor Point Placement
+                            </h3>
+                            <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                                <li>Distribute points across different areas of the room (corners, center, edges)</li>
+                                <li>Choose distinct, memorable locations (door, window, furniture, etc.)</li>
+                                <li>Follow a logical path through the room (left to right, or clockwise)</li>
+                            </ul>
+                        </div>
+
                     </div>
 
                     {/* Image with click handler */}
