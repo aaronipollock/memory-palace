@@ -9,25 +9,10 @@ import { getApiUrl } from '../config/api';
 
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
-/**
- * 🎓 COMPONENT 2: Anchor Point Editor
- *
- * WHAT THIS COMPONENT DOES:
- * - Displays the uploaded room image
- * - Allows users to click on the image to place anchor points
- * - Shows existing anchor points as markers
- * - Allows editing/deleting anchor points
- * - Saves anchor points to the database
- *
- * KEY CONCEPTS:
- * 1. useParams - Get room ID from URL
- * 2. Image click handling - Calculate click position
- * 3. Coordinate conversion - Convert click position to percentage
- * 4. CRUD operations - Create, read, update, delete anchor points
- */
+// Anchor Point Editor - allows users to place, edit, and reorder anchor points on custom room images
 
 const AnchorPointEditor = () => {
-    const { id } = useParams(); // Get room ID from URL
+    const { id } = useParams();
     const navigate = useNavigate();
     const imageRef = useRef(null);
     const [room, setRoom] = useState(null);
@@ -45,18 +30,11 @@ const AnchorPointEditor = () => {
     const [draggedIndex, setDraggedIndex] = useState(null);
     const { showSuccess, showError } = useToast();
 
-    // Load room data when component mounts
     useEffect(() => {
         loadRoom();
     }, [id]);
 
-    /**
-     * 📖 FUNCTION: loadRoom
-     *
-     * WHAT IT DOES:
-     * - Fetches the custom room from the API
-     * - Sets the room data and anchor points
-     */
+    // Fetches custom room data and anchor points from API
     const loadRoom = async () => {
         try {
             setIsLoading(true);
@@ -89,20 +67,7 @@ const AnchorPointEditor = () => {
         }
     };
 
-    /**
-     * 📖 FUNCTION: handleImageClick
-     *
-     * WHAT IT DOES:
-     * - Called when user clicks on the image
-     * - Calculates the click position as a percentage
-     * - Opens a modal to name the anchor point
-     *
-     * HOW IT WORKS:
-     * 1. Get the image element and its position
-     * 2. Calculate click position relative to image
-     * 3. Convert to percentage (0-100)
-     * 4. Open edit modal for new point
-     */
+    // Calculates click position as percentage and opens modal to create new anchor point
     const handleImageClick = (e) => {
         if (!imageRef.current) return;
 
@@ -110,9 +75,8 @@ const AnchorPointEditor = () => {
         const x = ((e.clientX - rect.left) / rect.width) * 100;
         const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-        // Create new anchor point
         setEditingPoint({
-            x: Math.round(x * 100) / 100, // Round to 2 decimal places
+            x: Math.round(x * 100) / 100,
             y: Math.round(y * 100) / 100,
             name: '',
             description: ''
@@ -121,13 +85,7 @@ const AnchorPointEditor = () => {
         setPointDescription('');
     };
 
-    /**
-     * 📖 FUNCTION: handleSavePoint
-     *
-     * WHAT IT DOES:
-     * - Saves a new anchor point or updates an existing one
-     * - Updates the room in the database
-     */
+    // Saves new anchor point or updates existing one
     const handleSavePoint = async () => {
         if (!pointName.trim()) {
             setError('Please enter a name for the anchor point');
@@ -140,14 +98,12 @@ const AnchorPointEditor = () => {
 
             let updatedPoints;
             if (editingPoint && editingPoint._id) {
-                // Update existing point
                 updatedPoints = anchorPoints.map(p =>
                     p._id === editingPoint._id
                         ? { ...p, name: pointName.trim(), description: pointDescription.trim() }
                         : p
                 );
             } else {
-                // Add new point
                 const newPoint = {
                     name: pointName.trim(),
                     description: pointDescription.trim(),
@@ -156,8 +112,6 @@ const AnchorPointEditor = () => {
                 };
                 updatedPoints = [...anchorPoints, newPoint];
             }
-
-            // Update room with new anchor points
             const response = await apiClient.put(`/api/custom-rooms/${id}`, {
                 anchorPoints: updatedPoints
             });
@@ -182,13 +136,7 @@ const AnchorPointEditor = () => {
         }
     };
 
-    /**
-     * 📖 FUNCTION: handleDeletePoint
-     *
-     * WHAT IT DOES:
-     * - Deletes an anchor point
-     * - Updates the room in the database
-     */
+    // Deletes anchor point and updates room in database
     const handleDeletePoint = async (pointToDelete) => {
         if (!window.confirm('Are you sure you want to delete this anchor point?')) {
             return;
@@ -198,12 +146,10 @@ const AnchorPointEditor = () => {
             setIsSaving(true);
             setError(null);
 
-            // Filter out the point to delete (match by _id if available, or by all properties)
             const updatedPoints = anchorPoints.filter(p => {
                 if (pointToDelete._id && p._id) {
                     return p._id.toString() !== pointToDelete._id.toString();
                 }
-                // If no _id, match by all properties
                 return !(p.x === pointToDelete.x && p.y === pointToDelete.y && p.name === pointToDelete.name);
             });
 
@@ -228,26 +174,15 @@ const AnchorPointEditor = () => {
         }
     };
 
-    /**
-     * 📖 FUNCTION: handleEditPoint
-     *
-     * WHAT IT DOES:
-     * - Opens the edit modal for an existing anchor point
-     */
+    // Opens edit modal for existing anchor point
     const handleEditPoint = (point) => {
         setEditingPoint(point);
         setPointName(point.name);
         setPointDescription(point.description || '');
     };
 
-    /**
-     * 📖 FUNCTION: handleDragStart
-     *
-     * WHAT IT DOES:
-     * - Initiates drag operation for reordering anchor points
-     */
+    // Initiates drag operation for reordering anchor points
     const handleDragStart = (e, index) => {
-        // Only allow dragging from the row itself, not from buttons
         if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
             e.preventDefault();
             return;
@@ -256,40 +191,25 @@ const AnchorPointEditor = () => {
         setDraggedIndex(index);
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', index.toString());
-        // Use currentTarget to style the entire row
         e.currentTarget.style.opacity = '0.5';
     };
 
-    /**
-     * 📖 FUNCTION: handleDragOver
-     *
-     * WHAT IT DOES:
-     * - Allows drop by preventing default behavior
-     */
+    // Allows drop by preventing default behavior and provides visual feedback
     const handleDragOver = (e, index) => {
         e.preventDefault();
         e.stopPropagation();
         e.dataTransfer.dropEffect = 'move';
 
-        // Visual feedback: highlight the drop target
         if (draggedIndex !== null && draggedIndex !== index) {
             e.currentTarget.classList.add('bg-blue-50', 'border-blue-300');
         }
     };
 
-    /**
-     * 📖 FUNCTION: handleDrop
-     *
-     * WHAT IT DOES:
-     * - Handles dropping an anchor point in a new position
-     * - Reorders the anchor points array
-     * - Saves the new order to the backend
-     */
+    // Handles dropping anchor point in new position, reorders array, and saves to backend
     const handleDrop = async (e, dropIndex) => {
         e.preventDefault();
         e.stopPropagation();
 
-        // Remove visual feedback
         e.currentTarget.classList.remove('bg-blue-50', 'border-blue-300');
 
         if (draggedIndex === null || draggedIndex === dropIndex) {
@@ -301,12 +221,9 @@ const AnchorPointEditor = () => {
             setIsSaving(true);
             setError(null);
 
-            // Reorder the anchor points array
             const newAnchorPoints = [...anchorPoints];
             const [draggedItem] = newAnchorPoints.splice(draggedIndex, 1);
             newAnchorPoints.splice(dropIndex, 0, draggedItem);
-
-            // Update room with reordered anchor points
             const response = await apiClient.put(`/api/custom-rooms/${id}`, {
                 anchorPoints: newAnchorPoints
             });
@@ -329,36 +246,19 @@ const AnchorPointEditor = () => {
         }
     };
 
-    /**
-     * 📖 FUNCTION: handleDragEnd
-     *
-     * WHAT IT DOES:
-     * - Cleans up drag state after drag operation ends
-     */
+    // Cleans up drag state after drag operation ends
     const handleDragEnd = (e) => {
-        // Reset opacity on the row
         e.currentTarget.style.opacity = '1';
-        // Remove any visual feedback classes
         e.currentTarget.classList.remove('bg-blue-50', 'border-blue-300');
         setDraggedIndex(null);
     };
 
-    /**
-     * 📖 FUNCTION: handleDragLeave
-     *
-     * WHAT IT DOES:
-     * - Removes visual feedback when dragging leaves an item
-     */
+    // Removes visual feedback when dragging leaves an item
     const handleDragLeave = (e) => {
         e.currentTarget.classList.remove('bg-blue-50', 'border-blue-300');
     };
 
-    /**
-     * 📖 FUNCTION: handleSaveRoomMetadata
-     *
-     * WHAT IT DOES:
-     * - Saves changes to room name and description
-     */
+    // Saves changes to room name and description
     const handleSaveRoomMetadata = async () => {
         if (!roomName.trim()) {
             setError('Room name is required');
@@ -458,7 +358,6 @@ const AnchorPointEditor = () => {
                             Anchor points mark locations where you'll place memorable items in your memory palace.
                         </p>
 
-                        {/* Tips for anchor point placement */}
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                             <h3 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -475,7 +374,6 @@ const AnchorPointEditor = () => {
 
                     </div>
 
-                    {/* Image with click handler */}
                     <div className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100" style={{ minHeight: '400px' }}>
                         <img
                             ref={imageRef}
@@ -486,7 +384,6 @@ const AnchorPointEditor = () => {
                             style={{ display: 'block' }}
                         />
 
-                        {/* Render anchor points as markers */}
                         {anchorPoints.map((point, index) => (
                             <div
                                 key={point._id || index}
@@ -500,12 +397,10 @@ const AnchorPointEditor = () => {
                                     handleEditPoint(point);
                                 }}
                             >
-                                {/* Marker dot */}
                                 <div className="w-6 h-6 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
                                     <span className="text-white text-xs font-bold">{index + 1}</span>
                                 </div>
 
-                                {/* Tooltip on hover */}
                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
                                     {point.name}
                                 </div>
@@ -514,7 +409,6 @@ const AnchorPointEditor = () => {
                     </div>
                 </div>
 
-                {/* Empty State Message - appears above list when no anchor points */}
                 {anchorPoints.length === 0 && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                         <div className="text-gray-600">
@@ -527,7 +421,6 @@ const AnchorPointEditor = () => {
                     </div>
                 )}
 
-                {/* Next Steps Section - appears above list when anchor points exist */}
                 {anchorPoints.length > 0 && (
                     <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-blue-900 mb-2">
@@ -540,7 +433,6 @@ const AnchorPointEditor = () => {
                         </p>
                         <button
                             onClick={() => {
-                                // Set the custom room ID in localStorage so InputPage will auto-select it
                                 localStorage.setItem('customRoomId', id);
                                 localStorage.setItem('roomType', 'custom');
                                 navigate('/input');
@@ -552,7 +444,6 @@ const AnchorPointEditor = () => {
                     </div>
                 )}
 
-                {/* Anchor Points List */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <div className="mb-4">
                         <h2 className="text-xl font-semibold mb-2">Anchor Points ({anchorPoints.length})</h2>
@@ -594,7 +485,6 @@ const AnchorPointEditor = () => {
                                     } ${isSaving ? 'pointer-events-none opacity-50' : ''}`}
                                 >
                                     <div className="flex items-center space-x-3 flex-1">
-                                        {/* Prominent drag handle icon */}
                                         <div className="text-primary hover:text-[#7C3AED] flex-shrink-0 cursor-grab active:cursor-grabbing">
                                             <svg
                                                 className="w-6 h-6"
@@ -653,7 +543,6 @@ const AnchorPointEditor = () => {
                     )}
                 </div>
 
-                {/* Edit Room Metadata Modal */}
                 {editingRoom && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -717,7 +606,6 @@ const AnchorPointEditor = () => {
                     </div>
                 )}
 
-                {/* Edit/Add Modal */}
                 {editingPoint && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -789,7 +677,6 @@ const AnchorPointEditor = () => {
                     </div>
                 )}
 
-                {/* Action Buttons */}
                 <div className="mt-6 flex justify-end space-x-4">
                     <button
                         onClick={() => navigate('/custom-rooms/upload')}
