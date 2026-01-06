@@ -55,7 +55,7 @@ const OptimizedImage = ({
         alt={alt}
         className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
         loading={loading}
-        onLoad={() => { handleLoad(); console.log('Image loaded!', imageSrc); }}
+        onLoad={handleLoad}
         onError={handleError}
         style={{ position: 'relative', zIndex: 2 }}
         {...props}

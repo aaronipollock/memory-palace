@@ -234,7 +234,6 @@ const LandingPage = () => {
               if (data.csrfToken) {
                 CSRFManager.setCSRFToken(data.csrfToken);
               }
-              console.log('Token stored in localStorage:', localStorage.getItem('token'));
               navigate('/saved-rooms');
           } else {
               const errorData = await response.json();

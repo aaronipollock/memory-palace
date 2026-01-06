@@ -33,7 +33,6 @@ export const generateImage = async (association, setCurrentPrompt) => {
       console.error('Failed to generate prompt:', promptResult);
       // Use a fallback prompt
       const fallbackPrompt = `a ${sanitizedAssociation.memorableItem} near a ${sanitizedAssociation.anchor}, digital art`;
-      console.log('Using fallback prompt:', fallbackPrompt);
 
       if (setCurrentPrompt) {
         setCurrentPrompt(fallbackPrompt);
@@ -53,11 +52,8 @@ export const generateImage = async (association, setCurrentPrompt) => {
       }
 
       const data = await response.json();
-      console.log('Backend image generation response:', data);
       return data;
     }
-
-    console.log('Sending prompt to API:', promptResult.fullPrompt);
 
     // Make API request with generated prompt
     const response = await apiClient.post('/api/generate-images', {
@@ -73,7 +69,6 @@ export const generateImage = async (association, setCurrentPrompt) => {
     }
 
     const data = await response.json();
-    console.log('Backend image generation response:', data);
     return data;
   } catch (error) {
     console.error('Image generation error:', error);
@@ -112,8 +107,6 @@ export const generateStrangerImage = async (association, setCurrentPrompt) => {
       return generateImage(association, setCurrentPrompt);
     }
 
-    console.log('Sending STRANGER prompt to API:', promptResult.fullPrompt);
-
     // Make API request with stranger prompt
     const response = await apiClient.post('/api/generate-images', {
       prompt: promptResult.fullPrompt,
@@ -128,7 +121,6 @@ export const generateStrangerImage = async (association, setCurrentPrompt) => {
     }
 
     const data = await response.json();
-    console.log('Backend stranger image generation response:', data);
     return data;
   } catch (error) {
     console.error('Stranger image generation error:', error);

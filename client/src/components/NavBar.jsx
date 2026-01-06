@@ -17,7 +17,6 @@ const NavBar = ({ onLoginClick }) => {
             // Only update state if it actually changed (prevents unnecessary re-renders)
             setIsLoggedIn(prevLoggedIn => {
                 if (prevLoggedIn !== loggedIn) {
-                    console.log('NavBar: Login status changed', { loggedIn });
                     return loggedIn;
                 }
                 return prevLoggedIn; // No change, return previous value

@@ -306,24 +306,13 @@ const VisualizerPage = () => {
       } else {
         // Generate new image if no accepted image exists
         const result = await generateImage(association, setCurrentPrompt);
-        console.log('Received result from generateImage:', {
-          success: result.success,
-          hasImageData: !!result.imageData,
-          imageDataLength: result.imageData ? result.imageData.length : 0,
-          hasOptimizedUrl: !!result.optimizedUrl,
-          hasImageUrl: !!result.imageUrl,
-          prompt: result.prompt
-        });
         // Handle base64 image data from backend
         if (result.imageData) {
           // Check if it's a placeholder (SVG) or real image (PNG)
           const mimeType = result.isPlaceholder ? 'image/svg+xml' : 'image/png';
           const imageUrl = `data:${mimeType};base64,${result.imageData}`;
-          console.log('Setting generated image with base64 data, length:', imageUrl.length);
-          console.log('Using MIME type:', mimeType);
           setGeneratedImage(imageUrl);
         } else {
-          console.log('No imageData, using URL:', result.optimizedUrl || result.imageUrl);
           setGeneratedImage(result.optimizedUrl || result.imageUrl);
         }
         setCurrentPrompt(result.prompt);

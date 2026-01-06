@@ -9,18 +9,12 @@ exports.generateRoom = async (req, res) => {
     }
 
     try {
-        console.log('=== Starting Room Generation ===');
-        console.log('Room Type:', roomType);
-        console.log('Anchor Points:', anchorPoints);
-
         // Generate room image with DALL-E
         const imagePrompt = `A clear, eye-level view of a ${roomType}, like a sitcom set.
             The room MUST prominently feature these specific items: ${anchorPoints.join(', ')}.
             Each item should be clearly visible and naturally placed.
             Style should be simple and clean, like a 3D rendered room.
             The view should be straight-on, like looking at a TV set.`;
-
-        console.log('Image Prompt:', imagePrompt);
 
         const response = await axios.post('https://api.openai.com/v1/images/generations', {
             prompt: imagePrompt,
@@ -42,11 +36,6 @@ exports.generateRoom = async (req, res) => {
             x: 400,  // Center X
             y: 200 + (index * 100)  // Stacked vertically with spacing
         }));
-
-        console.log('Sending response:', {
-            roomImage: response.data.data[0].url,
-            positions: positions
-        });
 
         res.json({
             roomImage: response.data.data[0].url,

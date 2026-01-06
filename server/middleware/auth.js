@@ -160,7 +160,6 @@ const csrfProtection = (req, res, next) => {
         });
     }
 
-    console.log('CSRF validation passed');
     next();
 };
 

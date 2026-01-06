@@ -225,20 +225,8 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
                 throw new Error('No file selected');
             }
 
-            console.log('Uploading file:', {
-                name: selectedFile.name,
-                type: selectedFile.type,
-                size: selectedFile.size,
-                lastModified: selectedFile.lastModified
-            });
-
             const formDataToUpload = new FormData();
             formDataToUpload.append('image', selectedFile);
-
-            // Verify FormData has the file (for debugging)
-            for (const [key, value] of formDataToUpload.entries()) {
-                console.log('FormData entry:', key, value instanceof File ? `File: ${value.name}` : value);
-            }
 
             // Upload the image file
             // NOTE: Don't set Content-Type header - browser will set it automatically with boundary
@@ -252,8 +240,6 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
                 credentials: 'include',
                 body: formDataToUpload
             });
-
-            console.log('Upload response status:', uploadResponse.status);
 
             if (!uploadResponse.ok) {
                 const errorData = await uploadResponse.json();
