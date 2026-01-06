@@ -80,6 +80,9 @@ const NavBar = ({ onLoginClick }) => {
             localStorage.removeItem('token');
             setIsLoggedIn(false);
 
+            // Dispatch logout event so LandingPage can update its state immediately
+            window.dispatchEvent(new CustomEvent('logout'));
+
             // Add a small delay before navigation to ensure state is updated
             logoutTimeoutRef.current = setTimeout(() => {
                 navigate('/');

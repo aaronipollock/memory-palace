@@ -280,6 +280,10 @@ const UserDashboard = () => {
         } finally {
             // Always clear local storage and navigate
             localStorage.removeItem('token');
+
+            // Dispatch logout event so LandingPage can update its state immediately
+            window.dispatchEvent(new CustomEvent('logout'));
+
             navigate('/');
         }
     };

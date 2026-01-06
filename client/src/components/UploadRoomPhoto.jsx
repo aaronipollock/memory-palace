@@ -7,64 +7,32 @@ import { getApiUrl } from '../config/api';
 
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
-/**
- * 🎓 COMPONENT: Upload Room Photo Modal
- *
- * WHAT THIS COMPONENT DOES:
- * - Lets users upload a photo of a real room
- * - Shows a preview of the selected image
- * - Allows users to name and describe the room
- * - Saves the room to the database
- *
- * KEY CONCEPTS:
- * 1. File input and FileReader API
- * 2. Image preview using base64
- * 3. Form state management
- * 4. API calls to create room
- * 5. Modal with focus trap and keyboard navigation
- */
+// Upload Room Photo Modal - allows users to upload room images, add name/description, and create custom rooms
 
 const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
-    // 🎯 STATE MANAGEMENT
-    // These variables store data that can change (React calls this "state")
-
-    // Store the selected file
     const [selectedFile, setSelectedFile] = useState(null);
-
-    // Store the image preview (as base64 string)
-    // This is what we'll display in the <img> tag
-    const [imagePreview, setImagePreview] = useState(null);
-
-    // Store form data (name and description)
+    const [imagePreview, setImagePreview] = useState(null); // Base64 string for preview
     const [formData, setFormData] = useState({
         name: '',
         description: ''
     });
-
-    // Track if we're currently saving (to show loading spinner)
     const [isLoading, setIsLoading] = useState(false);
-
-    // Store any error messages
     const [error, setError] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
 
-    // React Router hook to navigate to different pages
     const navigate = useNavigate();
-
-    // Toast notifications (success/error messages)
     const { showSuccess, showError } = useToast();
-
-    // Modal refs for focus trap
     const modalRef = useRef(null);
     const firstInputRef = useRef(null);
 
-    // Reset form when modal opens/closes
+    // Reset form when modal closes
     useEffect(() => {
         if (!isOpen) {
-            // Reset form when modal closes
             setSelectedFile(null);
             setImagePreview(null);
             setFormData({ name: '', description: '' });
             setError(null);
+            setIsDragging(false);
         }
     }, [isOpen]);
 
@@ -107,101 +75,67 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
         };
     }, [isOpen, onClose]);
 
-    /**
-     * 📖 FUNCTION: handleFileChange
-     *
-     * WHAT IT DOES:
-     * - Called when user selects a file
-     * - Reads the file and converts it to base64
-     * - Sets the preview so user can see the image
-     *
-     * HOW IT WORKS:
-     * 1. User clicks file input and selects an image
-     * 2. Browser gives us a File object in e.target.files[0]
-     * 3. We create a FileReader to read the file
-     * 4. FileReader converts file to base64 string
-     * 5. We store both the file and the base64 preview
-     */
-    const handleFileChange = (e) => {
-        const file = e.target.files[0]; // Get the first selected file
+    // Validates and processes file (from input or drag-and-drop), converts to base64 for preview
+    const processFile = (file) => {
+        if (!file) return;
 
-        if (!file) {
-            return; // No file selected
-        }
-
-        // Validate file type
         if (!file.type.startsWith('image/')) {
             setError('Please select an image file');
             return;
         }
 
-        // Validate file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
             setError('Image must be less than 10MB');
             return;
         }
 
-        // Store the file
         setSelectedFile(file);
-        setError(null); // Clear any previous errors
-
-        // 📖 FILEREADER API EXPLANATION:
-        // FileReader is a browser API that reads files
-        // readAsDataURL converts the file to a base64 string
-        // This string can be used as the src of an <img> tag
+        setError(null);
 
         const reader = new FileReader();
-
-        // This function runs when the file is done reading
         reader.onload = (event) => {
-            // event.target.result contains the base64 string
-            // It looks like: "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
-            const base64String = event.target.result;
-            setImagePreview(base64String);
+            setImagePreview(event.target.result);
         };
-
-        // Start reading the file
         reader.readAsDataURL(file);
     };
 
-    /**
-     * 📖 FUNCTION: handleInputChange
-     *
-     * WHAT IT DOES:
-     * - Updates form data when user types in name/description fields
-     *
-     * HOW IT WORKS:
-     * - e.target.name = the input's name attribute ("name" or "description")
-     * - e.target.value = what the user typed
-     * - We update the formData state with the new value
-     */
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+    const handleFileChange = (e) => {
+        processFile(e.target.files[0]);
     };
 
-    /**
-     * 📖 FUNCTION: handleSubmit
-     *
-     * WHAT IT DOES:
-     * - Validates the form
-     * - Creates the custom room in the database
-     * - Navigates to the anchor point editor
-     *
-     * HOW IT WORKS:
-     * 1. Check if all required fields are filled
-     * 2. Show loading spinner
-     * 3. Send POST request to API
-     * 4. If successful, navigate to edit page
-     * 5. If error, show error message
-     */
-    const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent page refresh
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
 
-        // Validation
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Only remove dragging state if leaving drop zone (not entering a child)
+        if (e.currentTarget === e.target) {
+            setIsDragging(false);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        if (e.dataTransfer.files[0]) {
+            processFile(e.dataTransfer.files[0]);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Uploads image, creates custom room, and navigates to anchor point editor
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
         if (!selectedFile) {
             setError('Please select an image');
             return;
@@ -216,26 +150,15 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
         setError(null);
 
         try {
-            // 📖 STEP 1: UPLOAD THE IMAGE FILE
-            // First, we upload the file to get a URL
-            // This avoids storing huge base64 strings in the database
-
-            // Validate file is selected
-            if (!selectedFile) {
-                throw new Error('No file selected');
-            }
-
+            // Upload image file to get URL (avoids storing base64 in database)
             const formDataToUpload = new FormData();
             formDataToUpload.append('image', selectedFile);
 
-            // Upload the image file
-            // NOTE: Don't set Content-Type header - browser will set it automatically with boundary
             const uploadResponse = await fetch(`${getApiUrl('')}/api/upload-image`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
-                    // Don't set Content-Type - browser will set it automatically for FormData
                 },
                 credentials: 'include',
                 body: formDataToUpload
@@ -254,13 +177,12 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
                 throw new Error('No image URL returned from upload');
             }
 
-            // 📖 STEP 2: CREATE THE CUSTOM ROOM WITH THE URL
-            // Now we create the room using the URL (which is < 500 characters)
+            // Create custom room with the image URL
             const response = await apiClient.post('/api/custom-rooms', {
                 name: formData.name.trim(),
                 description: formData.description.trim(),
-                imageUrl: imageUrl, // Use the URL from the upload
-                anchorPoints: [] // Start with no anchor points
+                imageUrl: imageUrl,
+                anchorPoints: []
             });
 
             if (!response.ok) {
@@ -269,20 +191,13 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
             }
 
             const room = await response.json();
-
-            // Show success message
             showSuccess('Room created successfully!');
 
-            // Call onSuccess callback if provided (to refresh custom rooms list)
             if (onSuccess) {
                 onSuccess(room);
             }
 
-            // Close modal
             onClose();
-
-            // Navigate to anchor point editor
-            // We pass the room ID in the URL
             navigate(`/custom-rooms/${room._id}/edit`);
 
         } catch (err) {
@@ -294,24 +209,12 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
         }
     };
 
-    /**
-     * 📖 THE JSX (WHAT GETS RENDERED):
-     *
-     * This is what the user sees in the modal
-     * - Modal overlay with backdrop
-     * - Form with file input, name, description
-     * - Image preview
-     * - Submit button
-     * - Loading spinner (when saving)
-     * - Error message (if something goes wrong)
-     */
     if (!isOpen) return null;
 
     return (
         <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto p-4"
             onClick={(e) => {
-                // Close modal when clicking backdrop
                 if (e.target === e.currentTarget) {
                     onClose();
                 }
@@ -341,56 +244,96 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
                     </div>
 
                     <form onSubmit={handleSubmit}>
-                    {/* FILE INPUT SECTION */}
                     <div className="mb-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Room Photo *
                         </label>
-
-                        {/* 📖 FILE INPUT EXPLANATION:
-                            - type="file" creates a file picker button
-                            - accept="image/*" only allows image files
-                            - onChange calls handleFileChange when user selects a file
-                        */}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="block w-full text-sm text-gray-500
-                                     file:mr-4 file:py-2 file:px-4
-                                     file:rounded-full file:border-0
-                                     file:text-sm file:font-semibold
-                                     file:bg-blue-50 file:text-blue-700
-                                     hover:file:bg-blue-100"
-                        />
-
-                        <p className="mt-2 text-sm text-gray-500">
-                            Select an image file (max 10MB)
-                        </p>
+                        <div
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            className={`
+                                relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200
+                                ${isDragging
+                                    ? 'border-primary bg-primary/5'
+                                    : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
+                                }
+                                ${selectedFile ? 'border-green-300 bg-green-50' : ''}
+                            `}
+                        >
+                            {imagePreview ? (
+                                <div className="space-y-4">
+                                    <img
+                                        src={imagePreview}
+                                        alt="Room preview"
+                                        className="max-w-full h-auto rounded-lg mx-auto block"
+                                        style={{ maxHeight: '200px' }}
+                                    />
+                                    <div className="text-sm text-gray-600">
+                                        <p className="font-medium text-green-700">Image selected: {selectedFile.name}</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedFile(null);
+                                                setImagePreview(null);
+                                            }}
+                                            className="mt-2 text-primary hover:text-primary-dark underline"
+                                        >
+                                            Change image
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex flex-col items-center">
+                                        <svg
+                                            className="w-12 h-12 text-gray-400 mb-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                            />
+                                        </svg>
+                                        <p className="text-lg font-medium text-gray-700 mb-2">
+                                            {isDragging ? 'Drop your image here' : 'Drag and drop your image here'}
+                                        </p>
+                                        <p className="text-sm text-gray-500 mb-4">or</p>
+                                        <label className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-[#7C3AED] cursor-pointer transition-colors">
+                                            <svg
+                                                className="w-5 h-5 mr-2"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 4v16m8-8H4"
+                                                />
+                                            </svg>
+                                            Browse Files
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                        <p className="text-xs text-gray-500 mt-4">
+                                            Supported formats: JPG, PNG, GIF, WEBP (max 10MB)
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* IMAGE PREVIEW SECTION */}
-                    {imagePreview && (
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Preview
-                            </label>
-
-                            {/* 📖 IMAGE PREVIEW EXPLANATION:
-                                - We use the base64 string as the src
-                                - Browser automatically displays it
-                                - max-w-full ensures it doesn't overflow
-                            */}
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 inline-block">
-                                <img
-                                    src={imagePreview}
-                                    alt="Room preview"
-                                    className="max-w-full h-auto rounded-lg block"
-                                    style={{ maxHeight: '400px' }}
-                                />
-                            </div>
-                        </div>
-                    )}
 
                     {/* NAME INPUT */}
                     <div className="mb-6">
