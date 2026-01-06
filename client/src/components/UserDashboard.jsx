@@ -506,15 +506,17 @@ const UserDashboard = () => {
                         {/* Custom Rooms Tab Content */}
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-2xl font-bold">Your Custom Rooms</h3>
-                            <button
-                                onClick={() => {
-                                    const event = new CustomEvent('openUploadModal');
-                                    window.dispatchEvent(event);
-                                }}
-                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-                            >
-                                + Create Custom Room
-                            </button>
+                            {customRooms.length > 0 && (
+                                <button
+                                    onClick={() => {
+                                        const event = new CustomEvent('openUploadModal');
+                                        window.dispatchEvent(event);
+                                    }}
+                                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                                >
+                                    + Create Custom Room
+                                </button>
+                            )}
                         </div>
                         {customRooms.length === 0 ? (
                             <div className="text-center text-gray-600 mt-8">
