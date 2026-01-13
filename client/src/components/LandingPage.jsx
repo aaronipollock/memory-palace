@@ -25,11 +25,12 @@ const LandingPage = () => {
   const [error, setError] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const [visibleFeatures, setVisibleFeatures] = useState([false, false, false]);
-  const featureRefs = [useRef(null), useRef(null), useRef(null)];
+  const [visibleFeatures, setVisibleFeatures] = useState([false, false, false, false]);
+  const featureRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
   const [showUserGuide, setShowUserGuide] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
+  const [showNewFeatureBanner, setShowNewFeatureBanner] = useState(true);
 
   const decodeJwtPayload = (jwt) => {
     const parts = jwt?.split('.');
@@ -254,10 +255,60 @@ const LandingPage = () => {
         <NavBar
           onLoginClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
         />
+        {/* New Feature Banner */}
+        {showNewFeatureBanner && !isLoggedIn && (
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 mt-[80px] relative z-10">
+            <div className="container mx-auto max-w-6xl flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 flex-1">
+                <div>
+                  <span className="font-bold">New:</span> Create custom rooms with your own photos! Upload familiar spaces and use them as memory palace foundations.
+                </div>
+              </div>
+              <button
+                onClick={() => setShowNewFeatureBanner(false)}
+                className="text-white hover:text-gray-200 transition-colors text-xl leading-none px-2"
+                aria-label="Close banner"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
         {/* Hero Section */}
         {isLoggedIn ? (
           /* Personalized Welcome for Logged-in Users */
-          <section className="py-20 px-4 mt-[224px]">
+          <section className={`py-20 px-4 ${showNewFeatureBanner ? 'mt-[144px]' : 'mt-[224px]'}`}>
+            {/* New Feature Announcement for Logged-in Users */}
+            {showNewFeatureBanner && (
+              <div className="container mx-auto max-w-6xl mb-8">
+                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 px-6 rounded-lg shadow-lg flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div>
+                      <div className="font-bold text-lg mb-1">New Feature: Custom Rooms</div>
+                      <div className="text-sm">Upload your own room photos and create memory palaces from familiar spaces!</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        const event = new CustomEvent('openUploadModal');
+                        window.dispatchEvent(event);
+                      }}
+                      className="bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-sm"
+                    >
+                      Try It Now
+                    </button>
+                    <button
+                      onClick={() => setShowNewFeatureBanner(false)}
+                      className="text-white hover:text-gray-200 transition-colors text-xl leading-none px-2"
+                      aria-label="Close banner"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="container mx-auto max-w-6xl">
               <div className="flex flex-col md:flex-row items-center justify-between gap-12">
                 <div className="flex-1 text-center md:text-left">
@@ -283,6 +334,15 @@ const LandingPage = () => {
                     >
                       Create New Palace
                     </button>
+                    <button
+                      onClick={() => {
+                        const event = new CustomEvent('openUploadModal');
+                        window.dispatchEvent(event);
+                      }}
+                      className="btn-loci-secondary text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[200px] border-2 border-white/50"
+                    >
+                      Create Custom Room
+                    </button>
                   </div>
                 </div>
               </div>
@@ -290,7 +350,7 @@ const LandingPage = () => {
           </section>
         ) : (
           /* Original Marketing Content for Non-logged-in Users */
-          <section className="py-20 px-4 mt-[224px]">
+          <section className={`py-20 px-4 ${showNewFeatureBanner ? 'mt-[144px]' : 'mt-[224px]'}`}>
             <div className="container mx-auto max-w-6xl">
               <div className="flex flex-col md:flex-row items-center justify-between gap-12">
                 <div className="flex-1 text-center md:text-left">
@@ -470,6 +530,31 @@ const LandingPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Custom Rooms - New Feature */}
+            <div
+              ref={featureRefs[3]}
+              className={`w-full feature-card-container ${visibleFeatures[3] ? 'feature-visible' : 'feature-hidden'}`}
+              style={{ transitionDelay: '450ms' }}
+            >
+              <div className="p-2">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-purple-400/50 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                  <div className="absolute top-4 right-4 z-20 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    NEW
+                  </div>
+                  <img
+                    src="/images/custom_room.png"
+                    alt="My Palaces"
+                    className="absolute inset-0 w-full h-full object-cover z-0 feature-image"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent z-[5]"></div>
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Use Your Own Spaces</h3>
+                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Upload photos of familiar rooms and use them as stable spatial anchors for your memory palaces.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
         )}
@@ -526,15 +611,27 @@ const LandingPage = () => {
                 </p> */}
               </div>
 
+              {/* New Features Section - Only show for non-logged-in users */}
+              {!isLoggedIn && (
+              <div className="w-full mb-8">
+                <h3 className="text-2xl font-semibold text-white mb-6 text-center">Now Available</h3>
+                <div className="grid gap-4 md:grid-cols-1 max-w-2xl mx-auto">
+                  <div className="rounded-lg p-4 text-center bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-400/30">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <div className="font-medium text-white">Custom Rooms</div>
+                      <span className="bg-purple-600 text-white px-2 py-0.5 rounded-full text-xs font-bold">NEW</span>
+                    </div>
+                    <div className="text-sm text-gray-200">Upload photos of familiar rooms and use them as stable spatial anchors for your memory palaces. Define anchor points and create palaces based on spaces you know intimately.</div>
+                  </div>
+                </div>
+              </div>
+              )}
+
               {/* Upcoming Features Section - Only show for non-logged-in users */}
               {!isLoggedIn && (
               <div className="w-full">
                 <h3 className="text-2xl font-semibold text-white mb-6 text-center">In Progress</h3>
-                <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
-                  <div className="rounded-lg p-4 text-center">
-                    <div className="font-medium mb-2 text-white">Use Your Own Spaces</div>
-                    <div className="text-sm text-gray-200">Upload photos of familiar rooms and use them as stable spatial anchors for your memory palaces.</div>
-                  </div>
+                <div className="grid gap-4 md:grid-cols-2 max-w-4xl mx-auto">
                   <div className="rounded-lg p-4 text-center">
                     <div className="font-medium mb-2 text-white">Custom Room Layouts</div>
                     <div className="text-sm text-gray-200">Define your own room structures to match how you already think about physical spaces.</div>
