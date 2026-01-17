@@ -9,10 +9,10 @@ import {
   getFieldIcon
 } from '../utils/validation';
 
-const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData: initialFormData, setFormData }) => {
+const AuthModal = ({ isOpen, onClose, mode, setMode, onSubmit, error, isLoading, formData: initialFormData, setFormData }) => {
   // Use local state to prevent parent re-renders on every keystroke
   const [localFormData, setLocalFormData] = useState(initialFormData);
-  const [touched, setTouched] = useState({ email: false, password: false, confirmPassword: false });
+  const [touched, setTouched] = useState({ email: false, password: false, confirmPassword: false, firstName: false, lastName: false });
   const [validation, setValidation] = useState({
     isValid: false,
     errors: {},
@@ -34,9 +34,30 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
   };
 
   // Sync local state with prop when modal opens or prop changes externally
+  // Reset state when modal closes
   useEffect(() => {
     if (isOpen) {
       setLocalFormData(initialFormData);
+    } else {
+      // Reset state when modal closes
+      setLocalFormData({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        firstName: '',
+        lastName: '',
+        username: ''
+      });
+      setTouched({ email: false, password: false, confirmPassword: false, firstName: false, lastName: false });
+      setValidation({
+        isValid: false,
+        errors: {},
+        isValidations: {},
+        passwordStrength: 0,
+        passwordStrengthLabel: '',
+        passwordStrengthColor: '',
+        passwordRequirements: []
+      });
     }
   }, [isOpen, initialFormData]);
 
@@ -174,6 +195,83 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+          {mode === 'signup' && (
+            <>
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                  First Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={localFormData.firstName}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('firstName')}
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
+                      getFieldStyling(
+                        validation.isValidations.firstName,
+                        localFormData.firstName,
+                        touched.firstName
+                      )
+                    }`}
+                    required
+                    disabled={isLoading}
+                    maxLength={50}
+                    ref={firstInputRef}
+                  />
+                  {touched.firstName && localFormData.firstName && (
+                    <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                      validation.isValidations.firstName ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {getFieldIcon(validation.isValidations.firstName, localFormData.firstName, touched.firstName)}
+                    </span>
+                  )}
+                </div>
+                {touched.firstName && validation.errors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">{validation.errors.firstName}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Last Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={localFormData.lastName}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('lastName')}
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
+                      getFieldStyling(
+                        validation.isValidations.lastName,
+                        localFormData.lastName,
+                        touched.lastName
+                      )
+                    }`}
+                    required
+                    disabled={isLoading}
+                    maxLength={50}
+                  />
+                  {touched.lastName && localFormData.lastName && (
+                    <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
+                      validation.isValidations.lastName ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {getFieldIcon(validation.isValidations.lastName, localFormData.lastName, touched.lastName)}
+                    </span>
+                  )}
+                </div>
+                {touched.lastName && validation.errors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">{validation.errors.lastName}</p>
+                )}
+              </div>
+            </>
+          )}
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -197,7 +295,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                 autoComplete="off"
                 disabled={isLoading}
                 maxLength={254}
-                ref={firstInputRef}
+                ref={mode === 'login' ? firstInputRef : undefined}
               />
               {touched.email && localFormData.email && (
                 <span className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-sm ${
@@ -272,12 +370,12 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
                   onChange={handleInputChange}
                   onBlur={() => handleBlur('confirmPassword')}
                   className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
-                  getFieldStyling(
-                    validation.isValidations.confirmPassword,
-                    localFormData.confirmPassword,
-                    touched.confirmPassword
-                  )
-                }`}
+                    getFieldStyling(
+                      validation.isValidations.confirmPassword,
+                      localFormData.confirmPassword,
+                      touched.confirmPassword
+                    )
+                  }`}
                   required
                   disabled={isLoading}
                   maxLength={128}
@@ -321,7 +419,9 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
             <p>
               Don't have an account?{' '}
               <button
-                onClick={() => onClose()}
+                onClick={() => {
+                  if (setMode) setMode('signup');
+                }}
                 className="text-primary hover:text-primary-dark underline"
               >
                 Sign up
@@ -331,10 +431,12 @@ const AuthModal = ({ isOpen, onClose, mode, onSubmit, error, isLoading, formData
             <p>
               Already have an account?{' '}
               <button
-                onClick={() => onClose()}
+                onClick={() => {
+                  if (setMode) setMode('login');
+                }}
                 className="text-primary hover:text-primary-dark underline"
               >
-                Sign in
+                Log in
               </button>
             </p>
           )}

@@ -174,7 +174,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#2B4C7E]/60 via-[#2B4C7E]/30 to-white">
+        <div className="page-bg-input">
             <NavBar />
             <div className="container mx-auto px-4 py-8">
                 <div className="max-w-4xl mx-auto bg-white/90 p-6 rounded-lg shadow-lg">

@@ -97,7 +97,9 @@ app.use('/api/custom-rooms', ...routeSecurity.customRoomRoutes, customRoomRoutes
 app.use('/api', csrfProtection);
 
 const roomController = require('./controllers/roomController');
+const imageController = require('./controllers/imageController');
 app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, roomController.generateRoom);
+app.post('/api/generate-images', ...routeSecurity.imageGenRoutes, imageController.generateImages);
 
 // Note: The React frontend is deployed as a separate static service on Render,
 // so this API service does not serve the client build.

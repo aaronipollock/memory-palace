@@ -74,6 +74,19 @@ exports.generateImages = async (req, res) => {
     try {
         const { prompt, association } = req.body;
 
+        // Check if API key is configured
+        if (!API_KEY) {
+            console.warn('STABILITY_API_KEY is not configured. Generating placeholder image.');
+            const placeholderImage = generatePlaceholderImage(association);
+            return res.json({
+                success: true,
+                imageData: placeholderImage,
+                mimeType: 'image/png',
+                filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
+                isPlaceholder: true
+            });
+        }
+
         // Enhanced parameters for better tapestry, dais, and anchor point generation
         const isTapestryPrompt = prompt.toLowerCase().includes('tapestry');
         const isDaisPrompt = prompt.toLowerCase().includes('dais');
@@ -82,6 +95,7 @@ exports.generateImages = async (req, res) => {
         const steps = needsEnhancedParams ? 35 : 30; // More steps for complex architectural elements
 
         try {
+            console.log('Calling Stability AI API for image generation...');
             // Generate image using Stability AI API
             const response = await axios({
                 method: 'post',
@@ -119,12 +133,23 @@ exports.generateImages = async (req, res) => {
             res.json(responseData);
 
         } catch (apiError) {
-            console.error('Stability AI API error:', apiError.response ? apiError.response.data : apiError.message);
+            const errorStatus = apiError.response?.status;
+            const errorData = apiError.response?.data;
+            const errorMessage = apiError.message;
+
+            console.error('Stability AI API error:', {
+                status: errorStatus,
+                statusText: apiError.response?.statusText,
+                data: errorData,
+                message: errorMessage,
+                hasApiKey: !!API_KEY
+            });
 
             // If API key is missing, invalid, or insufficient balance, generate a placeholder image instead of failing
-            if (apiError.response?.status === 401 || apiError.response?.status === 403 ||
-                (apiError.response?.data?.name === 'insufficient_balance')) {
+            if (errorStatus === 401 || errorStatus === 403 ||
+                (errorData?.name === 'insufficient_balance')) {
 
+                console.warn('Stability AI API authentication/authorization failed. Generating placeholder image.');
                 // Generate a simple placeholder image (base64 encoded)
                 const placeholderImage = generatePlaceholderImage(association);
 
@@ -136,6 +161,7 @@ exports.generateImages = async (req, res) => {
                     isPlaceholder: true
                 });
             } else {
+                console.error('Unexpected Stability AI API error:', errorMessage);
                 res.status(500).json({
                     success: false,
                     error: apiError.message || 'Failed to generate image with Stability AI'

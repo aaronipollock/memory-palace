@@ -4,7 +4,12 @@ import { getErrorType, getErrorStyling } from '../utils/errorHandler';
 const ErrorMessage = ({ error, context = '', className = '', onRetry }) => {
   if (!error) return null;
 
-  const errorType = getErrorType(error);
+  // Handle string errors (from auth failures, etc.)
+  const errorObj = typeof error === 'string'
+    ? { message: error, response: { status: context === 'authentication' ? 401 : undefined } }
+    : error;
+
+  const errorType = getErrorType(errorObj);
   const styling = getErrorStyling(errorType);
 
   const getRetryText = () => {
@@ -20,15 +25,20 @@ const ErrorMessage = ({ error, context = '', className = '', onRetry }) => {
     }
   };
 
+  // Get error message - handle both string and object errors
+  const errorMessage = typeof error === 'string'
+    ? error
+    : (errorObj.response?.data?.error || errorObj.message || 'An error occurred');
+
   return (
     <div className={`border rounded-lg p-4 ${styling} ${className}`}>
       <div className="flex-1">
         <p className="font-medium mb-2">
-          {error.response?.data?.error || error.message || 'An error occurred'}
+          {errorMessage}
         </p>
-        {error.response?.data?.details && (
+        {errorObj.response?.data?.details && (
           <p className="text-sm opacity-75 mb-3">
-            {error.response.data.details}
+            {errorObj.response.data.details}
           </p>
         )}
         {(errorType === 'network' || errorType === 'timeout' || errorType === 'server') && onRetry && (

@@ -305,7 +305,14 @@ const VisualizerPage = () => {
 
       } else {
         // Generate new image if no accepted image exists
+        console.log('Generating image for association:', association);
         const result = await generateImage(association, setCurrentPrompt);
+        console.log('Image generation result:', {
+          hasImageData: !!result.imageData,
+          hasOptimizedUrl: !!result.optimizedUrl,
+          hasImageUrl: !!result.imageUrl,
+          isPlaceholder: result.isPlaceholder
+        });
         // Handle base64 image data from backend
         if (result.imageData) {
           // Check if it's a placeholder (SVG) or real image (PNG)
@@ -319,6 +326,12 @@ const VisualizerPage = () => {
       }
     } catch (err) {
       console.error('Image generation error:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data
+      });
       setError(err);
     } finally {
       setIsLoading(false);
@@ -415,7 +428,7 @@ const VisualizerPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#4E8DED]/60 via-[#4E8DED]/30 to-white">
+    <div className="page-bg-visualizer">
       <NavBar />
       <div className="py-12 px-4">
         {/* Top actions: navigation + How to Use */}

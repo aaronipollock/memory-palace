@@ -25,6 +25,20 @@
   --gradient-purple-darker-end: #8b5cf6;
   --gradient-use-cases-start: var(--color-background);
   --gradient-use-cases-end: #e2e8f0;
+
+  /* Unified Background Gradients */
+  /* Base gradient colors - using more purple and less dark blue */
+  --bg-gradient-start: rgba(124, 58, 237, 0.12);      /* Purple - lighter, less gray */
+  --bg-gradient-mid: rgba(139, 92, 246, 0.08);       /* Lighter purple */
+  --bg-gradient-end: rgba(255, 255, 255, 1);         /* Pure white */
+
+  /* Landing page overlay (darker for image background) */
+  --bg-landing-overlay: rgba(27, 54, 93, 0.75);     /* Stronger overlay for image */
+
+  /* Page-specific variations (subtle but visible differences) */
+  --bg-visualizer-start: rgba(124, 58, 237, 0.10);    /* Purple tint - no gray */
+  --bg-dashboard-start: rgba(124, 58, 237, 0.12);  /* More purple tint */
+  --bg-input-start: rgba(124, 58, 237, 0.10);        /* Purple - no gray */
 }
 
 /* Custom Spinner Animation */
@@ -367,7 +381,77 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Gradient Backgrounds */
+/* Unified Page Backgrounds - Option 1 & 4 */
+.page-bg-base {
+  background: linear-gradient(to bottom,
+    var(--bg-gradient-start) 0%,
+    var(--bg-gradient-mid) 50%,
+    var(--bg-gradient-end) 100%
+  );
+  min-height: 100vh;
+}
+
+/* Landing Page - with image overlay */
+.page-bg-landing {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-image:
+    linear-gradient(135deg,
+      var(--bg-landing-overlay) 0%,
+      rgba(124, 58, 237, 0.65) 50%,
+      var(--bg-landing-overlay) 100%
+    ),
+    url('../assets/palace-bg.webp');
+  background-size: cover, cover;
+  background-position: center center, center center;
+  background-repeat: no-repeat, no-repeat;
+  background-blend-mode: overlay, normal;
+}
+
+/* Content Pages - subtle unified gradients */
+.page-bg-content {
+  background: linear-gradient(to bottom,
+    var(--bg-gradient-start) 0%,
+    var(--bg-gradient-mid) 50%,
+    var(--bg-gradient-end) 100%
+  );
+  min-height: 100vh;
+}
+
+  /* Visualizer Page - matches dashboard */
+  .page-bg-visualizer {
+    background: linear-gradient(to bottom,
+      var(--bg-dashboard-start) 0%,
+      rgba(124, 58, 237, 0.20) 50%,
+      var(--bg-gradient-end) 100%
+    );
+    min-height: 100vh;
+  }
+
+  /* Dashboard Page - more purple tint */
+  .page-bg-dashboard {
+    background: linear-gradient(to bottom,
+      var(--bg-dashboard-start) 0%,
+      rgba(124, 58, 237, 0.20) 50%,
+      var(--bg-gradient-end) 100%
+    );
+    min-height: 100vh;
+  }
+
+/* Input Page - matches dashboard */
+.page-bg-input {
+  background: linear-gradient(to bottom,
+    var(--bg-dashboard-start) 0%,
+    rgba(124, 58, 237, 0.20) 50%,
+    var(--bg-gradient-end) 100%
+  );
+  min-height: 100vh;
+}
+
+/* Legacy Gradient Backgrounds (kept for compatibility) */
 .gradient-blue-200 {
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #bfdbfe);
   background-attachment: fixed;

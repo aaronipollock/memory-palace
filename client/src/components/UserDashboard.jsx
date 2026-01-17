@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
@@ -28,37 +28,73 @@ const UserDashboard = () => {
     const navigate = useNavigate();
     const { showSuccess, showError, showInfo } = useToast();
 
-    useEffect(() => {
-        // Check if user is authenticated
-        const token = localStorage.getItem('token');
-        if (!token) {
-            navigate('/');
-            return;
-        }
-
-        // For all users (including demo), decode token and fetch from API
+    // Define fetchPalaces before useEffect that uses it
+    const fetchPalaces = useCallback(async () => {
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            setUserEmail(payload.email);
-            fetchPalaces();
-            fetchCustomRooms();
+            const response = await apiClient.get('/api/memory-palaces');
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // If unauthorized, redirect to login
+                    localStorage.removeItem('token');
+                    navigate('/');
+                    return;
+                }
+                const data = await response.json();
+                const errorObj = new Error(data.message || data.error || 'Failed to fetch memory palaces');
+                errorObj.response = { data, status: response.status };
+
+                // For rate limiting (429), show error but don't clear existing data
+                if (response.status === 429) {
+                    setError(errorObj);
+                    // Don't modify palaces array - keep whatever we have (or empty if first load)
+                    // The data is still on the server, just temporarily unavailable
+                } else {
+                    throw errorObj;
+                }
+                return;
+            }
+
+            const data = await response.json();
+            setPalaces(data);
+            setError(null); // Clear any previous errors on success
         } catch (err) {
-            console.error('Error decoding token:', err);
-            const tokenError = new Error('Invalid authentication token');
-            tokenError.response = { status: 401 };
-            setError(tokenError);
+            // Always set error so user knows what happened
+            setError(err);
+            // For rate limit errors, the data is still on the server - just temporarily unavailable
+            // Don't clear existing data if we have it
+            if (err.response?.status === 429) {
+                // Keep existing data visible even with rate limit error
+                console.warn('Rate limited - keeping existing palace data visible');
+            }
+        } finally {
             setLoading(false);
         }
-
-        // Listen for global event to refresh custom rooms (when modal creates a new room)
-        const handleRefresh = () => {
-            fetchCustomRooms();
-        };
-        window.addEventListener('refreshCustomRooms', handleRefresh);
-        return () => {
-            window.removeEventListener('refreshCustomRooms', handleRefresh);
-        };
     }, [navigate]);
+
+    // Define fetchCustomRooms before useEffect that uses it
+    const fetchCustomRooms = useCallback(async () => {
+        try {
+            const response = await apiClient.get('/api/custom-rooms');
+            if (response.ok) {
+                const data = await response.json();
+                setCustomRooms(data);
+            } else if (response.status === 429) {
+                // For rate limiting, keep existing custom rooms if any
+                console.warn('Rate limited when fetching custom rooms, keeping existing data');
+            }
+        } catch (err) {
+            console.error('Error fetching custom rooms:', err);
+            // Don't set error state - custom rooms are optional
+            // Keep existing custom rooms if rate limited
+            if (err.response?.status !== 429) {
+                // Only clear if it's not a rate limit error
+                if (customRooms.length === 0) {
+                    setCustomRooms([]);
+                }
+            }
+        }
+    }, []);
 
     // Fetch user profile data
     const fetchUserProfile = async () => {
@@ -91,74 +127,47 @@ const UserDashboard = () => {
     };
 
     useEffect(() => {
+        console.log('UserDashboard useEffect running...');
+
+        // Check if user is authenticated
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.log('No token found, redirecting to home');
+            navigate('/');
+            return;
+        }
+
+        // For all users (including demo), decode token and fetch from API
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            console.log('Token decoded, email:', payload.email);
+            setUserEmail(payload.email);
+            fetchPalaces();
+            fetchCustomRooms();
+        } catch (err) {
+            console.error('Error decoding token:', err);
+            // Clear invalid token
+            localStorage.removeItem('token');
+            const tokenError = new Error('Invalid authentication token');
+            tokenError.response = { status: 401 };
+            setError(tokenError);
+            setLoading(false);
+        }
+
+        // Listen for global event to refresh custom rooms (when modal creates a new room)
+        const handleRefresh = () => {
+            fetchCustomRooms();
+        };
+        window.addEventListener('refreshCustomRooms', handleRefresh);
+        return () => {
+            window.removeEventListener('refreshCustomRooms', handleRefresh);
+        };
+    }, [navigate, fetchPalaces, fetchCustomRooms]);
+
+    useEffect(() => {
         fetchUserProfile();
         fetchUserStats();
     }, []);
-
-    const fetchPalaces = async () => {
-        try {
-            const response = await apiClient.get('/api/memory-palaces');
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    // If unauthorized, redirect to login
-                    navigate('/');
-                    return;
-                }
-                const data = await response.json();
-                const errorObj = new Error(data.message || data.error || 'Failed to fetch memory palaces');
-                errorObj.response = { data, status: response.status };
-
-                // For rate limiting (429), show error but don't clear existing data
-                if (response.status === 429) {
-                    setError(errorObj);
-                    // Don't modify palaces array - keep whatever we have (or empty if first load)
-                    // The data is still on the server, just temporarily unavailable
-                } else {
-                    throw errorObj;
-                }
-                return;
-            }
-
-            const data = await response.json();
-            setPalaces(data);
-            setError(null); // Clear any previous errors on success
-        } catch (err) {
-            // Always set error so user knows what happened
-            setError(err);
-            // For rate limit errors, the data is still on the server - just temporarily unavailable
-            // Don't clear existing data if we have it
-            if (err.response?.status === 429 && palaces.length > 0) {
-                // Keep existing data visible even with rate limit error
-                console.warn('Rate limited - keeping existing palace data visible');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchCustomRooms = async () => {
-        try {
-            const response = await apiClient.get('/api/custom-rooms');
-            if (response.ok) {
-                const data = await response.json();
-                setCustomRooms(data);
-            } else if (response.status === 429) {
-                // For rate limiting, keep existing custom rooms if any
-                console.warn('Rate limited when fetching custom rooms, keeping existing data');
-            }
-        } catch (err) {
-            console.error('Error fetching custom rooms:', err);
-            // Don't set error state - custom rooms are optional
-            // Keep existing custom rooms if rate limited
-            if (err.response?.status !== 429) {
-                // Only clear if it's not a rate limit error
-                if (customRooms.length === 0) {
-                    setCustomRooms([]);
-                }
-            }
-        }
-    };
 
     const handlePalaceClick = (palace) => {
         // Store only essential palace data in localStorage to avoid quota issues
@@ -299,9 +308,12 @@ const UserDashboard = () => {
         setUser(updatedUser);
     };
 
+    console.log('UserDashboard render - loading:', loading, 'error:', error?.message);
+
     if (loading) {
+        console.log('Rendering loading state');
         return (
-            <div className="min-h-screen bg-background">
+            <div className="page-bg-dashboard">
                 <NavBar onLogout={handleLogout} />
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-center min-h-[400px]">
@@ -312,8 +324,32 @@ const UserDashboard = () => {
         );
     }
 
+    // Render error state if there's a critical authentication error
+    if (error && error.response?.status === 401) {
+        console.log('Rendering 401 error state');
+        return (
+            <div className="page-bg-dashboard">
+                <NavBar onLogout={handleLogout} />
+                <div className="container mx-auto px-4 py-8">
+                    <div className="bg-white/90 rounded-lg shadow-lg p-6">
+                        <ErrorMessage
+                            error={error}
+                            context="authentication"
+                            onRetry={() => {
+                                localStorage.removeItem('token');
+                                navigate('/');
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    console.log('Rendering main dashboard');
+
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#7C3AED]/60 via-[#8B5CF6]/40 to-white">
+        <div className="page-bg-dashboard">
             <NavBar onLogout={handleLogout} />
             <div className="container mx-auto px-4 py-8">
                 {/* Profile Header Section */}

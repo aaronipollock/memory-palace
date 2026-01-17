@@ -178,6 +178,10 @@ const LandingPage = () => {
   const handleAuthSubmit = async (data) => {
     setIsLoading(true);
     setAuthError('');
+
+    // Clear any existing token before attempting login
+    localStorage.removeItem('token');
+
     try {
       const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/signup';
       const response = await fetch(getApiUrl(endpoint), {
@@ -191,21 +195,35 @@ const LandingPage = () => {
 
       const result = await response.json();
 
-      if (response.ok && result.accessToken) {
-        // Store tokens
+      console.log('Auth response:', { status: response.status, hasToken: !!result.accessToken, message: result.message });
+
+      // Only navigate if we have a valid token AND response is OK
+      if (response.ok && result.accessToken && typeof result.accessToken === 'string' && result.accessToken.length > 0) {
+        // Store tokens only on successful login
         localStorage.setItem('token', result.accessToken);
         if (result.csrfToken) {
           CSRFManager.setCSRFToken(result.csrfToken);
         }
         setShowAuthModal(false);
+        setIsLoading(false);
         navigate('/saved-rooms');
+        return;
       } else {
-        setAuthError(result.message || 'Login/Signup failed');
+        // Show error and stay on landing page - DO NOT navigate
+        const errorMsg = result.message || result.error || 'Login/Signup failed';
+        console.log('Auth failed:', errorMsg);
+        setAuthError(errorMsg);
+        setIsLoading(false);
+        // Explicitly do NOT navigate - stay on landing page
+        return;
       }
     } catch (err) {
-      setAuthError('Login/Signup failed');
+      console.error('Auth error:', err);
+      setAuthError(err.message || 'Login/Signup failed. Please try again.');
+      setIsLoading(false);
+      // Explicitly do NOT navigate - stay on landing page
+      return;
     }
-    setIsLoading(false);
   };
 
   const handleDemoClick = () => {
@@ -481,7 +499,7 @@ const LandingPage = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
                     <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Encoding-first image generation</h3>
-                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Generate visual cues to support associations you define (not replace them).</p>
+                    <p className="text-lg md:text-xl text-white text-center max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Generate visual cues to support associations you define (not replace them).</p>
                   </div>
                 </div>
               </div>
@@ -503,7 +521,7 @@ const LandingPage = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
                     <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Spatial anchors and repeatable review</h3>
-                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Place cues at consistent locations and revisit them in a fixed order.</p>
+                    <p className="text-lg md:text-xl text-white text-center max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Place cues at consistent locations and revisit them in a fixed order.</p>
                   </div>
                 </div>
               </div>
@@ -525,7 +543,7 @@ const LandingPage = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
                     <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Save and iterate</h3>
-                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Store palaces and refine them over time as your understanding changes.</p>
+                    <p className="text-lg md:text-xl text-white text-center max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Store palaces and refine them over time as your understanding changes.</p>
                   </div>
                 </div>
               </div>
@@ -550,7 +568,7 @@ const LandingPage = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-8">
                     <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Use Your Own Spaces</h3>
-                    <p className="text-lg md:text-xl text-white text-center max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Upload photos of familiar rooms and use them as stable spatial anchors for your memory palaces.</p>
+                    <p className="text-lg md:text-xl text-white text-center max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Upload photos of familiar rooms and use them as stable spatial anchors for your memory palaces.</p>
                   </div>
                 </div>
               </div>
@@ -687,7 +705,18 @@ const LandingPage = () => {
         </footer>
         <AuthModal
           isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
+          onClose={() => {
+            setShowAuthModal(false);
+            setAuthError(''); // Clear errors when modal closes
+            setFormData({
+              email: '',
+              password: '',
+              confirmPassword: '',
+              firstName: '',
+              lastName: '',
+              username: ''
+            }); // Reset form data when modal closes
+          }}
           mode={authMode}
           setMode={setAuthMode}
           onSubmit={handleAuthSubmit}

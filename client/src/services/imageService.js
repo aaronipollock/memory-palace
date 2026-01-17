@@ -56,22 +56,44 @@ export const generateImage = async (association, setCurrentPrompt) => {
     }
 
     // Make API request with generated prompt
+    console.log('Making API request to /api/generate-images with prompt:', promptResult.fullPrompt);
     const response = await apiClient.post('/api/generate-images', {
       prompt: promptResult.fullPrompt,
       association: sanitizedAssociation
     });
 
+    console.log('API response status:', response.status, response.statusText);
+
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+      }
+      console.error('Image generation API error:', errorData);
       const error = new Error(errorData.error || 'Failed to generate image');
       error.response = { status: response.status, data: errorData };
       throw error;
     }
 
     const data = await response.json();
+    console.log('Image generation successful:', {
+      hasImageData: !!data.imageData,
+      hasOptimizedUrl: !!data.optimizedUrl,
+      hasImageUrl: !!data.imageUrl,
+      isPlaceholder: data.isPlaceholder
+    });
     return data;
   } catch (error) {
     console.error('Image generation error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response,
+      status: error.response?.status,
+      data: error.response?.data,
+      context: error.context
+    });
 
     // Enhance the error with context if it doesn't have response data
     if (!error.response) {

@@ -38,7 +38,8 @@ const upload = multer({
     }
 });
 
-router.post('/generate-images', imageController.generateImages);
+// Note: /generate-images is mounted separately in server.js to avoid CSRF protection
+// router.post('/generate-images', imageController.generateImages);
 router.post('/generate-room', roomController.generateRoom);
 
 // Add additional image routes with authentication and multer middleware

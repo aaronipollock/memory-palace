@@ -2,15 +2,21 @@
 export const getErrorMessage = (error, context = '') => {
   console.error(`Error in ${context}:`, error);
 
+  // Handle string errors
+  if (typeof error === 'string') {
+    return error;
+  }
+
   // Network/connection errors
   if (!error.response) {
-    if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+    const message = error.message || '';
+    if (error.code === 'ECONNREFUSED' || message.includes('Network Error')) {
       return 'Unable to connect to the server. Please check your internet connection and try again.';
     }
-    if (error.message.includes('timeout')) {
+    if (message.includes('timeout')) {
       return 'Request timed out. Please try again.';
     }
-    return 'Network error occurred. Please try again.';
+    return error.message || 'Network error occurred. Please try again.';
   }
 
   const { status, data } = error.response;
@@ -94,11 +100,21 @@ export const ErrorTypes = {
 
 // Get error type for styling
 export const getErrorType = (error) => {
+  // Handle string errors (from auth failures)
+  if (typeof error === 'string') {
+    if (error.toLowerCase().includes('invalid') || error.toLowerCase().includes('credential')) {
+      return ErrorTypes.AUTHENTICATION;
+    }
+    return ErrorTypes.UNKNOWN;
+  }
+
+  // Handle error objects without response
   if (!error.response) {
-    if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+    const message = error.message || '';
+    if (error.code === 'ECONNREFUSED' || message.includes('Network Error')) {
       return ErrorTypes.NETWORK;
     }
-    if (error.message.includes('timeout')) {
+    if (message.includes('timeout')) {
       return ErrorTypes.TIMEOUT;
     }
     return ErrorTypes.NETWORK;

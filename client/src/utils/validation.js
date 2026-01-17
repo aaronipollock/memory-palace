@@ -129,7 +129,7 @@ export const validateAuthForm = (formData, mode) => {
     }
     isValidations.confirmPassword = confirmValidation.isValid;
 
-    // First name validation
+    // First name validation (required)
     if (!formData.firstName || formData.firstName.trim().length === 0) {
       errors.firstName = 'First name is required';
       isValidations.firstName = false;
@@ -140,7 +140,7 @@ export const validateAuthForm = (formData, mode) => {
       isValidations.firstName = true;
     }
 
-    // Last name validation
+    // Last name validation (required)
     if (!formData.lastName || formData.lastName.trim().length === 0) {
       errors.lastName = 'Last name is required';
       isValidations.lastName = false;
