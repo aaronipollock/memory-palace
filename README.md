@@ -13,6 +13,7 @@ Low·sai is an AI-powered learning platform that helps users memorize informatio
 
 ### Memory Palace Creation
 - Create personalized memory palaces with custom room layouts
+- **Custom Rooms**: Upload your own room images and add anchor points
 - Generate AI-powered images for memorable items using Stability AI
 - Save and manage multiple memory palaces
 - Interactive visualizer with drag-and-drop functionality
@@ -71,6 +72,8 @@ The application uses MongoDB with the following collections:
 {
   email: String,
   password: String (hashed),
+  firstName: String,
+  lastName: String,
   createdAt: Date,
   updatedAt: Date
 }
@@ -95,6 +98,25 @@ The application uses MongoDB with the following collections:
 }
 ```
 
+### Custom Rooms
+```javascript
+{
+  userId: ObjectId,
+  name: String,
+  description: String,
+  roomType: String (enum: ['custom']),
+  imageUrl: String,
+  anchorPoints: [{
+    name: String,
+    x: Number,
+    y: Number,
+    description: String
+  }],
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
 ## API Documentation
 
 ### Authentication Endpoints
@@ -109,6 +131,13 @@ The application uses MongoDB with the following collections:
 - `GET /api/memory-palaces/:id` - Get specific memory palace
 - `PUT /api/memory-palaces/:id` - Update memory palace
 - `DELETE /api/memory-palaces/:id` - Delete memory palace
+
+### Custom Rooms Endpoints
+- `GET /api/custom-rooms` - Get user's custom rooms
+- `POST /api/custom-rooms` - Create new custom room
+- `GET /api/custom-rooms/:id` - Get specific custom room
+- `PUT /api/custom-rooms/:id` - Update custom room (e.g., add anchor points)
+- `DELETE /api/custom-rooms/:id` - Delete custom room
 
 ### Image Generation Endpoints
 - `POST /api/images/generate` - Generate AI image
@@ -221,7 +250,6 @@ low-sai/
 
 ## Future Features
 
-- **User Accounts**: Full user registration and profile management
 - **Collaborative Palaces**: Share memory palaces with others
 - **Advanced AI**: More sophisticated image generation options
 - **Mobile App**: Native mobile application

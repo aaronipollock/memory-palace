@@ -167,12 +167,7 @@ const LandingPage = () => {
       title: "Language Learners",
       description: "Build vocabulary and grammar through memorable visual associations.",
       icon: "🌍"
-    },
-    // {
-    //   title: "Medical Students",
-    //   description: "Learn anatomy, terms, and procedures through visual memory palaces.",
-    //   icon: "⚕️"
-    // }
+    }
   ];
 
   const handleAuthSubmit = async (data) => {

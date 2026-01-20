@@ -7,8 +7,6 @@ import ProfileSettingsModal from './ProfileSettingsModal';
 import PalacePreview from './PalacePreview';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
-// import { ROOM_IMAGES } from '../constants/roomData';
-
 import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
 

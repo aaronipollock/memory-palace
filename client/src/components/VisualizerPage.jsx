@@ -272,8 +272,6 @@ const VisualizerPage = () => {
       }
 
       // Don't clear accepted images after save - let user continue working
-      // setAcceptedImages({});
-      // localStorage.removeItem('acceptedImages');
     } catch (err) {
       console.error('Error saving palace:', err);
       // Show the actual error message from the backend if available

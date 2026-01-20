@@ -12,12 +12,13 @@ The Low·sAI API is a RESTful service that enables users to create, manage, and 
 
 1. [Authentication](#authentication)
 2. [Memory Palaces](#memory-palaces)
-3. [Image Generation](#image-generation)
-4. [Room Generation](#room-generation)
-5. [Utility Endpoints](#utility-endpoints)
-6. [Error Handling](#error-handling)
-7. [Rate Limiting](#rate-limiting)
-8. [Security](#security)
+3. [Custom Rooms](#custom-rooms)
+4. [Image Generation](#image-generation)
+5. [Room Generation](#room-generation)
+6. [Utility Endpoints](#utility-endpoints)
+7. [Error Handling](#error-handling)
+8. [Rate Limiting](#rate-limiting)
+9. [Security](#security)
 
 ---
 
@@ -278,6 +279,217 @@ X-CSRF-Token: <csrf_token>
 **Error Responses:**
 - `401` - Unauthorized
 - `400` - Validation errors
+- `500` - Server error
+
+---
+
+## Custom Rooms
+
+Endpoints for managing user-uploaded custom room images with anchor points.
+
+### GET /api/custom-rooms
+
+Get all custom rooms for the authenticated user.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+X-CSRF-Token: <csrf_token>
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "_id": "507f1f77bcf86cd799439011",
+    "name": "My Living Room",
+    "description": "A cozy living room space",
+    "roomType": "custom",
+    "userId": "507f1f77bcf86cd799439012",
+    "imageUrl": "https://example.com/room.jpg",
+    "anchorPoints": [
+      {
+        "name": "Sofa",
+        "x": 100,
+        "y": 200,
+        "description": "Main seating area"
+      }
+    ],
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]
+```
+
+**Error Responses:**
+- `401` - Unauthorized
+- `500` - Server error
+
+---
+
+### GET /api/custom-rooms/:id
+
+Get a specific custom room by ID.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+X-CSRF-Token: <csrf_token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "name": "My Living Room",
+  "description": "A cozy living room space",
+  "roomType": "custom",
+  "userId": "507f1f77bcf86cd799439012",
+  "imageUrl": "https://example.com/room.jpg",
+  "anchorPoints": [...],
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**Error Responses:**
+- `400` - Invalid room ID format
+- `401` - Unauthorized
+- `403` - Access denied (room belongs to another user)
+- `404` - Custom room not found
+- `500` - Server error
+
+---
+
+### POST /api/custom-rooms
+
+Create a new custom room.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+X-CSRF-Token: <csrf_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "My Living Room",
+  "description": "A cozy living room space",
+  "imageUrl": "https://example.com/room.jpg",
+  "anchorPoints": [
+    {
+      "name": "Sofa",
+      "x": 100,
+      "y": 200,
+      "description": "Main seating area"
+    }
+  ]
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "name": "My Living Room",
+  "description": "A cozy living room space",
+  "roomType": "custom",
+  "userId": "507f1f77bcf86cd799439012",
+  "imageUrl": "https://example.com/room.jpg",
+  "anchorPoints": [...],
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**Error Responses:**
+- `400` - Validation errors (missing name, invalid anchor points, etc.)
+- `401` - Unauthorized
+- `500` - Server error
+
+---
+
+### PUT /api/custom-rooms/:id
+
+Update an existing custom room (e.g., add or modify anchor points).
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+X-CSRF-Token: <csrf_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Updated Room Name",
+  "description": "Updated description",
+  "anchorPoints": [
+    {
+      "name": "Sofa",
+      "x": 100,
+      "y": 200,
+      "description": "Main seating area"
+    },
+    {
+      "name": "TV",
+      "x": 300,
+      "y": 150,
+      "description": "Entertainment center"
+    }
+  ]
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "name": "Updated Room Name",
+  "description": "Updated description",
+  "roomType": "custom",
+  "userId": "507f1f77bcf86cd799439012",
+  "imageUrl": "https://example.com/room.jpg",
+  "anchorPoints": [...],
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-02T00:00:00.000Z"
+}
+```
+
+**Error Responses:**
+- `400` - Validation errors or invalid room ID format
+- `401` - Unauthorized
+- `403` - Access denied (room belongs to another user)
+- `404` - Custom room not found
+- `500` - Server error
+
+---
+
+### DELETE /api/custom-rooms/:id
+
+Delete a custom room.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+X-CSRF-Token: <csrf_token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Custom room deleted successfully"
+}
+```
+
+**Error Responses:**
+- `400` - Invalid room ID format
+- `401` - Unauthorized
+- `403` - Access denied (room belongs to another user)
+- `404` - Custom room not found
 - `500` - Server error
 
 ---

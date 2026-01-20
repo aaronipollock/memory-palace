@@ -158,7 +158,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .loci-container:hover {
-  /* transform: translateY(-2px); */
   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -221,7 +220,6 @@ h1, h2, h3, h4, h5, h6 {
 .btn-loci-secondary {
   background-color: var(--color-secondary);
   color: white;
-  /* font-weight: 600; */
 }
 
 /* Interactive Elements */
@@ -237,7 +235,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .loci-anchor:hover {
-  /* transform: scale(1.05); */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -449,25 +446,4 @@ h1, h2, h3, h4, h5, h6 {
     var(--bg-gradient-end) 100%
   );
   min-height: 100vh;
-}
-
-/* Legacy Gradient Backgrounds (kept for compatibility) */
-.gradient-blue-200 {
-  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #bfdbfe);
-  background-attachment: fixed;
-}
-
-.gradient-blue-300 {
-  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #93c5fd);
-  background-attachment: fixed;
-}
-
-.gradient-blue-400 {
-  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #60a5fa);
-  background-attachment: fixed;
-}
-
-.gradient-use-cases {
-  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 70%, #e2e8f0);
-  background-attachment: fixed;
 }

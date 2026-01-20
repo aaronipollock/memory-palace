@@ -23,6 +23,7 @@ A memory palace is a mental technique where you associate information you want t
 - **AI-Powered Image Generation**: Transform any information into vivid, memorable images
 - **Interactive Memory Palaces**: Build and explore your own memory palaces with interactive anchor points
 - **Multiple Room Types**: Choose from throne rooms, bedchambers, and dungeons
+- **Custom Rooms**: Upload your own room images and create personalized memory spaces
 - **Art Style Customization**: Select from various art styles for your generated images
 - **Save and Review**: Store your memory palaces for later review and practice
 
@@ -34,13 +35,12 @@ A memory palace is a mental technique where you associate information you want t
 2. **Try Demo**: Click the "Try Demo" button to experience the application without creating an account
 3. **Explore Features**: The demo includes sample memory palaces to help you understand the concept
 
-### Creating an Account (Future Feature)
+### Creating an Account
 
-When account creation is available:
-1. Click "Get Started" on the landing page
-2. Fill in your email and create a password
-3. Verify your email address
-4. Start creating your own memory palaces
+1. Click "Get Started" or "Sign Up" on the landing page
+2. Fill in your first name, last name, email, and create a password
+3. Click "Create Account" to complete registration
+4. You'll be automatically logged in and can start creating your own memory palaces
 
 ## Creating Your First Memory Palace
 
