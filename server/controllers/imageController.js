@@ -217,7 +217,17 @@ exports.uploadImage = async (req, res) => {
         const optimizationSuccess = await generateOptimizedImage(originalPath, optimizedPath);
 
         // Construct URLs
-        const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`;
+        // Use BACKEND_URL if set, otherwise construct from request or use production default
+        let backendUrl = process.env.BACKEND_URL;
+        if (!backendUrl) {
+            // In production (Render), use the production API URL
+            if (process.env.NODE_ENV === 'production') {
+                backendUrl = 'https://memory-palace-api.onrender.com';
+            } else {
+                // In development, use localhost
+                backendUrl = `http://localhost:${process.env.PORT || 5001}`;
+            }
+        }
         const originalUrl = `${backendUrl}/images/original/${req.file.filename}`;
         const optimizedUrl = `${backendUrl}/images/optimized/${req.file.filename}`;
 
@@ -250,7 +260,17 @@ exports.getImageInfo = async (req, res) => {
         const originalExists = fs.existsSync(originalPath);
         const optimizedExists = fs.existsSync(optimizedPath);
 
-        const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`;
+        // Use BACKEND_URL if set, otherwise construct from request or use production default
+        let backendUrl = process.env.BACKEND_URL;
+        if (!backendUrl) {
+            // In production (Render), use the production API URL
+            if (process.env.NODE_ENV === 'production') {
+                backendUrl = 'https://memory-palace-api.onrender.com';
+            } else {
+                // In development, use localhost
+                backendUrl = `http://localhost:${process.env.PORT || 5001}`;
+            }
+        }
         const originalUrl = `${backendUrl}/images/original/${filename}`;
         const optimizedUrl = `${backendUrl}/images/optimized/${filename}`;
 
