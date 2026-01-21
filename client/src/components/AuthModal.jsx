@@ -370,12 +370,12 @@ const AuthModal = ({ isOpen, onClose, mode, setMode, onSubmit, error, isLoading,
                   onChange={handleInputChange}
                   onBlur={() => handleBlur('confirmPassword')}
                   className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 ${
-                    getFieldStyling(
-                      validation.isValidations.confirmPassword,
-                      localFormData.confirmPassword,
-                      touched.confirmPassword
-                    )
-                  }`}
+                  getFieldStyling(
+                    validation.isValidations.confirmPassword,
+                    localFormData.confirmPassword,
+                    touched.confirmPassword
+                  )
+                }`}
                   required
                   disabled={isLoading}
                   maxLength={128}

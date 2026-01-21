@@ -222,12 +222,16 @@ const LandingPage = () => {
   };
 
   const handleDemoClick = () => {
+    setError(''); // Clear any previous errors
     handleDemoLogin();
   };
 
   const handleDemoLogin = async () => {
       setIsLoading(true);
       setError('');
+
+      // Clear any existing token before attempting login
+      localStorage.removeItem('token');
 
       try {
           const response = await fetch(getApiUrl('/api/auth/login'), {
@@ -242,21 +246,35 @@ const LandingPage = () => {
               credentials: 'include'
           });
 
-          if (response.ok) {
-              const data = await response.json();
-              localStorage.setItem('token', data.accessToken);
-              if (data.csrfToken) {
-                CSRFManager.setCSRFToken(data.csrfToken);
+          let result;
+          try {
+              result = await response.json();
+          } catch (jsonError) {
+              console.error('Failed to parse JSON response:', jsonError);
+              setError('Invalid response from server. Please try again.');
+              setIsLoading(false);
+              return;
+          }
+
+          console.log('Demo login response:', { status: response.status, hasToken: !!result.accessToken, message: result.message, result });
+
+          // Only navigate if we have a valid token AND response is OK
+          if (response.ok && result.accessToken && typeof result.accessToken === 'string' && result.accessToken.length > 0) {
+              localStorage.setItem('token', result.accessToken);
+              if (result.csrfToken) {
+                CSRFManager.setCSRFToken(result.csrfToken);
               }
+              setIsLoading(false);
               navigate('/saved-rooms');
           } else {
-              const errorData = await response.json();
-              setError(errorData.message || 'Demo login failed');
+              const errorMsg = result.message || result.error || 'Demo login failed';
+              console.log('Demo login failed:', errorMsg, result);
+              setError(errorMsg);
+              setIsLoading(false);
           }
       } catch (error) {
           console.error('Demo login error:', error);
-          setError('Demo login failed. Please try again.');
-      } finally {
+          setError(error.message || 'Demo login failed. Please try again.');
           setIsLoading(false);
       }
   };
@@ -455,9 +473,10 @@ const LandingPage = () => {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={handleDemoClick}
-                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px]"
+                      disabled={isLoading}
+                      className="btn-loci text-lg px-4 py-4 rounded-lg hover:scale-105 transition-transform duration-200 min-w-[160px] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Try Demo
+                      {isLoading ? 'Loading...' : 'Try Demo'}
                     </button>
                     <button
                       onClick={() => { setShowAuthModal(true); setAuthMode('signup'); }}
@@ -466,6 +485,11 @@ const LandingPage = () => {
                       Get Started
                     </button>
                   </div>
+                  {error && (
+                    <div className="mt-4 text-center">
+                      <p className="text-red-600 text-sm">{error}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

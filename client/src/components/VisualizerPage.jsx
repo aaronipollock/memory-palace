@@ -105,6 +105,14 @@ const VisualizerPage = () => {
 
   // State for custom room anchor points
   const [customRoomAnchorPoints, setCustomRoomAnchorPoints] = useState([]);
+  // State for edit mode
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingAnchorPoint, setEditingAnchorPoint] = useState(null);
+  const [anchorPointName, setAnchorPointName] = useState('');
+  const [anchorPointDescription, setAnchorPointDescription] = useState('');
+  const [isSavingAnchorPoint, setIsSavingAnchorPoint] = useState(false);
+  const [showAnchorPointModal, setShowAnchorPointModal] = useState(false);
+  const [isChangingPosition, setIsChangingPosition] = useState(false);
 
   // Fetch custom room data if customRoomId is present
   useEffect(() => {
@@ -280,7 +288,170 @@ const VisualizerPage = () => {
     }
   };
 
+  // Handle image click in edit mode (for adding anchor points or changing position)
+  const handleImageClickEditMode = (e) => {
+    if (!isEditMode || !customRoomId) return;
+
+    const img = e.currentTarget;
+    const rect = img.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    const newX = Math.round(x * 100) / 100;
+    const newY = Math.round(y * 100) / 100;
+
+    // If changing position of existing anchor point
+    if (isChangingPosition && editingAnchorPoint) {
+      setEditingAnchorPoint({
+        ...editingAnchorPoint,
+        x: newX,
+        y: newY
+      });
+      setIsChangingPosition(false);
+      setShowAnchorPointModal(true);
+      showInfo('Position updated! Click Save to confirm.');
+      return;
+    }
+
+    // Otherwise, adding new anchor point
+    setEditingAnchorPoint({
+      x: newX,
+      y: newY,
+      name: '',
+      description: ''
+    });
+    setAnchorPointName('');
+    setAnchorPointDescription('');
+    setShowAnchorPointModal(true);
+  };
+
+  // Handle anchor point click in edit mode
+  const handleAnchorPointClickEditMode = (point, e) => {
+    if (!isEditMode || !customRoomId) return;
+    e.stopPropagation();
+    setEditingAnchorPoint(point);
+    setAnchorPointName(point.name);
+    setAnchorPointDescription(point.description || '');
+    setShowAnchorPointModal(true);
+  };
+
+  // Save anchor point (add or update)
+  const handleSaveAnchorPoint = async () => {
+    if (!anchorPointName.trim()) {
+      showError('Please enter a name for the anchor point');
+      return;
+    }
+
+    if (!customRoomId) return;
+
+    try {
+      setIsSavingAnchorPoint(true);
+      let updatedPoints;
+
+      if (editingAnchorPoint && editingAnchorPoint._id) {
+        // Update existing point (including position if changed)
+        updatedPoints = customRoomAnchorPoints.map(p =>
+          p._id === editingAnchorPoint._id
+            ? {
+                ...p,
+                name: anchorPointName.trim(),
+                description: anchorPointDescription.trim(),
+                x: editingAnchorPoint.x,
+                y: editingAnchorPoint.y
+              }
+            : p
+        );
+      } else {
+        // Add new point
+        const newPoint = {
+          name: anchorPointName.trim(),
+          description: anchorPointDescription.trim(),
+          x: editingAnchorPoint.x,
+          y: editingAnchorPoint.y
+        };
+        updatedPoints = [...customRoomAnchorPoints, newPoint];
+      }
+
+      const response = await apiClient.put(`/api/custom-rooms/${customRoomId}`, {
+        anchorPoints: updatedPoints
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save anchor point');
+      }
+
+      const updatedRoom = await response.json();
+      setCustomRoomAnchorPoints(updatedRoom.anchorPoints || []);
+      setShowAnchorPointModal(false);
+      setEditingAnchorPoint(null);
+      setAnchorPointName('');
+      setAnchorPointDescription('');
+      showSuccess('Anchor point saved successfully!');
+    } catch (err) {
+      console.error('Error saving anchor point:', err);
+      showError(err.message || 'Failed to save anchor point');
+    } finally {
+      setIsSavingAnchorPoint(false);
+    }
+  };
+
+  // Delete anchor point
+  const handleDeleteAnchorPoint = async () => {
+    if (!editingAnchorPoint || !customRoomId) return;
+
+    if (!window.confirm('Are you sure you want to delete this anchor point?')) {
+      return;
+    }
+
+    try {
+      setIsSavingAnchorPoint(true);
+      const updatedPoints = customRoomAnchorPoints.filter(p => {
+        if (editingAnchorPoint._id && p._id) {
+          return p._id.toString() !== editingAnchorPoint._id.toString();
+        }
+        return !(p.x === editingAnchorPoint.x && p.y === editingAnchorPoint.y && p.name === editingAnchorPoint.name);
+      });
+
+      const response = await apiClient.put(`/api/custom-rooms/${customRoomId}`, {
+        anchorPoints: updatedPoints
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete anchor point');
+      }
+
+      const updatedRoom = await response.json();
+      setCustomRoomAnchorPoints(updatedRoom.anchorPoints || []);
+      setShowAnchorPointModal(false);
+      setEditingAnchorPoint(null);
+      setAnchorPointName('');
+      setAnchorPointDescription('');
+      showSuccess('Anchor point deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting anchor point:', err);
+      showError(err.message || 'Failed to delete anchor point');
+    } finally {
+      setIsSavingAnchorPoint(false);
+    }
+  };
+
   const handleClick = async (association, event) => {
+    // If in edit mode and this is a custom room, handle anchor point editing instead
+    if (isEditMode && customRoomId) {
+      // Find the anchor point that matches this association's anchor name
+      const matchingPoint = customRoomAnchorPoints.find(ap => ap.name === association.anchor);
+      if (matchingPoint) {
+        event.preventDefault();
+        event.stopPropagation();
+        handleAnchorPointClickEditMode(matchingPoint, event);
+        return;
+      }
+      // If no matching point found, don't proceed with image generation in edit mode
+      return;
+    }
+
     setSelectedAssociation(association);
     setIsLoading(true);
     setError(null);
@@ -434,24 +605,30 @@ const VisualizerPage = () => {
           <div className="flex gap-3">
             <button
               type="button"
-              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 h-[40px]"
               onClick={() => navigate('/saved-rooms')}
             >
               ← Back to Dashboard
             </button>
-            <button
-              type="button"
-              className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
-              onClick={() => navigate('/input')}
-            >
-              + New Palace
-            </button>
           </div>
           <div className="flex gap-3 items-center">
+            {/* Edit Anchor Points Button - only show for custom rooms */}
+            {customRoomId && (
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`px-4 py-2 rounded shadow transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 w-[180px] h-[40px] ${
+                  isEditMode
+                    ? 'bg-secondary text-white hover:bg-[#6D28D9]'
+                    : 'bg-primary text-white hover:bg-[#7C3AED]'
+                }`}
+              >
+                {isEditMode ? '✓ Edit Mode' : 'Edit Anchor Points'}
+              </button>
+            )}
             {/* Save Palace Button - moved here to avoid covering anchor points */}
             <button
               onClick={() => setIsSaveModalOpen(true)}
-              className="group relative px-6 py-2 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 bg-primary hover:bg-[#7C3AED] text-white"
+              className="group relative px-6 py-2 rounded-xl shadow-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 focus-visible:ring-offset-2 bg-primary hover:bg-[#7C3AED] text-white h-[40px]"
               aria-describedby="save-room-help"
             >
               <div className="flex items-center space-x-2">
@@ -634,11 +811,41 @@ const VisualizerPage = () => {
         )}
         {/* Image and anchors full width below */}
         <div className="relative w-full max-w-5xl loci-container p-4 mx-auto">
+          {isEditMode && customRoomId && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex justify-between items-start">
+                <p className="text-sm text-blue-800">
+                  {isChangingPosition ? (
+                    <strong>Change Position Mode:</strong>
+                  ) : (
+                    <strong>Edit Mode:</strong>
+                  )}{' '}
+                  {isChangingPosition
+                    ? 'Click on the image to set the new position for this anchor point.'
+                    : 'Click on the image to add anchor points, or click existing anchor points to edit them.'}
+                </p>
+                {isChangingPosition && (
+                  <button
+                    onClick={() => {
+                      setIsChangingPosition(false);
+                      setShowAnchorPointModal(true);
+                    }}
+                    className="ml-4 px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
           <img
             src={roomImage}
             alt={`${roomType} memory palace room with interactive anchor points`}
-            className="w-full h-auto rounded-lg aspect-[1/1]"
+            className={`w-full h-auto rounded-lg aspect-[1/1] ${
+              (isEditMode && customRoomId) || isChangingPosition ? 'cursor-crosshair' : ''
+            }`}
             style={{ maxHeight: '95vh' }}
+            onClick={(isEditMode && customRoomId) || isChangingPosition ? handleImageClickEditMode : undefined}
           />
 
           {/* Status announcement for screen readers */}
@@ -661,7 +868,9 @@ const VisualizerPage = () => {
             return (
               <button
                 key={index}
-                className="absolute cursor-pointer loci-anchor focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1"
+                className={`absolute cursor-pointer loci-anchor focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 ${
+                  isEditMode && customRoomId ? 'ring-2 ring-yellow-400 ring-offset-2' : ''
+                }`}
                 style={{
                   ...anchorPositions[assoc.anchor],
                   position: 'absolute',
@@ -672,7 +881,7 @@ const VisualizerPage = () => {
                 }}
                 onClick={(e) => handleClick(assoc, e)}
                 disabled={isLoading}
-                aria-label={`${assoc.anchor} anchor point ${displayNumber}${hasAcceptedImage ? ' - image accepted' : ' - click to generate image'}`}
+                aria-label={`${assoc.anchor} anchor point ${displayNumber}${hasAcceptedImage ? ' - image accepted' : ' - click to generate image'}${isEditMode && customRoomId ? ' - click to edit' : ''}`}
                 aria-describedby={`anchor-${index}-desc`}
               >
                 <div className={`w-full h-full flex items-center justify-center rounded transition-all duration-200 ${
@@ -724,6 +933,100 @@ const VisualizerPage = () => {
               roomType={roomType}
               existingRoomName={palaceName}
             />
+          )}
+
+          {/* Anchor Point Edit Modal */}
+          {showAnchorPointModal && customRoomId && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <h2 className="text-2xl font-bold mb-4 text-primary">
+                  {editingAnchorPoint && editingAnchorPoint._id ? 'Edit Anchor Point' : 'Add Anchor Point'}
+                </h2>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={anchorPointName}
+                    onChange={(e) => setAnchorPointName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="e.g., Throne, Window, Door"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description (optional)
+                  </label>
+                  <textarea
+                    value={anchorPointDescription}
+                    onChange={(e) => setAnchorPointDescription(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Optional description for this anchor point"
+                    rows={3}
+                  />
+                </div>
+
+                {editingAnchorPoint && (
+                  <div className="mb-4">
+                    <div className="text-sm text-gray-600 mb-2">
+                      <p>Position: ({editingAnchorPoint.x.toFixed(1)}%, {editingAnchorPoint.y.toFixed(1)}%)</p>
+                    </div>
+                    {editingAnchorPoint._id && (
+                      <button
+                        onClick={() => {
+                          setIsChangingPosition(true);
+                          setShowAnchorPointModal(false);
+                          showInfo('Click on the image to set a new position for this anchor point.');
+                        }}
+                        className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                      >
+                        Change Position
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex justify-between gap-3">
+                  <div>
+                    {editingAnchorPoint && editingAnchorPoint._id && (
+                      <button
+                        onClick={handleDeleteAnchorPoint}
+                        disabled={isSavingAnchorPoint}
+                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowAnchorPointModal(false);
+                        setEditingAnchorPoint(null);
+                        setAnchorPointName('');
+                        setAnchorPointDescription('');
+                        setIsChangingPosition(false);
+                      }}
+                      disabled={isSavingAnchorPoint}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveAnchorPoint}
+                      disabled={isSavingAnchorPoint || !anchorPointName.trim()}
+                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-[#7C3AED] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSavingAnchorPoint ? 'Saving...' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
