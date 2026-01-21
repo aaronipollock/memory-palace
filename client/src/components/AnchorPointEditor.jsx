@@ -58,6 +58,10 @@ const AnchorPointEditor = () => {
             setRoomName(roomData.name);
             setRoomDescription(roomData.description || '');
             setAnchorPoints(roomData.anchorPoints || []);
+
+            // Log image URL for debugging
+            console.log('Custom room imageUrl:', roomData.imageUrl);
+            console.log('Backend API URL:', getApiUrl(''));
         } catch (err) {
             console.error('Error loading room:', err);
             setError(err.message || 'Failed to load room');
@@ -377,16 +381,30 @@ const AnchorPointEditor = () => {
                     <div className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100" style={{ minHeight: '400px' }}>
                         <img
                             ref={imageRef}
-                            src={room.imageUrl && room.imageUrl.startsWith('/')
-                                ? `${getApiUrl('')}${room.imageUrl}`
-                                : room.imageUrl}
+                            src={(() => {
+                                if (!room.imageUrl) return '';
+                                // If it's a relative path, prefix with backend URL
+                                if (room.imageUrl.startsWith('/')) {
+                                    return `${getApiUrl('')}${room.imageUrl}`;
+                                }
+                                // If it contains localhost, replace with backend URL
+                                if (room.imageUrl.includes('localhost')) {
+                                    const backendUrl = getApiUrl('').replace(/\/$/, '');
+                                    return room.imageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+                                }
+                                // Otherwise use as-is (should be a full URL)
+                                return room.imageUrl;
+                            })()}
                             alt={room.name}
                             className="w-full h-auto cursor-crosshair"
                             onClick={handleImageClick}
                             style={{ display: 'block' }}
                             onError={(e) => {
-                                console.error('Image failed to load:', room.imageUrl);
-                                e.target.style.display = 'none';
+                                console.error('Image failed to load:', {
+                                    originalUrl: room.imageUrl,
+                                    computedSrc: e.target.src,
+                                    backendUrl: getApiUrl('')
+                                });
                             }}
                         />
 
