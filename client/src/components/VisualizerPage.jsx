@@ -105,6 +105,7 @@ const VisualizerPage = () => {
 
   // State for custom room anchor points
   const [customRoomAnchorPoints, setCustomRoomAnchorPoints] = useState([]);
+  const [fetchedCustomRoomImageUrl, setFetchedCustomRoomImageUrl] = useState(null);
   // State for edit mode
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingAnchorPoint, setEditingAnchorPoint] = useState(null);
@@ -123,20 +124,51 @@ const VisualizerPage = () => {
           if (response.ok) {
             const roomData = await response.json();
             setCustomRoomAnchorPoints(roomData.anchorPoints || []);
+            // Also fetch and set the image URL
+            if (roomData.imageUrl) {
+              setFetchedCustomRoomImageUrl(roomData.imageUrl);
+            }
           }
         } catch (err) {
           console.error('Error fetching custom room:', err);
         }
       } else {
         setCustomRoomAnchorPoints([]);
+        setFetchedCustomRoomImageUrl(null);
       }
     };
     fetchCustomRoom();
   }, [customRoomId]);
 
   // Get the appropriate room image
-  // If a custom room is selected, use its image URL, otherwise use the predefined room image
-  const roomImage = customRoomImageUrl || ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
+  // Priority: fetched image URL > localStorage image URL > predefined room image
+  const roomImage = (() => {
+    // Use fetched image URL first (most up-to-date)
+    if (fetchedCustomRoomImageUrl) {
+      // Handle relative URLs and localhost URLs
+      if (fetchedCustomRoomImageUrl.startsWith('/')) {
+        return `${getApiUrl('')}${fetchedCustomRoomImageUrl}`;
+      }
+      if (fetchedCustomRoomImageUrl.includes('localhost')) {
+        const backendUrl = getApiUrl('').replace(/\/$/, '');
+        return fetchedCustomRoomImageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+      }
+      return fetchedCustomRoomImageUrl;
+    }
+    // Fallback to localStorage image URL
+    if (customRoomImageUrl) {
+      if (customRoomImageUrl.startsWith('/')) {
+        return `${getApiUrl('')}${customRoomImageUrl}`;
+      }
+      if (customRoomImageUrl.includes('localhost')) {
+        const backendUrl = getApiUrl('').replace(/\/$/, '');
+        return customRoomImageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+      }
+      return customRoomImageUrl;
+    }
+    // Fallback to predefined room image
+    return ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
+  })();
 
   // Get the appropriate anchor positions for this room
   // For custom rooms, convert anchor points (x, y percentages) to the format used by the visualizer
