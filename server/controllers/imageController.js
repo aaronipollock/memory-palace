@@ -200,7 +200,18 @@ exports.uploadImage = async (req, res) => {
         const optimizedPath = path.join(optimizedDir, req.file.filename);
 
         // Move uploaded file to original directory
-        fs.renameSync(req.file.path, originalPath);
+        // Use copyFile + unlink instead of rename to handle cross-device scenarios (e.g., Render)
+        try {
+            fs.copyFileSync(req.file.path, originalPath);
+            fs.unlinkSync(req.file.path); // Delete temp file after successful copy
+        } catch (error) {
+            // If copy fails, try rename as fallback (for same-device scenarios)
+            if (error.code === 'ENOENT' || error.code === 'EACCES') {
+                fs.renameSync(req.file.path, originalPath);
+            } else {
+                throw error;
+            }
+        }
 
         // Generate optimized version
         const optimizationSuccess = await generateOptimizedImage(originalPath, optimizedPath);
