@@ -377,11 +377,17 @@ const AnchorPointEditor = () => {
                     <div className="relative border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100" style={{ minHeight: '400px' }}>
                         <img
                             ref={imageRef}
-                            src={room.imageUrl}
+                            src={room.imageUrl && room.imageUrl.startsWith('/')
+                                ? `${getApiUrl('')}${room.imageUrl}`
+                                : room.imageUrl}
                             alt={room.name}
                             className="w-full h-auto cursor-crosshair"
                             onClick={handleImageClick}
                             style={{ display: 'block' }}
+                            onError={(e) => {
+                                console.error('Image failed to load:', room.imageUrl);
+                                e.target.style.display = 'none';
+                            }}
                         />
 
                         {anchorPoints.map((point, index) => (
