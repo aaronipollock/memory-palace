@@ -93,13 +93,14 @@ app.use('/api/memory-palaces', ...routeSecurity.memoryPalaceRoutes, memoryPalace
 const customRoomRoutes = require('./routes/customRoomRoutes');
 app.use('/api/custom-rooms', ...routeSecurity.customRoomRoutes, customRoomRoutes);
 
-// Apply CSRF protection to all other API routes (after auth, feedback, image, and memory palace routes)
-app.use('/api', csrfProtection);
-
+// Image generation routes (must be defined BEFORE CSRF protection)
 const roomController = require('./controllers/roomController');
 const imageController = require('./controllers/imageController');
 app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, roomController.generateRoom);
 app.post('/api/generate-images', ...routeSecurity.imageGenRoutes, imageController.generateImages);
+
+// Apply CSRF protection to all other API routes (after auth, feedback, image, and memory palace routes)
+app.use('/api', csrfProtection);
 
 // Note: The React frontend is deployed as a separate static service on Render,
 // so this API service does not serve the client build.
