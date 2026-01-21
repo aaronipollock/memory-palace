@@ -586,7 +586,18 @@ const UserDashboard = () => {
                                         </button>
                                         <div className="mb-4">
                                             <img
-                                                src={room.imageUrl}
+                                                src={(() => {
+                                                    // Handle relative URLs and localhost URLs
+                                                    if (!room.imageUrl) return '/images/placeholder.png';
+                                                    if (room.imageUrl.startsWith('/')) {
+                                                        return `${getApiUrl('')}${room.imageUrl}`;
+                                                    }
+                                                    if (room.imageUrl.includes('localhost')) {
+                                                        const backendUrl = getApiUrl('').replace(/\/$/, '');
+                                                        return room.imageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+                                                    }
+                                                    return room.imageUrl;
+                                                })()}
                                                 alt={room.name}
                                                 className="w-full h-48 object-cover rounded-lg"
                                                 onError={(e) => {

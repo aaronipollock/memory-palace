@@ -51,10 +51,21 @@ const PalacePreview = ({ palace }) => {
     return ROOM_ANCHOR_POSITIONS[palace.roomType] || ROOM_ANCHOR_POSITIONS['throne room'];
   }, [palace.customRoomId, palace.roomType, customRoomAnchorPoints]);
 
-  // Get the room image URL
-  const roomImageUrl = palace.customRoomImageUrl ||
-    ROOM_IMAGES[palace.roomType] ||
-    ROOM_IMAGES['throne room'];
+  // Get the room image URL with proper URL resolution
+  const roomImageUrl = (() => {
+    if (palace.customRoomImageUrl) {
+      // Handle relative URLs and localhost URLs
+      if (palace.customRoomImageUrl.startsWith('/')) {
+        return `${getApiUrl('')}${palace.customRoomImageUrl}`;
+      }
+      if (palace.customRoomImageUrl.includes('localhost')) {
+        const backendUrl = getApiUrl('').replace(/\/$/, '');
+        return palace.customRoomImageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+      }
+      return palace.customRoomImageUrl;
+    }
+    return ROOM_IMAGES[palace.roomType] || ROOM_IMAGES['throne room'];
+  })();
 
   // Get accepted images - handle both Map and plain object formats
   const acceptedImages = palace.acceptedImages || {};
