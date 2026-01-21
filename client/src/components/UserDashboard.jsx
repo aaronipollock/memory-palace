@@ -589,13 +589,20 @@ const UserDashboard = () => {
                                                 src={(() => {
                                                     // Handle relative URLs and localhost URLs
                                                     if (!room.imageUrl) return '/images/placeholder.png';
+
+                                                    // Relative URL - prefix with backend URL
                                                     if (room.imageUrl.startsWith('/')) {
-                                                        return `${getApiUrl('')}${room.imageUrl}`;
+                                                        const backendUrl = getApiUrl('').replace(/\/$/, '');
+                                                        return `${backendUrl}${room.imageUrl}`;
                                                     }
+
+                                                    // localhost URL - replace with production backend URL
                                                     if (room.imageUrl.includes('localhost')) {
                                                         const backendUrl = getApiUrl('').replace(/\/$/, '');
-                                                        return room.imageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+                                                        // Match and replace the entire origin (protocol + host + port)
+                                                        return room.imageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
                                                     }
+
                                                     return room.imageUrl;
                                                 })()}
                                                 alt={room.name}

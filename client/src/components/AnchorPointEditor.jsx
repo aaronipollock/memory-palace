@@ -385,12 +385,14 @@ const AnchorPointEditor = () => {
                                 if (!room.imageUrl) return '';
                                 // If it's a relative path, prefix with backend URL
                                 if (room.imageUrl.startsWith('/')) {
-                                    return `${getApiUrl('')}${room.imageUrl}`;
+                                    const backendUrl = getApiUrl('').replace(/\/$/, '');
+                                    return `${backendUrl}${room.imageUrl}`;
                                 }
                                 // If it contains localhost, replace with backend URL
                                 if (room.imageUrl.includes('localhost')) {
                                     const backendUrl = getApiUrl('').replace(/\/$/, '');
-                                    return room.imageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+                                    // Match and replace the entire origin (protocol + host + port)
+                                    return room.imageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
                                 }
                                 // Otherwise use as-is (should be a full URL)
                                 return room.imageUrl;

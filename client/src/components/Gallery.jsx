@@ -1,4 +1,26 @@
 import React, { useState } from 'react';
+import { getApiUrl } from '../config/api';
+
+// Helper function to resolve image URLs (handle relative and localhost URLs)
+const resolveImageUrl = (url) => {
+    if (!url) return null;
+
+    // If it's a relative path, prefix with backend URL
+    if (url.startsWith('/')) {
+        const backendUrl = getApiUrl('').replace(/\/$/, '');
+        return `${backendUrl}${url}`;
+    }
+
+    // If it contains localhost, replace with backend URL
+    if (url.includes('localhost')) {
+        const backendUrl = getApiUrl('').replace(/\/$/, '');
+        // Match and replace the entire origin (protocol + host + port)
+        return url.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
+    }
+
+    // Otherwise return as-is (should be a full URL)
+    return url;
+};
 
 const Gallery = ({ images = [] }) => {
     const [feedback, setFeedBack] = useState({});
@@ -16,16 +38,27 @@ const Gallery = ({ images = [] }) => {
 
     return (
         <div className="gallery-container">
-            {images.map((image, index) => (
+            {images.map((image, index) => {
+                // Resolve image URL for display
+                const imageUrl = image.imageData
+                    ? `data:image/png;base64,${image.imageData}`
+                    : resolveImageUrl(image.optimizedUrl || image.imageUrl);
+
+                // Resolve fallback URL
+                const fallbackUrl = image.imageData
+                    ? `data:image/png;base64,${image.imageData}`
+                    : resolveImageUrl(image.originalUrl);
+
+                return (
                 <div key={index} className="gallery-item">
                     <div className="image-container">
                         <img
-                            src={image.imageData ? `data:image/png;base64,${image.imageData}` : (image.optimizedUrl || image.imageUrl)}
+                            src={imageUrl}
                             alt={image.prompt || `Generated image ${index + 1}`}
                             loading="lazy"
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = image.imageData ? `data:image/png;base64,${image.imageData}` : image.originalUrl; // Fallback to original
+                                e.target.src = fallbackUrl || '/images/placeholder.png';
                             }}
                         />
                     </div>
@@ -52,7 +85,8 @@ const Gallery = ({ images = [] }) => {
                         </div>
                     </div>
                 </div>
-            ))}
+                );
+            })}
         </div>
     );
 };

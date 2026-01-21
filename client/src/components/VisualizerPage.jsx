@@ -147,22 +147,26 @@ const VisualizerPage = () => {
     if (fetchedCustomRoomImageUrl) {
       // Handle relative URLs and localhost URLs
       if (fetchedCustomRoomImageUrl.startsWith('/')) {
-        return `${getApiUrl('')}${fetchedCustomRoomImageUrl}`;
+        const backendUrl = getApiUrl('').replace(/\/$/, '');
+        return `${backendUrl}${fetchedCustomRoomImageUrl}`;
       }
       if (fetchedCustomRoomImageUrl.includes('localhost')) {
         const backendUrl = getApiUrl('').replace(/\/$/, '');
-        return fetchedCustomRoomImageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+        // Match and replace the entire origin (protocol + host + port)
+        return fetchedCustomRoomImageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
       }
       return fetchedCustomRoomImageUrl;
     }
     // Fallback to localStorage image URL
     if (customRoomImageUrl) {
       if (customRoomImageUrl.startsWith('/')) {
-        return `${getApiUrl('')}${customRoomImageUrl}`;
+        const backendUrl = getApiUrl('').replace(/\/$/, '');
+        return `${backendUrl}${customRoomImageUrl}`;
       }
       if (customRoomImageUrl.includes('localhost')) {
         const backendUrl = getApiUrl('').replace(/\/$/, '');
-        return customRoomImageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+        // Match and replace the entire origin (protocol + host + port)
+        return customRoomImageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
       }
       return customRoomImageUrl;
     }
@@ -494,10 +498,16 @@ const VisualizerPage = () => {
       // Check if we have an accepted image for this anchor (in memory or metadata)
       if (acceptedImages[association.anchor] && acceptedImages[association.anchor].image) {
         const imagePath = acceptedImages[association.anchor].image;
-        // If it's a file path (starts with /), prefix with backend URL
-        const fullImageUrl = imagePath.startsWith('/')
-                          ? `${getApiUrl('')}${imagePath}`
-          : imagePath;
+        // Handle relative URLs and localhost URLs
+        let fullImageUrl = imagePath;
+        if (imagePath.startsWith('/')) {
+          const backendUrl = getApiUrl('').replace(/\/$/, '');
+          fullImageUrl = `${backendUrl}${imagePath}`;
+        } else if (imagePath.includes('localhost')) {
+          const backendUrl = getApiUrl('').replace(/\/$/, '');
+          // Match and replace the entire origin (protocol + host + port)
+          fullImageUrl = imagePath.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
+        }
         setGeneratedImage(fullImageUrl);
         setCurrentPrompt(acceptedImages[association.anchor].prompt);
       } else if (imageMetadata[association.anchor]) {

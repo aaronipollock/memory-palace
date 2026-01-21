@@ -56,11 +56,13 @@ const PalacePreview = ({ palace }) => {
     if (palace.customRoomImageUrl) {
       // Handle relative URLs and localhost URLs
       if (palace.customRoomImageUrl.startsWith('/')) {
-        return `${getApiUrl('')}${palace.customRoomImageUrl}`;
+        const backendUrl = getApiUrl('').replace(/\/$/, '');
+        return `${backendUrl}${palace.customRoomImageUrl}`;
       }
       if (palace.customRoomImageUrl.includes('localhost')) {
         const backendUrl = getApiUrl('').replace(/\/$/, '');
-        return palace.customRoomImageUrl.replace(/https?:\/\/[^\/]+/, backendUrl);
+        // Match and replace the entire origin (protocol + host + port)
+        return palace.customRoomImageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
       }
       return palace.customRoomImageUrl;
     }
@@ -88,7 +90,15 @@ const PalacePreview = ({ palace }) => {
 
     // If it's a file path (starts with /), prefix with backend URL
     if (typeof image === 'string' && image.startsWith('/')) {
-      return `${getApiUrl('')}${image}`;
+      const backendUrl = getApiUrl('').replace(/\/$/, '');
+      return `${backendUrl}${image}`;
+    }
+
+    // If it contains localhost, replace with backend URL
+    if (typeof image === 'string' && image.includes('localhost')) {
+      const backendUrl = getApiUrl('').replace(/\/$/, '');
+      // Match and replace the entire origin (protocol + host + port)
+      return image.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
     }
 
     // Otherwise return as is (might be a full URL)
