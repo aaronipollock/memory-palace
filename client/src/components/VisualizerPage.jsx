@@ -654,19 +654,19 @@ const VisualizerPage = () => {
             </button>
           </div>
           <div className="flex gap-3 items-center">
-            {/* Edit Anchor Points Button - only show for custom rooms */}
-            {customRoomId && (
-              <button
+            {/* Edit Anchor Points Button - disabled in production */}
+            {/* {customRoomId && (
+            <button
                 onClick={() => setIsEditMode(!isEditMode)}
                 className={`px-4 py-2 rounded shadow transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent1 w-[180px] h-[40px] ${
                   isEditMode
                     ? 'bg-secondary text-white hover:bg-[#6D28D9]'
                     : 'bg-primary text-white hover:bg-[#7C3AED]'
                 }`}
-              >
+            >
                 {isEditMode ? '✓ Edit Mode' : 'Edit Anchor Points'}
-              </button>
-            )}
+            </button>
+            )} */}
             {/* Save Palace Button - moved here to avoid covering anchor points */}
             <button
               onClick={() => setIsSaveModalOpen(true)}
@@ -997,7 +997,7 @@ const VisualizerPage = () => {
                     placeholder="e.g., Throne, Window, Door"
                     autoFocus
                   />
-                </div>
+        </div>
 
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">

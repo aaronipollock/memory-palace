@@ -215,7 +215,7 @@ const LandingPage = () => {
     } catch (err) {
       console.error('Auth error:', err);
       setAuthError(err.message || 'Login/Signup failed. Please try again.');
-      setIsLoading(false);
+    setIsLoading(false);
       // Explicitly do NOT navigate - stay on landing page
       return;
     }

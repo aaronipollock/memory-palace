@@ -426,7 +426,7 @@ h1, h2, h3, h4, h5, h6 {
       var(--bg-gradient-end) 100%
     );
     min-height: 100vh;
-  }
+}
 
   /* Dashboard Page - more purple tint */
   .page-bg-dashboard {
@@ -436,7 +436,7 @@ h1, h2, h3, h4, h5, h6 {
       var(--bg-gradient-end) 100%
     );
     min-height: 100vh;
-  }
+}
 
 /* Input Page - matches dashboard */
 .page-bg-input {

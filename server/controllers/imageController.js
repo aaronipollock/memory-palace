@@ -207,7 +207,7 @@ exports.uploadImage = async (req, res) => {
         } catch (error) {
             // If copy fails, try rename as fallback (for same-device scenarios)
             if (error.code === 'ENOENT' || error.code === 'EACCES') {
-                fs.renameSync(req.file.path, originalPath);
+        fs.renameSync(req.file.path, originalPath);
             } else {
                 throw error;
             }
