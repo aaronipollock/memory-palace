@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const AppError = require('../utils/AppError');
 
 // Create transporter for sending emails
 const createTransporter = () => {
@@ -27,20 +28,15 @@ const createTransporter = () => {
 };
 
 const submitFeedback = async (req, res) => {
-  try {
-    const { rating, feedback, email, timestamp, userAgent, url } = req.body;
+  const { rating, feedback, email, timestamp, userAgent, url } = req.body;
 
-    // Process feedback submission
+  // Validate required fields
+  if (!rating || rating < 1 || rating > 5) {
+    throw new AppError('Rating is required and must be between 1 and 5', 400);
+  }
 
-    // Validate required fields
-    if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({
-        error: 'Rating is required and must be between 1 and 5',
-      });
-    }
-
-    // Create email content
-    const emailContent = `
+  // Create email content
+  const emailContent = `
 New Feedback Received
 
 Rating: ${rating}/5 stars
@@ -55,45 +51,31 @@ ${feedback || 'No additional feedback provided'}
 
 ---
 This feedback was submitted from the Low·sAI Memory Palace application.
-    `;
+  `;
 
-    // Send email (if email configuration is available)
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      try {
-        const transporter = createTransporter();
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: process.env.FEEDBACK_EMAIL || process.env.EMAIL_USER,
-          subject: `Low·sAI Feedback - ${rating}/5 stars`,
-          text: emailContent,
-          html: emailContent.replace(/\n/g, '<br>'),
-        });
-      } catch (emailError) {
-        console.error('Failed to send feedback email:', emailError.message);
-        // Continue processing even if email fails
-      }
-    }
-
-    res.status(200).json({
-      message: process.env.EMAIL_USER && process.env.EMAIL_PASS
-        ? 'Feedback submitted successfully'
-        : 'Feedback submitted successfully (development mode)',
-    });
-
-  } catch (error) {
-    console.error('Feedback submission error:', error);
-
-    // In development, still return success even if email fails
-    if (process.env.NODE_ENV === 'development') {
-      return res.status(200).json({
-        message: 'Feedback submitted successfully (development mode)',
+  // Send email (if email configuration is available)
+  // Keep try/catch here because email failure should not fail the feedback submission (fallback behavior)
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    try {
+      const transporter = createTransporter();
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.FEEDBACK_EMAIL || process.env.EMAIL_USER,
+        subject: `Low·sAI Feedback - ${rating}/5 stars`,
+        text: emailContent,
+        html: emailContent.replace(/\n/g, '<br>'),
       });
+    } catch (emailError) {
+      console.error('Failed to send feedback email:', emailError.message);
+      // Continue processing even if email fails - this is intentional fallback behavior
     }
-
-    res.status(500).json({
-      error: 'Failed to submit feedback. Please try again later.',
-    });
   }
+
+  res.status(200).json({
+    message: process.env.EMAIL_USER && process.env.EMAIL_PASS
+      ? 'Feedback submitted successfully'
+      : 'Feedback submitted successfully (development mode)',
+  });
 };
 
 module.exports = {

@@ -4,6 +4,7 @@ const authController = require('../controllers/authController');
 const { authValidation, sanitizeInput, xssProtection } = require('../middleware/validation');
 const { authRateLimit, securityHeaders, authenticateToken } = require('../middleware/auth');
 const { generateToken, refreshToken, blacklistToken } = require('../config/jwt');
+const asyncHandler = require('../utils/asyncHandler');
 
 // Apply security headers to all auth routes
 router.use(securityHeaders);
@@ -14,7 +15,7 @@ router.post('/signup',
   sanitizeInput,
   xssProtection,
   authValidation.signup,
-  authController.signup
+  asyncHandler(authController.signup)
 );
 
 // Login route with validation and rate limiting
@@ -23,7 +24,7 @@ router.post('/login',
   sanitizeInput,
   xssProtection,
   authValidation.login,
-  authController.login
+  asyncHandler(authController.login)
 );
 
 // Refresh token route
@@ -59,7 +60,7 @@ router.post('/refresh', (req, res) => {
 // Logout route with authentication required
 router.post('/logout',
   authenticateToken,
-  authController.logout
+  asyncHandler(authController.logout)
 );
 
 // Logout all sessions route

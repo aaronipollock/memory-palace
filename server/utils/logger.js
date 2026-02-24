@@ -33,7 +33,7 @@ class Logger {
       environment: process.env.NODE_ENV || 'development'
     };
 
-    // Add request context if available
+    // Add request ID at top level for easy correlation
     if (data.requestId) {
       logEntry.requestId = data.requestId;
     }
@@ -205,16 +205,26 @@ class Logger {
 const logger = new Logger();
 
 // Convenience functions
-export const logError = (message, data) => logger.error(message, data);
-export const logWarn = (message, data) => logger.warn(message, data);
-export const logInfo = (message, data) => logger.info(message, data);
-export const logDebug = (message, data) => logger.debug(message, data);
-export const logSecurity = (event, data) => logger.security(event, data);
-export const logPerformance = (metric, value, data) => logger.performance(metric, value, data);
-export const logApiRequest = (method, endpoint, statusCode, responseTime, data) =>
+const logError = (message, data) => logger.error(message, data);
+const logWarn = (message, data) => logger.warn(message, data);
+const logInfo = (message, data) => logger.info(message, data);
+const logDebug = (message, data) => logger.debug(message, data);
+const logSecurity = (event, data) => logger.security(event, data);
+const logPerformance = (metric, value, data) => logger.performance(metric, value, data);
+const logApiRequest = (method, endpoint, statusCode, responseTime, data) =>
   logger.apiRequest(method, endpoint, statusCode, responseTime, data);
-export const logDatabase = (operation, collection, duration, data) =>
+const logDatabase = (operation, collection, duration, data) =>
   logger.database(operation, collection, duration, data);
 
-// Export the logger instance
-export { logger };
+// Export the logger instance and convenience functions
+module.exports = {
+  logger,
+  logError,
+  logWarn,
+  logInfo,
+  logDebug,
+  logSecurity,
+  logPerformance,
+  logApiRequest,
+  logDatabase
+};

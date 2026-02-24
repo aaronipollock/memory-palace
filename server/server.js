@@ -24,6 +24,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/memory-pa
 // Setup security middleware
 setupSecurityMiddleware(app);
 
+// Request ID middleware (early in chain for log correlation)
+const requestIdMiddleware = require('./middleware/requestId');
+app.use(requestIdMiddleware);
+
 // Cookie parser
 app.use(cookieParser());
 
@@ -96,8 +100,9 @@ app.use('/api/custom-rooms', ...routeSecurity.customRoomRoutes, customRoomRoutes
 // Image generation routes (must be defined BEFORE CSRF protection)
 const roomController = require('./controllers/roomController');
 const imageController = require('./controllers/imageController');
-app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, roomController.generateRoom);
-app.post('/api/generate-images', ...routeSecurity.imageGenRoutes, imageController.generateImages);
+const asyncHandler = require('./utils/asyncHandler');
+app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, asyncHandler(roomController.generateRoom));
+app.post('/api/generate-images', ...routeSecurity.imageGenRoutes, asyncHandler(imageController.generateImages));
 
 // Apply CSRF protection to all other API routes (after auth, feedback, image, and memory palace routes)
 app.use('/api', csrfProtection);
@@ -105,17 +110,12 @@ app.use('/api', csrfProtection);
 // Note: The React frontend is deployed as a separate static service on Render,
 // so this API service does not serve the client build.
 
-// Global error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
+// Handle 404 for undefined routes (must be before error handler)
+const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
+app.use(notFoundHandler);
 
-  // Don't leak error details in production
-  if (process.env.NODE_ENV === 'production') {
-    res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
-  } else {
-    res.status(err.status || 500).json({ error: err.message || 'Internal Server Error', stack: err.stack });
-  }
-});
+// Global error handling middleware (must be last)
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

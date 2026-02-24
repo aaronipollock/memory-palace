@@ -1,21 +1,21 @@
 const axios = require('axios');
+const AppError = require('../utils/AppError');
 
 exports.generateRoom = async (req, res) => {
     const { roomType, anchorPoints } = req.body;
 
     if (!process.env.OPENAI_API_KEY) {
-        console.error('OPENAI_API_KEY is not set');
-        return res.status(500).json({ error: 'OpenAI API key is not configured' });
+        throw new AppError('OpenAI API key is not configured', 500);
     }
 
-    try {
-        // Generate room image with DALL-E
-        const imagePrompt = `A clear, eye-level view of a ${roomType}, like a sitcom set.
-            The room MUST prominently feature these specific items: ${anchorPoints.join(', ')}.
-            Each item should be clearly visible and naturally placed.
-            Style should be simple and clean, like a 3D rendered room.
-            The view should be straight-on, like looking at a TV set.`;
+    // Generate room image with DALL-E
+    const imagePrompt = `A clear, eye-level view of a ${roomType}, like a sitcom set.
+        The room MUST prominently feature these specific items: ${anchorPoints.join(', ')}.
+        Each item should be clearly visible and naturally placed.
+        Style should be simple and clean, like a 3D rendered room.
+        The view should be straight-on, like looking at a TV set.`;
 
+    try {
         const response = await axios.post('https://api.openai.com/v1/images/generations', {
             prompt: imagePrompt,
             n: 1,
@@ -43,16 +43,25 @@ exports.generateRoom = async (req, res) => {
             prompt: imagePrompt
         });
 
-    } catch (error) {
-        console.error('=== Error Details ===');
-        console.error('Error type:', error.name);
-        console.error('Error message:', error.message);
-        console.error('Response data:', error.response?.data);
-        console.error('Response status:', error.response?.status);
+    } catch (apiError) {
+        const errorStatus = apiError.response?.status;
 
-        res.status(500).json({
-            error: 'Failed to generate room layout',
-            details: error.response?.data?.error?.message || error.message
+        // Map upstream errors to appropriate status codes
+        if (errorStatus === 429) {
+            throw new AppError('Room generation service rate limit exceeded', 429, { provider: 'OpenAI' });
+        }
+        if (apiError.code === 'ECONNABORTED' || apiError.code === 'ETIMEDOUT') {
+            throw new AppError('Room generation service timeout', 504, { provider: 'OpenAI' });
+        }
+        if (errorStatus === 401 || errorStatus === 403) {
+            throw new AppError('Room generation service authentication failed', 502, { provider: 'OpenAI' });
+        }
+
+        // Generic upstream error
+        throw new AppError('Room generation service failed', 502, {
+            provider: 'OpenAI',
+            status: errorStatus,
+            message: apiError.response?.data?.error?.message || apiError.message
         });
     }
 };

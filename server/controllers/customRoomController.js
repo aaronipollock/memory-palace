@@ -1,5 +1,6 @@
 const CustomRoom = require('../models/CustomRoom');
 const mongoose = require('mongoose');
+const AppError = require('../utils/AppError');
 
 // Helper function to check if ID is valid ObjectId format
 const isValidObjectId = (id) => {
@@ -30,243 +31,203 @@ const validateAnchorPoints = (anchorPoints) => {
 
 // GET all custom rooms for the authenticated user
 exports.getCustomRooms = async (req, res) => {
-    try {
-        // Find all custom rooms that belong to this user
-        // req.user.userId comes from the JWT token (set by authenticateToken middleware)
-        const customRooms = await CustomRoom.find({
-            userId: req.user.userId
-        }).sort({ createdAt: -1 }); // Sort by newest first
+    // Find all custom rooms that belong to this user
+    // req.user.userId comes from the JWT token (set by authenticateToken middleware)
+    const customRooms = await CustomRoom.find({
+        userId: req.user.userId
+    }).sort({ createdAt: -1 }); // Sort by newest first
 
-        res.json(customRooms);
-    } catch (error) {
-        console.error('Error fetching custom rooms:', error);
-        res.status(500).json({ error: 'Failed to fetch custom rooms' });
-    }
+    res.json(customRooms);
 };
 
 // GET a single custom room by ID
 exports.getCustomRoomById = async (req, res) => {
-    try {
-        // Validate ID format
-        if (!isValidObjectId(req.params.id)) {
-            return res.status(400).json({ error: 'Invalid room ID format' });
-        }
-
-        const customRoom = await CustomRoom.findById(req.params.id);
-
-        // Check if room exists
-        if (!customRoom) {
-            return res.status(404).json({ error: 'Custom room not found' });
-        }
-
-        // Check if user owns this room
-        if (customRoom.userId.toString() !== req.user.userId) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        res.json(customRoom);
-    } catch (error) {
-        console.error('Error fetching custom room:', error);
-        res.status(500).json({ error: 'Failed to fetch custom room' });
+    // Validate ID format
+    if (!isValidObjectId(req.params.id)) {
+        throw new AppError('Invalid room ID format', 400);
     }
+
+    const customRoom = await CustomRoom.findById(req.params.id);
+
+    // Check if room exists
+    if (!customRoom) {
+        throw new AppError('Custom room not found', 404);
+    }
+
+    // Check if user owns this room
+    if (customRoom.userId.toString() !== req.user.userId) {
+        throw new AppError('Access denied', 403);
+    }
+
+    res.json(customRoom);
 };
 
 // CREATE a new custom room
 exports.createCustomRoom = async (req, res) => {
-    try {
-        // Extract data from request body
-        const { name, description, imageUrl, anchorPoints } = req.body;
+    // Extract data from request body
+    const { name, description, imageUrl, anchorPoints } = req.body;
 
-        // Basic validation
-        if (!name || typeof name !== 'string' || name.trim() === '') {
-            return res.status(400).json({
-                error: 'Name is required and must be a non-empty string'
-            });
-        }
-
-        if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
-            return res.status(400).json({
-                error: 'ImageUrl is required and must be a non-empty string'
-            });
-        }
-
-        // Length validation
-        const MAX_NAME_LENGTH = 200;
-        const MAX_DESCRIPTION_LENGTH = 1000;
-        const MAX_IMAGE_URL_LENGTH = 500;
-
-        if (name.length > MAX_NAME_LENGTH) {
-            return res.status(400).json({
-                error: `Name must be less than ${MAX_NAME_LENGTH} characters`
-            });
-        }
-
-        if (description && description.length > MAX_DESCRIPTION_LENGTH) {
-            return res.status(400).json({
-                error: `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`
-            });
-        }
-
-        if (imageUrl.length > MAX_IMAGE_URL_LENGTH) {
-            return res.status(400).json({
-                error: `ImageUrl must be less than ${MAX_IMAGE_URL_LENGTH} characters`
-            });
-        }
-
-        // Validate anchor points if provided
-        if (anchorPoints !== undefined) {
-            const validation = validateAnchorPoints(anchorPoints);
-            if (!validation.valid) {
-                return res.status(400).json({ error: validation.error });
-            }
-        }
-
-        // Create new custom room
-        const customRoom = new CustomRoom({
-            name: name.trim(),
-            description: description ? description.trim() : '', // Optional field
-            imageUrl: imageUrl.trim(),
-            anchorPoints: anchorPoints || [], // Start with empty array
-            userId: req.user.userId, // Set from JWT token
-            roomType: 'custom' // Default value
-        });
-
-        // Save to database
-        await customRoom.save();
-
-        // Return the created room with 201 status (Created)
-        res.status(201).json(customRoom);
-    } catch (error) {
-        console.error('Error creating custom room:', error);
-        res.status(500).json({ error: 'Failed to create custom room' });
+    // Basic validation
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+        throw new AppError('Name is required and must be a non-empty string', 400);
     }
+
+    if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
+        throw new AppError('ImageUrl is required and must be a non-empty string', 400);
+    }
+
+    // Length validation
+    const MAX_NAME_LENGTH = 200;
+    const MAX_DESCRIPTION_LENGTH = 1000;
+    const MAX_IMAGE_URL_LENGTH = 500;
+
+    if (name.length > MAX_NAME_LENGTH) {
+        throw new AppError(`Name must be less than ${MAX_NAME_LENGTH} characters`, 400);
+    }
+
+    if (description && description.length > MAX_DESCRIPTION_LENGTH) {
+        throw new AppError(`Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`, 400);
+    }
+
+    if (imageUrl.length > MAX_IMAGE_URL_LENGTH) {
+        throw new AppError(`ImageUrl must be less than ${MAX_IMAGE_URL_LENGTH} characters`, 400);
+    }
+
+    // Validate anchor points if provided
+    if (anchorPoints !== undefined) {
+        const validation = validateAnchorPoints(anchorPoints);
+        if (!validation.valid) {
+            throw new AppError(validation.error, 400);
+        }
+    }
+
+    // Create new custom room
+    const customRoom = new CustomRoom({
+        name: name.trim(),
+        description: description ? description.trim() : '', // Optional field
+        imageUrl: imageUrl.trim(),
+        anchorPoints: anchorPoints || [], // Start with empty array
+        userId: req.user.userId, // Set from JWT token
+        roomType: 'custom' // Default value
+    });
+
+    // Save to database
+    await customRoom.save();
+
+    // Return the created room with 201 status (Created)
+    res.status(201).json(customRoom);
 };
 
 // UPDATE a custom room (e.g., add anchor points)
 exports.updateCustomRoom = async (req, res) => {
-    try {
-        // Validate ID format
-        if (!isValidObjectId(req.params.id)) {
-            return res.status(400).json({ error: 'Invalid room ID format' });
-        }
-
-        const customRoom = await CustomRoom.findById(req.params.id);
-
-        // Check if room exists
-        if (!customRoom) {
-            return res.status(404).json({ error: 'Custom room not found' });
-        }
-
-        // Check if user owns this room
-        if (customRoom.userId.toString() !== req.user.userId) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        // Length validation constants
-        const MAX_NAME_LENGTH = 200;
-        const MAX_DESCRIPTION_LENGTH = 1000;
-        const MAX_IMAGE_URL_LENGTH = 500;
-
-        // Update fields (only update what's provided) with validation
-        if (req.body.name !== undefined) {
-            if (typeof req.body.name !== 'string' || req.body.name.trim() === '') {
-                return res.status(400).json({ error: 'Name must be a non-empty string' });
-            }
-            if (req.body.name.length > MAX_NAME_LENGTH) {
-                return res.status(400).json({ error: `Name must be less than ${MAX_NAME_LENGTH} characters` });
-            }
-            customRoom.name = req.body.name.trim();
-        }
-
-        if (req.body.description !== undefined) {
-            if (typeof req.body.description !== 'string') {
-                return res.status(400).json({ error: 'Description must be a string' });
-            }
-            if (req.body.description.length > MAX_DESCRIPTION_LENGTH) {
-                return res.status(400).json({ error: `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters` });
-            }
-            customRoom.description = req.body.description.trim();
-        }
-
-        if (req.body.imageUrl !== undefined) {
-            if (typeof req.body.imageUrl !== 'string' || req.body.imageUrl.trim() === '') {
-                return res.status(400).json({ error: 'ImageUrl must be a non-empty string' });
-            }
-            if (req.body.imageUrl.length > MAX_IMAGE_URL_LENGTH) {
-                return res.status(400).json({ error: `ImageUrl must be less than ${MAX_IMAGE_URL_LENGTH} characters` });
-            }
-            customRoom.imageUrl = req.body.imageUrl.trim();
-        }
-
-        // Handle anchor points - validate before assigning
-        if (req.body.anchorPoints !== undefined) {
-            const validation = validateAnchorPoints(req.body.anchorPoints);
-            if (!validation.valid) {
-                return res.status(400).json({ error: validation.error });
-            }
-            customRoom.anchorPoints = req.body.anchorPoints;
-        }
-
-        // Update the updatedAt timestamp
-        customRoom.updatedAt = Date.now();
-
-        // Save changes
-        await customRoom.save();
-
-        res.json(customRoom);
-    } catch (error) {
-        console.error('Error updating custom room:', error);
-        res.status(500).json({ error: 'Failed to update custom room' });
+    // Validate ID format
+    if (!isValidObjectId(req.params.id)) {
+        throw new AppError('Invalid room ID format', 400);
     }
+
+    const customRoom = await CustomRoom.findById(req.params.id);
+
+    // Check if room exists
+    if (!customRoom) {
+        throw new AppError('Custom room not found', 404);
+    }
+
+    // Check if user owns this room
+    if (customRoom.userId.toString() !== req.user.userId) {
+        throw new AppError('Access denied', 403);
+    }
+
+    // Length validation constants
+    const MAX_NAME_LENGTH = 200;
+    const MAX_DESCRIPTION_LENGTH = 1000;
+    const MAX_IMAGE_URL_LENGTH = 500;
+
+    // Update fields (only update what's provided) with validation
+    if (req.body.name !== undefined) {
+        if (typeof req.body.name !== 'string' || req.body.name.trim() === '') {
+            throw new AppError('Name must be a non-empty string', 400);
+        }
+        if (req.body.name.length > MAX_NAME_LENGTH) {
+            throw new AppError(`Name must be less than ${MAX_NAME_LENGTH} characters`, 400);
+        }
+        customRoom.name = req.body.name.trim();
+    }
+
+    if (req.body.description !== undefined) {
+        if (typeof req.body.description !== 'string') {
+            throw new AppError('Description must be a string', 400);
+        }
+        if (req.body.description.length > MAX_DESCRIPTION_LENGTH) {
+            throw new AppError(`Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`, 400);
+        }
+        customRoom.description = req.body.description.trim();
+    }
+
+    if (req.body.imageUrl !== undefined) {
+        if (typeof req.body.imageUrl !== 'string' || req.body.imageUrl.trim() === '') {
+            throw new AppError('ImageUrl must be a non-empty string', 400);
+        }
+        if (req.body.imageUrl.length > MAX_IMAGE_URL_LENGTH) {
+            throw new AppError(`ImageUrl must be less than ${MAX_IMAGE_URL_LENGTH} characters`, 400);
+        }
+        customRoom.imageUrl = req.body.imageUrl.trim();
+    }
+
+    // Handle anchor points - validate before assigning
+    if (req.body.anchorPoints !== undefined) {
+        const validation = validateAnchorPoints(req.body.anchorPoints);
+        if (!validation.valid) {
+            throw new AppError(validation.error, 400);
+        }
+        customRoom.anchorPoints = req.body.anchorPoints;
+    }
+
+    // Update the updatedAt timestamp
+    customRoom.updatedAt = Date.now();
+
+    // Save changes
+    await customRoom.save();
+
+    res.json(customRoom);
 };
 
 // DELETE a custom room
 exports.deleteCustomRoom = async (req, res) => {
-    try {
-        // Validate ID format
-        if (!isValidObjectId(req.params.id)) {
-            return res.status(400).json({ error: 'Invalid room ID format' });
-        }
-
-        const customRoom = await CustomRoom.findById(req.params.id);
-
-        // Check if room exists
-        if (!customRoom) {
-            return res.status(404).json({ error: 'Custom room not found' });
-        }
-
-        // Check if user owns this room
-        if (customRoom.userId.toString() !== req.user.userId) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        // Delete the room
-        await CustomRoom.findByIdAndDelete(req.params.id);
-
-        res.json({ message: 'Custom room deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting custom room:', error);
-        res.status(500).json({ error: 'Failed to delete custom room' });
+    // Validate ID format
+    if (!isValidObjectId(req.params.id)) {
+        throw new AppError('Invalid room ID format', 400);
     }
+
+    const customRoom = await CustomRoom.findById(req.params.id);
+
+    // Check if room exists
+    if (!customRoom) {
+        throw new AppError('Custom room not found', 404);
+    }
+
+    // Check if user owns this room
+    if (customRoom.userId.toString() !== req.user.userId) {
+        throw new AppError('Access denied', 403);
+    }
+
+    // Delete the room
+    await CustomRoom.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'Custom room deleted successfully' });
 };
 
 // DELETE all custom rooms for demo user (cleanup on logout/leave)
 exports.deleteAllDemoCustomRooms = async (req, res) => {
-    try {
-        // Only allow for demo users
-        if (req.user.email !== 'demo@example.com') {
-            return res.status(403).json({ error: 'Access denied. This endpoint is only for demo users.' });
-        }
-
-        // Delete all custom rooms for this user
-        const deleteResult = await CustomRoom.deleteMany({ userId: req.user.userId });
-
-        res.json({
-            message: 'All custom rooms deleted successfully',
-            deletedCount: deleteResult.deletedCount
-        });
-    } catch (error) {
-        console.error('Error deleting demo custom rooms:', error);
-        res.status(500).json({ error: 'Failed to delete custom rooms' });
+    // Only allow for demo users
+    if (req.user.email !== 'demo@example.com') {
+        throw new AppError('Access denied. This endpoint is only for demo users.', 403);
     }
+
+    // Delete all custom rooms for this user
+    const deleteResult = await CustomRoom.deleteMany({ userId: req.user.userId });
+
+    res.json({
+        message: 'All custom rooms deleted successfully',
+        deletedCount: deleteResult.deletedCount
+    });
 };

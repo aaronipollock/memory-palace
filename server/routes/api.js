@@ -9,6 +9,8 @@ const path = require('path');
 const os = require('os');
 require('dotenv').config();
 const embeddingService = require('../services/embeddingService');
+const asyncHandler = require('../utils/asyncHandler');
+const AppError = require('../utils/AppError');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -40,11 +42,11 @@ const upload = multer({
 
 // Note: /generate-images is mounted separately in server.js to avoid CSRF protection
 // router.post('/generate-images', imageController.generateImages);
-router.post('/generate-room', roomController.generateRoom);
+router.post('/generate-room', asyncHandler(roomController.generateRoom));
 
 // Add additional image routes with authentication and multer middleware
-router.post('/upload-image', authenticateToken, upload.single('image'), imageController.uploadImage);
-router.get('/image-info/:filename', imageController.getImageInfo);
+router.post('/upload-image', authenticateToken, upload.single('image'), asyncHandler(imageController.uploadImage));
+router.get('/image-info/:filename', asyncHandler(imageController.getImageInfo));
 
 // Improved word concreteness endpoint with better error handling
 router.get('/word-concreteness/:word', async (req, res) => {
@@ -196,34 +198,34 @@ router.get('/word-concreteness/:word', async (req, res) => {
 });
 
 // Endpoint to find similar words
-router.get('/similar-words/:word', async (req, res) => {
-  try {
-    const word = req.params.word;
-    const candidates = req.query.candidates ? req.query.candidates.split(',') : [];
-    const count = parseInt(req.query.count) || 5;
+router.get('/similar-words/:word', asyncHandler(async (req, res) => {
+  const word = req.params.word;
+  const candidates = req.query.candidates ? req.query.candidates.split(',') : [];
+  const count = parseInt(req.query.count) || 5;
 
-    if (!candidates || candidates.length === 0) {
-      return res.status(400).json({ error: 'No candidate words provided' });
-    }
-
-    const similarWords = await embeddingService.findSimilarWords(word, candidates, count);
-    return res.json({ similarWords });
-  } catch (error) {
-    console.error('Similar words API error:', error);
-    return res.status(500).json({ error: 'Failed to find similar words' });
+  if (!candidates || candidates.length === 0) {
+    throw new AppError('No candidate words provided', 400);
   }
-});
+
+  const similarWords = await embeddingService.findSimilarWords(word, candidates, count);
+  res.json({ similarWords });
+}));
 
 // Endpoint to generate figurative associations
-router.get('/figurative-association/:term', async (req, res) => {
-  try {
-    const term = req.params.term;
-    const association = await embeddingService.generateFigurativeAssociation(term);
-    return res.json({ association });
-  } catch (error) {
-    console.error('Figurative association API error:', error);
-    return res.status(500).json({ error: 'Failed to generate figurative association' });
+router.get('/figurative-association/:term', asyncHandler(async (req, res) => {
+  const term = req.params.term;
+  if (!term) {
+    throw new AppError('Term parameter is required', 400);
   }
-});
+  const association = await embeddingService.generateFigurativeAssociation(term);
+  res.json({ association });
+}));
+
+// Example route demonstrating centralized error handling
+// Replace "/something" with your actual endpoint path
+router.get('/something', asyncHandler(async (req, res) => {
+  // Example: throw new AppError("Not found", 404);
+  res.json({ ok: true });
+}));
 
 module.exports = router;
