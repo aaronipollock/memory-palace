@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const { logger } = require('./utils/logger');
 const { setupSecurityMiddleware, routeSecurity } = require('./config/security');
 const { sanitizeInput, xssProtection } = require('./middleware/validation');
 const { csrfProtection } = require('./middleware/auth');
@@ -18,8 +19,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/memory-pa
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(() => logger.info('MongoDB connected', { eventType: 'startup' }))
+.catch(error => logger.error('MongoDB connection error', { error, eventType: 'startup' }));
 
 // Setup security middleware
 setupSecurityMiddleware(app);
@@ -27,6 +28,10 @@ setupSecurityMiddleware(app);
 // Request ID middleware (early in chain for log correlation)
 const requestIdMiddleware = require('./middleware/requestId');
 app.use(requestIdMiddleware);
+
+// Request logging: one log line per request + req.log with requestId/userId propagation
+const requestLoggingMiddleware = require('./middleware/requestLogging');
+app.use(requestLoggingMiddleware);
 
 // Cookie parser
 app.use(cookieParser());
@@ -118,6 +123,9 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info('Server listening', {
+    port: PORT,
+    env: process.env.NODE_ENV || 'development',
+    eventType: 'startup'
+  });
 });

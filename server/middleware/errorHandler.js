@@ -1,5 +1,6 @@
 const AppError = require('../utils/AppError');
 const { logger } = require('../utils/logger');
+const { getRouteTemplate } = require('../utils/routeTemplate');
 
 /**
  * Centralized error handling middleware
@@ -8,6 +9,8 @@ const { logger } = require('../utils/logger');
  * SECURITY: Never exposes stack traces or internal error details in production
  */
 const errorHandler = (err, req, res, next) => {
+    const log = req.log || logger;
+
     let error = { ...err };
     error.message = err.message;
     error.statusCode = error.statusCode || err.status || 500;
@@ -16,10 +19,11 @@ const errorHandler = (err, req, res, next) => {
     const isDevelopment = process.env.NODE_ENV === 'development';
     const isProduction = process.env.NODE_ENV === 'production';
 
-    // Log error with context
+    // Log error with context (route = template for grouping; url = literal for debugging)
     const errorContext = {
         requestId: req.id,
         method: req.method,
+        route: getRouteTemplate(req),
         url: req.originalUrl,
         ip: req.ip,
         userAgent: req.get('user-agent'),
@@ -41,36 +45,36 @@ const errorHandler = (err, req, res, next) => {
 
         // Create AppError with details array
         error = new AppError('Validation Error', 400, validationDetails);
-        logger.warn('Validation Error', errorContext);
+        log.warn('Validation Error', errorContext);
     } else if (err.name === 'CastError') {
         // Mongoose bad ObjectId
         const message = `Resource not found with id of ${err.value}`;
         error = new AppError(message, 404);
-        logger.warn('Cast Error', errorContext);
+        log.warn('Cast Error', errorContext);
     } else if (err.code === 11000) {
         // Mongoose duplicate key error
         const field = Object.keys(err.keyPattern)[0];
         const message = `${field} already exists`;
         error = new AppError(message, 400);
-        logger.warn('Duplicate Key Error', errorContext);
+        log.warn('Duplicate Key Error', errorContext);
     } else if (err.name === 'JsonWebTokenError') {
         const message = 'Invalid token';
         error = new AppError(message, 401);
-        logger.security('Invalid JWT Token', errorContext);
+        logger.security({ event: 'Invalid JWT Token', ...errorContext });
     } else if (err.name === 'TokenExpiredError') {
         const message = 'Token expired';
         error = new AppError(message, 401);
-        logger.security('Expired JWT Token', errorContext);
+        logger.security({ event: 'Expired JWT Token', ...errorContext });
     } else if (err instanceof AppError) {
         // Operational error (expected errors)
         if (error.statusCode >= 500) {
-            logger.error('Application Error', errorContext);
+            log.error('Application Error', errorContext);
         } else {
-            logger.warn('Application Error', errorContext);
+            log.warn('Application Error', errorContext);
         }
     } else {
         // Programming or unknown errors (unexpected)
-        logger.error('Unexpected Error', {
+        log.error('Unexpected Error', {
             ...errorContext,
             errorName: err.name,
             errorCode: err.code
@@ -104,8 +108,9 @@ const errorHandler = (err, req, res, next) => {
     if (isProduction && response.stack) {
         delete response.stack;
         delete response.originalError;
-        logger.error('SECURITY WARNING: Attempted to include stack trace in production response', {
+        log.error('SECURITY WARNING: Attempted to include stack trace in production response', {
             requestId: req.id,
+            route: getRouteTemplate(req),
             url: req.originalUrl
         });
     }
@@ -118,9 +123,11 @@ const errorHandler = (err, req, res, next) => {
  */
 const notFoundHandler = (req, res, next) => {
     const error = new AppError(`Route ${req.originalUrl} not found`, 404);
-    logger.warn('Route Not Found', {
+    const log = req.log || logger;
+    log.warn('Route Not Found', {
         requestId: req.id,
         method: req.method,
+        route: getRouteTemplate(req),
         url: req.originalUrl,
         ip: req.ip
     });

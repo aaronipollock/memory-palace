@@ -1,44 +1,98 @@
-// Server-side logging utility for MVP
-// Can be extended with external logging services like Winston, Bunyan, etc.
+const pino = require('pino');
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Keys (and nested paths) to redact in logs. Pino redacts in emitted JSON; redactForMemory() redacts in-memory buffer.
+const SENSITIVE_KEYS = [
+  'password', 'token', 'authorization', 'cookie', 'secret', 'apiKey', 'api_key',
+  'refreshToken', 'accessToken', 'jwt', 'bearer', 'credentials', 'sessionId', 'session_id'
+];
+const REDACTED = '[Redacted]';
+
+// In fast-redact, * matches one path segment. So *.token = one level (e.g. body.token), not user.session.token.
+// Add paths for 1, 2, and 3 levels so we catch nested structures like user.session.token.
+function redactPathsForDepth(key, maxDepth = 3) {
+  const paths = [];
+  let prefix = '';
+  for (let d = 0; d < maxDepth; d++) {
+    prefix = d === 0 ? '*' : `${prefix}.*`;
+    paths.push(`${prefix}.${key}`);
+  }
+  return paths;
+}
+
+const pinoRedactPaths = [
+  ...SENSITIVE_KEYS,
+  ...SENSITIVE_KEYS.flatMap(k => redactPathsForDepth(k)),
+  'req.headers.authorization', 'req.headers.cookie', 'headers.authorization', 'headers.cookie'
+];
+
+const loggerEngine = pino({
+  level: process.env.LOG_LEVEL || (isProduction ? 'info' : 'debug'),
+  redact: {
+    paths: pinoRedactPaths,
+    censor: REDACTED
+  }
+});
+
+function redactForMemory(obj) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(redactForMemory);
+  const out = {};
+  const lower = (s) => String(s).toLowerCase();
+  for (const [key, value] of Object.entries(obj)) {
+    const isSensitive = SENSITIVE_KEYS.some(sk => lower(key) === lower(sk));
+    out[key] = isSensitive ? REDACTED : redactForMemory(value);
+  }
+  return out;
+}
+
+/** True if value looks like an Error (has message; optional name/stack). */
+function isErrorLike(value) {
+  return value && typeof value === 'object' && typeof value.message === 'string';
+}
+
+/**
+ * Turn an Error into a plain object for logging. Safe for JSON and Pino.
+ * - name, message, code (if set). Stack only when includeStack is true (default: development).
+ * - cause chain serialized recursively.
+ */
+function serializeError(err, opts = {}) {
+  if (!isErrorLike(err)) return err;
+  const includeStack = opts.includeStack ?? process.env.NODE_ENV !== 'production';
+  const out = {
+    name: err.name || 'Error',
+    message: err.message,
+    code: err.code
+  };
+  if (includeStack && err.stack) out.stack = err.stack;
+  if (err.cause !== undefined) out.cause = serializeError(err.cause, opts);
+  return out;
+}
+
+/** Deep-clone fields and replace any Error (or error-like) value with serializeError(result). */
+function normalizeFieldsForLog(fields) {
+  if (fields === null || typeof fields !== 'object') return fields;
+  if (Array.isArray(fields)) return fields.map(normalizeFieldsForLog);
+  if (isErrorLike(fields)) return serializeError(fields);
+  const out = {};
+  for (const [key, value] of Object.entries(fields)) {
+    out[key] = isErrorLike(value) ? serializeError(value) : normalizeFieldsForLog(value);
+  }
+  return out;
+}
 
 class Logger {
   constructor() {
     this.isProduction = process.env.NODE_ENV === 'production';
-    this.logLevel = process.env.LOG_LEVEL || 'info';
     this.logs = [];
     this.maxLogs = 1000; // Keep last 1000 logs in memory
   }
 
-  // Log levels
-  static LEVELS = {
-    ERROR: 0,
-    WARN: 1,
-    INFO: 2,
-    DEBUG: 3
-  };
-
-  // Check if should log based on level
-  shouldLog(level) {
-    return Logger.LEVELS[level] <= Logger.LEVELS[this.logLevel.toUpperCase()];
-  }
-
-  // Format log message
-  formatMessage(level, message, data = {}) {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-      timestamp,
-      level,
-      message,
-      data,
-      environment: process.env.NODE_ENV || 'development'
-    };
-
-    // Add request ID at top level for easy correlation
-    if (data.requestId) {
-      logEntry.requestId = data.requestId;
-    }
-
-    return logEntry;
+  // In-memory shape is { level, msg, ...fields } for getLogs/getStats; Pino output has its own format (time, numeric level, etc.).
+  // Redact sensitive fields before storing so getLogs/exportLogs never expose secrets.
+  formatMessage(level, msg, fields) {
+    return redactForMemory({ level, msg, ...fields });
   }
 
   // Add log to memory
@@ -51,114 +105,137 @@ class Logger {
     }
   }
 
-  // Error logging
-  error(message, data = {}) {
-    if (!this.shouldLog('ERROR')) return;
-
-    const logEntry = this.formatMessage('ERROR', message, data);
+  // Internal: normalize, in-memory, Pino emit, and optional sendToExternalService for errors.
+  // extraForMemory: merged into in-memory entry only (e.g. requestId when using Pino child so child bindings are sole source in output).
+  _log(level, msg, fields, pinoTarget = loggerEngine, extraForMemory = null) {
+    const safeFields = normalizeFieldsForLog(fields);
+    const memoryFields = extraForMemory ? { ...safeFields, ...extraForMemory } : safeFields;
+    const logEntry = this.formatMessage(level, msg, memoryFields);
     this.addToLogs(logEntry);
 
-    // Console output
-    console.error(`❌ [ERROR] ${message}`, data);
+    pinoTarget[level](safeFields, msg);
 
-    // Send to external service in production
-    if (this.isProduction) {
+    if (level === 'error' && this.isProduction) {
       this.sendToExternalService(logEntry);
     }
   }
 
-  // Warning logging
-  warn(message, data = {}) {
-    if (!this.shouldLog('WARN')) return;
-
-    const logEntry = this.formatMessage('WARN', message, data);
-    this.addToLogs(logEntry);
-
-    console.warn(`⚠️ [WARN] ${message}`, data);
+  // Error logging. Error objects in fields are serialized (name, message, code, stack in dev).
+  error(msg, fields = {}) {
+    this._log('error', msg, fields, loggerEngine);
   }
 
-  // Info logging
-  info(message, data = {}) {
-    if (!this.shouldLog('INFO')) return;
-
-    const logEntry = this.formatMessage('INFO', message, data);
-    this.addToLogs(logEntry);
-
-    console.info(`ℹ️ [INFO] ${message}`, data);
+  warn(msg, fields = {}) {
+    this._log('warn', msg, fields, loggerEngine);
   }
 
-  // Debug logging
-  debug(message, data = {}) {
-    if (!this.shouldLog('DEBUG')) return;
-
-    const logEntry = this.formatMessage('DEBUG', message, data);
-    this.addToLogs(logEntry);
-
-    console.debug(`🔍 [DEBUG] ${message}`, data);
+  info(msg, fields = {}) {
+    this._log('info', msg, fields, loggerEngine);
   }
 
-  // Security logging
-  security(event, data = {}) {
-    const logEntry = this.formatMessage('SECURITY', event, {
-      ...data,
-      securityEvent: true
+  debug(msg, fields = {}) {
+    this._log('debug', msg, fields, loggerEngine);
+  }
+
+  // Security logging: one fields object in, fixed message, event in fields (same pattern as apiRequest)
+  security(fields = {}) {
+    const { event, ...rest } = fields;
+
+    const logFields = normalizeFieldsForLog({
+      event,
+      ...rest,
+      eventType: 'security_event'
     });
-    this.addToLogs(logEntry);
 
-    console.warn(`🔒 [SECURITY] ${event}`, data);
+    const memoryEntry = this.formatMessage('warn', 'Security event detected', logFields);
+    this.addToLogs(memoryEntry);
 
-    // Always send security events to external service
+    loggerEngine.warn(logFields, 'Security event detected');
+
     if (this.isProduction) {
-      this.sendToExternalService(logEntry);
+      this.sendToExternalService(memoryEntry);
     }
   }
 
-  // Performance logging
-  performance(metric, value, data = {}) {
-    const logEntry = this.formatMessage('PERFORMANCE', metric, {
+  // Performance logging: one fields object in, fixed message (same pattern as apiRequest)
+  performance(fields = {}) {
+    const { metric, value, ...rest } = fields;
+
+    const logFields = normalizeFieldsForLog({
+      metric,
       value,
-      ...data
+      ...rest,
+      eventType: 'performance'
     });
-    this.addToLogs(logEntry);
 
-    console.info(`⚡ [PERF] ${metric}: ${value}ms`, data);
+    const memoryEntry = this.formatMessage('info', 'Performance metric recorded', logFields);
+    this.addToLogs(memoryEntry);
+
+    loggerEngine.info(logFields, 'Performance metric recorded');
   }
 
-  // API request logging
-  apiRequest(method, endpoint, statusCode, responseTime, data = {}) {
-    const logEntry = this.formatMessage('API', `${method} ${endpoint}`, {
+  // API request logging: one fields object in, fixed message, severity from statusCode
+  apiRequest(fields = {}) {
+    const {
+      requestId,
+      route,
       method,
-      endpoint,
       statusCode,
-      responseTime,
-      ...data
-    });
-    this.addToLogs(logEntry);
+      duration,
+      userId
+    } = fields;
 
-    const emoji = statusCode >= 400 ? '❌' : '✅';
-    console.info(`${emoji} [API] ${method} ${endpoint} - ${statusCode} (${responseTime}ms)`);
+    // Normalize statusCode so severity and logged value match (missing/invalid => 500)
+    const status = typeof statusCode === 'number' && statusCode >= 0 ? statusCode : 500;
+
+    const logFields = {
+      requestId,
+      route,
+      method,
+      statusCode: status,
+      duration,
+      userId,
+      eventType: 'api_request'
+    };
+
+    const level = status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
+
+    const memoryEntry = this.formatMessage(level, 'HTTP request completed', logFields);
+    this.addToLogs(memoryEntry);
+
+    loggerEngine[level](logFields, 'HTTP request completed');
   }
 
-  // Database logging
-  database(operation, collection, duration, data = {}) {
-    const logEntry = this.formatMessage('DATABASE', `${operation} on ${collection}`, {
+
+
+  // Database logging: one fields object in, fixed message (same pattern as apiRequest)
+  database(fields = {}) {
+    const {
       operation,
       collection,
       duration,
-      ...data
-    });
-    this.addToLogs(logEntry);
+      requestId,
+      ...rest
+    } = fields;
 
-    console.info(`🗄️ [DB] ${operation} on ${collection} - ${duration}ms`);
+    const logFields = normalizeFieldsForLog({
+      operation,
+      collection,
+      duration,
+      requestId,
+      ...rest,
+      eventType: 'database_query'
+    });
+
+    const memoryEntry = this.formatMessage('info', 'Database query completed', logFields);
+    this.addToLogs(memoryEntry);
+
+    loggerEngine.info(logFields, 'Database query completed');
   }
 
-  // Send to external logging service (placeholder)
+  // No-op until you plug in a transport (e.g. pino.transport to file/Datadog). Keeps production output Pino-only.
   sendToExternalService(logEntry) {
-    // External logging service integration can be added here
-
-
-    // For now, just log to console in production
-    console.log('📊 Production Log:', logEntry);
+    void logEntry;
   }
 
   // Get logs for debugging
@@ -188,8 +265,8 @@ class Logger {
       total: this.logs.length,
       byLevel: {},
       byHour: {},
-      errors: this.logs.filter(log => log.level === 'ERROR').length,
-      warnings: this.logs.filter(log => log.level === 'WARN').length
+      errors: this.logs.filter(log => log.level === 'error').length,
+      warnings: this.logs.filter(log => log.level === 'warn').length
     };
 
     // Count by level
@@ -199,22 +276,41 @@ class Logger {
 
     return stats;
   }
+
+  /**
+   * Returns a request-scoped logger backed by a real Pino child (bindings: requestId).
+   * requestId is only in the child's bindings (not merged into payload) to avoid duplicate in output.
+   * userId is merged at call time. extraForMemory adds requestId to in-memory buffer only.
+   */
+  requestLogger(req) {
+    const pinoChild = loggerEngine.child({ requestId: req.id });
+    const extraForMemory = { requestId: req.id };
+
+    const payloadBindings = () => ({
+      userId: req.user?.id ?? req.user?._id ?? null
+    });
+
+    return {
+      error: (msg, fields = {}) => this._log('error', msg, { ...payloadBindings(), ...fields }, pinoChild, extraForMemory),
+      warn: (msg, fields = {}) => this._log('warn', msg, { ...payloadBindings(), ...fields }, pinoChild, extraForMemory),
+      info: (msg, fields = {}) => this._log('info', msg, { ...payloadBindings(), ...fields }, pinoChild, extraForMemory),
+      debug: (msg, fields = {}) => this._log('debug', msg, { ...payloadBindings(), ...fields }, pinoChild, extraForMemory)
+    };
+  }
 }
 
 // Global logger instance
 const logger = new Logger();
 
 // Convenience functions
-const logError = (message, data) => logger.error(message, data);
-const logWarn = (message, data) => logger.warn(message, data);
-const logInfo = (message, data) => logger.info(message, data);
-const logDebug = (message, data) => logger.debug(message, data);
-const logSecurity = (event, data) => logger.security(event, data);
-const logPerformance = (metric, value, data) => logger.performance(metric, value, data);
-const logApiRequest = (method, endpoint, statusCode, responseTime, data) =>
-  logger.apiRequest(method, endpoint, statusCode, responseTime, data);
-const logDatabase = (operation, collection, duration, data) =>
-  logger.database(operation, collection, duration, data);
+const logError = (msg, fields) => logger.error(msg, fields);
+const logWarn = (msg, fields) => logger.warn(msg, fields);
+const logInfo = (msg, fields) => logger.info(msg, fields);
+const logDebug = (msg, fields) => logger.debug(msg, fields);
+const logSecurity = (fields) => logger.security(fields);
+const logPerformance = (fields) => logger.performance(fields);
+const logApiRequest = (fields) => logger.apiRequest(fields);
+const logDatabase = (fields) => logger.database(fields);
 
 // Export the logger instance and convenience functions
 module.exports = {
@@ -226,5 +322,6 @@ module.exports = {
   logSecurity,
   logPerformance,
   logApiRequest,
-  logDatabase
+  logDatabase,
+  serializeError
 };
