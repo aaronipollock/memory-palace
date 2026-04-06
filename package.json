@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@sentry/node": "^10.47.0",
+    "@sentry/profiling-node": "^10.47.0",
     "canvas": "^3.2.0",
     "compromise": "^14.14.4",
     "dotenv": "^16.4.7",

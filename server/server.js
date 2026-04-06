@@ -1,4 +1,6 @@
-require('dotenv').config();
+// IMPORTANT: Load Sentry instrumentation before other modules.
+require('./instrument.js');
+
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -115,11 +117,18 @@ app.use('/api', csrfProtection);
 // Note: The React frontend is deployed as a separate static service on Render,
 // so this API service does not serve the client build.
 
-// Handle 404 for undefined routes (must be before error handler)
+// Handle 404 for undefined routes (must be before error handlers)
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
+const Sentry = require('@sentry/node');
+
 app.use(notFoundHandler);
 
-// Global error handling middleware (must be last)
+// Sentry error middleware: after all routes / notFoundHandler, before the app error formatter
+if (process.env.SENTRY_DSN) {
+  Sentry.setupExpressErrorHandler(app);
+}
+
+// Global error handling middleware (must be last among error handlers)
 app.use(errorHandler);
 
 app.listen(PORT, () => {

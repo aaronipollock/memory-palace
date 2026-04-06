@@ -29,6 +29,7 @@ flowchart TB
 - **Request ID Middleware** sets `req.id`, `res.locals.requestId`, and the `X-Request-ID` response header (validates incoming ID or generates one).
 - **Request Logger Middleware** attaches `req.log` (Pino child with `requestId` in bindings) and, on `res.on('finish')`, calls `logger.apiRequest()` for one summary line per request.
 - **Route handlers** use `req.log`; each line gets `requestId` (and `userId` when set). All output is **structured JSON logs** with redaction and error serialization applied.
+- **Sentry (optional)** – When `SENTRY_DSN` is set, `server/instrument.js` runs `Sentry.init` before any other app code. After routes and the 404 handler, `Sentry.setupExpressErrorHandler(app)` runs, then the app’s JSON `errorHandler`. Error responses may include a `sentry` field when Sentry attaches an event id to `res.sentry`.
 
 ---
 

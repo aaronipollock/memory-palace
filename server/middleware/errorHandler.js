@@ -115,6 +115,10 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
+    if (res.sentry) {
+        response.sentry = res.sentry;
+    }
+
     res.status(error.statusCode).json(response);
 };
 
