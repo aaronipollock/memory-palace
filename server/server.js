@@ -96,6 +96,18 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Dev-only: deterministic endpoint to generate a Sentry trace/transaction
+// Requires SENTRY_DSN and SENTRY_TRACES_SAMPLE_RATE (e.g. 1.0) to be set.
+if (process.env.NODE_ENV !== 'production') {
+  const Sentry = require('@sentry/node');
+  app.get('/api/dev/sentry-trace', async (req, res) => {
+    await Sentry.startSpan({ name: 'dev sentry trace', op: 'debug' }, async () => {
+      await new Promise((r) => setTimeout(r, 150));
+      res.status(200).json({ ok: true, message: 'Trace generated. Check Sentry → Traces.' });
+    });
+  });
+}
+
 // Memory palace routes (no CSRF protection needed for core functionality)
 const memoryPalaceRoutes = require('./routes/memoryPalaceRoutes');
 app.use('/api/memory-palaces', ...routeSecurity.memoryPalaceRoutes, memoryPalaceRoutes);
