@@ -20,26 +20,24 @@ I also added structured logging with request IDs and mid-route instrumentation a
 - span-level timing
 - structured logs
 
-The goal wasn’t just to “see logs,” but to answer specific questions about system behavior.
-
 ---
 
 ## Test 1 — Where is the latency actually coming from?
 
-### Baseline
+### Baseline (Normal Behavior)
 
-A normal request looked like:
+![Baseline Trace](./images/baseline-trace.png)
 
+**What this shows:**
 - Total request time: ~3.3s
 - Stability API call: ~3.1s
-
-From the trace, almost the entire request time was spent in the outbound API call.
+- Nearly all latency is spent in the external API
 
 > Initial assumption: the endpoint is slow because the external API is slow.
 
 ---
 
-### Introduced delay
+### Introduced Delay (Controlled Experiment)
 
 I added an 8-second artificial delay *before* the outbound API call:
 
@@ -48,14 +46,23 @@ await new Promise((r) => setTimeout(r, 8000));
 ```
 
 
-Now the same request looked like:
+![Delayed Trace](./images/delayed-trace.png)
 
+**What changed:**
 - Total request time: ~12.1s
 - Stability API call: ~3.9s
 
-The key observation:
-
 > The external API timing stayed roughly the same, while total request time increased by ~8 seconds.
+
+---
+
+### Supporting Evidence — Span Data
+
+![Span Samples](./images/span-samples.png)
+
+
+**Across multiple requests:**
+- Stability API consistently completes in ~3–5 seconds
 
 ---
 
@@ -63,23 +70,18 @@ The key observation:
 
 The slowdown was not in the dependency—it was inside my own request path.
 
-More specifically:
-
 > The added latency occurred before the upstream API call, not inside it.
 
-This seems obvious in hindsight, but the important part is how it was verified:
-
-- Trace view showed total request expansion
-- Span data showed stable dependency timing
-- Logs confirmed when the upstream call actually started
-
-Without correlating all three, it would be easy to misattribute the issue.
+This was verified by correlating:
+- trace timelines
+- span-level data
+- structured logs
 
 ---
 
 ### Secondary insight
 
-The trace made the request “look slow,” but didn’t explicitly show where the 8 seconds went.
+The trace showed the request was slow, but didn’t explicitly show where the extra time was spent.
 
 > The delay appeared as unaccounted time inside the request handler.
 
@@ -91,13 +93,12 @@ This highlighted a gap:
 
 ## Test 2 — What happens when the dependency exceeds our tolerance?
 
-Next, I tested failure behavior instead of just latency.
-
-I reduced the Axios timeout from 30 seconds to 2000 ms:
+To test failure behavior, I reduced the Axios timeout:
 
 ```js
 timeout: 2000;
 ```
+
 
 
 Since the Stability API normally takes ~3–5 seconds, this forces a timeout.
@@ -106,20 +107,16 @@ Since the Stability API normally takes ~3–5 seconds, this forces a timeout.
 
 ### Result
 
+![Timeout Trace](./images/timeout-trace.png)
+
 - Stability request failed with `ECONNABORTED` after ~2016 ms
 - Backend returned a `504 Gateway Timeout`
 - Total request duration: ~2.0 seconds
 
 From logs:
-
 - `stability_request_start`
 - `stability_request_failed`
 - `stabilityDuration: ~2000ms`
-
-From Sentry:
-
-- failed transaction trace
-- request duration aligned with timeout threshold
 
 ---
 
@@ -127,21 +124,16 @@ From Sentry:
 
 > When the dependency exceeded the configured timeout budget, the system failed fast and returned a clear 504 response.
 
-This matters because the alternative is worse:
-
+This prevents:
 - hanging requests
-- misleading 200 responses
-- or swallowed errors
-
-Instead, the behavior is explicit and consistent.
+- misleading success responses
+- silent failures
 
 ---
 
 ## Unexpected finding — Logging inconsistency
 
-While adding instrumentation, I ran into something subtle but important.
-
-Some logs looked like this:
+While adding instrumentation, I noticed malformed logs like:
 
 ```js
 "0": "A",
@@ -150,17 +142,14 @@ Some logs looked like this:
 ```
 
 
-Instead of a normal message string.
 
-The issue turned out to be:
+The cause:
 
-> Different logger wrappers were using different argument conventions (message-first vs. object-first).
+> Different logger wrappers were using inconsistent argument conventions (message-first vs. object-first).
 
 Specifically:
 - request-scoped logs (`req.log`) were fixed
 - central error handler logs were still reversed
-
-Because of that, strings were being spread into objects and serialized incorrectly.
 
 ---
 
@@ -169,37 +158,40 @@ Because of that, strings were being spread into objects and serialized incorrect
 I standardized all logging calls to match Pino’s expected format:
 
 ```js
+log.error(errorContext, 'Application Error');
+```
+
+instead of:
+
+```js
 log.error('Application Error', errorContext);
 ```
+
 
 
 ---
 
 ### Why this matters
 
-This wasn’t just cosmetic.
+> Bad logging structure makes traces and logs much harder to correlate.
 
-> Bad logging structure makes traces and logs much harder to correlate, which defeats the purpose of observability.
-
-Fixing it made the debugging workflow reliable again.
+Fixing this ensured logs could be reliably used alongside traces.
 
 ---
 
 ## What I took away
 
-Two things that sound simple but are easy to get wrong:
-
 ### 1. A slow endpoint is not the same as a slow dependency
 Tracing alone can mislead you if you don’t validate where time is actually spent.
 
 ### 2. Observability tools are only as good as your instrumentation
-If spans or logs aren’t structured correctly, you lose the ability to reason about the system.
+Without proper spans and structured logs, you lose the ability to explain system behavior.
 
 ---
 
 ## Final result
 
-This exercise gave me a concrete, repeatable debugging workflow:
+This exercise gave me a repeatable debugging workflow:
 
 - introduce controlled failure or latency
 - observe behavior in traces
@@ -207,4 +199,4 @@ This exercise gave me a concrete, repeatable debugging workflow:
 - isolate the cause
 - confirm the fix
 
-That’s the part I want to demonstrate—not just that I can build something, but that I can **debug it under pressure and explain what’s happening**.
+That’s what I’m trying to demonstrate—not just building features, but **debugging real systems and explaining what’s happening clearly**.
