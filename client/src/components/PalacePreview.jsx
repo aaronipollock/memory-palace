@@ -2,12 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ROOM_ANCHOR_POSITIONS, ROOM_IMAGES } from '../constants/roomData';
 import { SecureAPIClient } from '../utils/security';
 import { getApiUrl } from '../config/api';
+import { getDemoRoomImage } from '../utils/demoRoomImageStore';
 
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
 const PalacePreview = ({ palace }) => {
   const [customRoomAnchorPoints, setCustomRoomAnchorPoints] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [localRoomImageUrl, setLocalRoomImageUrl] = useState(null);
 
   // Fetch custom room anchor points if needed
   useEffect(() => {
@@ -32,6 +34,46 @@ const PalacePreview = ({ palace }) => {
     fetchCustomRoom();
   }, [palace.customRoomId]);
 
+  // Demo privacy mode: resolve demo-local marker to a local object URL for previews
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+
+    const loadDemoLocal = async () => {
+      if (!palace.customRoomId) return;
+      if (!palace.customRoomImageUrl) return;
+      if (!palace.customRoomImageUrl.startsWith('demo-local:')) return;
+
+      try {
+        const blob = await getDemoRoomImage(palace.customRoomId);
+        if (!blob) return;
+        objectUrl = URL.createObjectURL(blob);
+        if (!cancelled) {
+          setLocalRoomImageUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return objectUrl;
+          });
+        }
+      } catch (e) {
+        console.warn('Failed to load demo-local room image for preview:', e);
+      }
+    };
+
+    if (!palace.customRoomImageUrl || !palace.customRoomImageUrl.startsWith('demo-local:')) {
+      setLocalRoomImageUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+    } else {
+      loadDemoLocal();
+    }
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [palace.customRoomId, palace.customRoomImageUrl]);
+
   // Get anchor positions
   const anchorPositions = useMemo(() => {
     if (palace.customRoomId && customRoomAnchorPoints.length > 0) {
@@ -53,6 +95,9 @@ const PalacePreview = ({ palace }) => {
 
   // Get the room image URL with proper URL resolution
   const roomImageUrl = (() => {
+    if (localRoomImageUrl) {
+      return localRoomImageUrl;
+    }
     if (palace.customRoomImageUrl) {
       // Handle relative URLs and localhost URLs
       if (palace.customRoomImageUrl.startsWith('/')) {
@@ -63,6 +108,10 @@ const PalacePreview = ({ palace }) => {
         const backendUrl = getApiUrl('').replace(/\/$/, '');
         // Match and replace the entire origin (protocol + host + port)
         return palace.customRoomImageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
+      }
+      // demo-local markers are handled by localRoomImageUrl above
+      if (palace.customRoomImageUrl.startsWith('demo-local:')) {
+        return ROOM_IMAGES[palace.roomType] || ROOM_IMAGES['throne room'];
       }
       return palace.customRoomImageUrl;
     }

@@ -490,6 +490,11 @@ const AnchorPointEditor = () => {
                             onClick={() => {
                                 localStorage.setItem('customRoomId', id);
                                 localStorage.setItem('roomType', 'custom');
+                                if (room?.imageUrl) {
+                                    localStorage.setItem('customRoomImageUrl', room.imageUrl);
+                                } else {
+                                    localStorage.removeItem('customRoomImageUrl');
+                                }
                                 navigate('/input');
                             }}
                             className="px-6 py-3 bg-primary text-white rounded-md hover:bg-secondary font-medium transition-colors shadow-md hover:shadow-lg"

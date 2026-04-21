@@ -303,8 +303,15 @@ const VisualizerPage = () => {
       if (customRoomId) {
         palaceData.customRoomId = customRoomId;
       }
-      if (customRoomImageUrl) {
-        palaceData.customRoomImageUrl = customRoomImageUrl;
+      // Prefer the latest fetched image URL for custom rooms (includes demo-local marker)
+      if (customRoomId) {
+        const chosenCustomImageUrl =
+          fetchedCustomRoomImageUrl ||
+          customRoomImageUrl ||
+          null;
+        if (chosenCustomImageUrl) {
+          palaceData.customRoomImageUrl = chosenCustomImageUrl;
+        }
       }
 
 
