@@ -8,7 +8,60 @@ import PalacePreview from './PalacePreview';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
 import { getApiUrl } from '../config/api';
+import { getDemoRoomImage } from '../utils/demoRoomImageStore';
 const apiClient = new SecureAPIClient(getApiUrl(''));
+
+const DemoRoomThumbnail = ({ roomId, alt, className }) => {
+    const [src, setSrc] = useState(null);
+    const [error, setError] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        let objectUrl = null;
+
+        const load = async () => {
+            try {
+                const blob = await getDemoRoomImage(roomId);
+                if (!blob) {
+                    setError(true);
+                    return;
+                }
+                objectUrl = URL.createObjectURL(blob);
+                if (!cancelled) {
+                    setSrc(objectUrl);
+                }
+            } catch (e) {
+                console.warn('Failed to load demo room image:', e);
+                setError(true);
+            }
+        };
+
+        load();
+
+        return () => {
+            cancelled = true;
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
+    }, [roomId]);
+
+    if (error) {
+        return (
+            <div className={`${className} bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 text-sm`}>
+                Demo photo not available
+            </div>
+        );
+    }
+
+    if (!src) {
+        return (
+            <div className={`${className} bg-gray-100 rounded-lg flex items-center justify-center`}>
+                <LoadingSpinner size="sm" text="" />
+            </div>
+        );
+    }
+
+    return <img src={src} alt={alt} className={className} />;
+};
 
 const UserDashboard = () => {
     const [user, setUser] = useState(null);
@@ -585,32 +638,40 @@ const UserDashboard = () => {
                                             ×
                                         </button>
                                         <div className="mb-4">
-                                            <img
-                                                src={(() => {
-                                                    // Handle relative URLs and localhost URLs
-                                                    if (!room.imageUrl) return '/images/placeholder.png';
+                                            {room.imageUrl && room.imageUrl.startsWith('demo-local:') ? (
+                                                <DemoRoomThumbnail
+                                                    roomId={room._id}
+                                                    alt={room.name}
+                                                    className="w-full h-48 object-cover rounded-lg"
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={(() => {
+                                                        // Handle relative URLs and localhost URLs
+                                                        if (!room.imageUrl) return '/images/placeholder.png';
 
-                                                    // Relative URL - prefix with backend URL
-                                                    if (room.imageUrl.startsWith('/')) {
-                                                        const backendUrl = getApiUrl('').replace(/\/$/, '');
-                                                        return `${backendUrl}${room.imageUrl}`;
-                                                    }
+                                                        // Relative URL - prefix with backend URL
+                                                        if (room.imageUrl.startsWith('/')) {
+                                                            const backendUrl = getApiUrl('').replace(/\/$/, '');
+                                                            return `${backendUrl}${room.imageUrl}`;
+                                                        }
 
-                                                    // localhost URL - replace with production backend URL
-                                                    if (room.imageUrl.includes('localhost')) {
-                                                        const backendUrl = getApiUrl('').replace(/\/$/, '');
-                                                        // Match and replace the entire origin (protocol + host + port)
-                                                        return room.imageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
-                                                    }
+                                                        // localhost URL - replace with production backend URL
+                                                        if (room.imageUrl.includes('localhost')) {
+                                                            const backendUrl = getApiUrl('').replace(/\/$/, '');
+                                                            // Match and replace the entire origin (protocol + host + port)
+                                                            return room.imageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
+                                                        }
 
-                                                    return room.imageUrl;
-                                                })()}
-                                                alt={room.name}
-                                                className="w-full h-48 object-cover rounded-lg"
-                                                onError={(e) => {
-                                                    e.target.src = '/images/placeholder.png';
-                                                }}
-                                            />
+                                                        return room.imageUrl;
+                                                    })()}
+                                                    alt={room.name}
+                                                    className="w-full h-48 object-cover rounded-lg"
+                                                    onError={(e) => {
+                                                        e.target.src = '/images/placeholder.png';
+                                                    }}
+                                                />
+                                            )}
                                         </div>
                                         <h3 className="text-xl font-semibold mb-2">{room.name}</h3>
                                         {room.description && (

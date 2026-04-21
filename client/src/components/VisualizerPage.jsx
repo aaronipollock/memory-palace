@@ -9,6 +9,7 @@ import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
+import { getDemoRoomImage } from '../utils/demoRoomImageStore';
 
 import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
@@ -106,6 +107,7 @@ const VisualizerPage = () => {
   // State for custom room anchor points
   const [customRoomAnchorPoints, setCustomRoomAnchorPoints] = useState([]);
   const [fetchedCustomRoomImageUrl, setFetchedCustomRoomImageUrl] = useState(null);
+  const [localCustomRoomImageUrl, setLocalCustomRoomImageUrl] = useState(null);
   // State for edit mode
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingAnchorPoint, setEditingAnchorPoint] = useState(null);
@@ -135,14 +137,62 @@ const VisualizerPage = () => {
       } else {
         setCustomRoomAnchorPoints([]);
         setFetchedCustomRoomImageUrl(null);
+        setLocalCustomRoomImageUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return null;
+        });
       }
     };
     fetchCustomRoom();
   }, [customRoomId]);
 
+  // Demo privacy mode: resolve demo-local:<id> to a local object URL for rendering
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+
+    const loadLocalDemoImage = async () => {
+      if (!customRoomId) return;
+      if (!fetchedCustomRoomImageUrl || !fetchedCustomRoomImageUrl.startsWith('demo-local:')) return;
+
+      try {
+        const blob = await getDemoRoomImage(customRoomId);
+        if (!blob) return;
+        objectUrl = URL.createObjectURL(blob);
+        if (!cancelled) {
+          setLocalCustomRoomImageUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return objectUrl;
+          });
+        }
+      } catch (e) {
+        console.warn('Failed to load demo custom room image:', e);
+      }
+    };
+
+    // Clear when switching away from demo-local images
+    if (!fetchedCustomRoomImageUrl || !fetchedCustomRoomImageUrl.startsWith('demo-local:')) {
+      setLocalCustomRoomImageUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+    } else {
+      loadLocalDemoImage();
+    }
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [customRoomId, fetchedCustomRoomImageUrl]);
+
   // Get the appropriate room image
   // Priority: fetched image URL > localStorage image URL > predefined room image
   const roomImage = (() => {
+    // Demo-local image resolved from IndexedDB
+    if (localCustomRoomImageUrl) {
+      return localCustomRoomImageUrl;
+    }
     // Use fetched image URL first (most up-to-date)
     if (fetchedCustomRoomImageUrl) {
       // Handle relative URLs and localhost URLs
@@ -154,6 +204,10 @@ const VisualizerPage = () => {
         const backendUrl = getApiUrl('').replace(/\/$/, '');
         // Match and replace the entire origin (protocol + host + port)
         return fetchedCustomRoomImageUrl.replace(/https?:\/\/[^\/:]+(?::\d+)?/, backendUrl);
+      }
+      // demo-local marker won't resolve to a usable URL; handled by localCustomRoomImageUrl above
+      if (fetchedCustomRoomImageUrl.startsWith('demo-local:')) {
+        return ROOM_IMAGES[roomType] || ROOM_IMAGES["throne room"];
       }
       return fetchedCustomRoomImageUrl;
     }
