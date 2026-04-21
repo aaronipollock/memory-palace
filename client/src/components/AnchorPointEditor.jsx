@@ -6,6 +6,7 @@ import ErrorMessage from './ErrorMessage';
 import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
 import { getApiUrl } from '../config/api';
+import { getDemoRoomImage } from '../utils/demoRoomImageStore';
 
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
@@ -28,11 +29,20 @@ const AnchorPointEditor = () => {
     const [roomDescription, setRoomDescription] = useState('');
     const [isSavingRoom, setIsSavingRoom] = useState(false);
     const [draggedIndex, setDraggedIndex] = useState(null);
+    const [localRoomImageUrl, setLocalRoomImageUrl] = useState(null);
     const { showSuccess, showError } = useToast();
 
     useEffect(() => {
         loadRoom();
     }, [id]);
+
+    useEffect(() => {
+        return () => {
+            if (localRoomImageUrl) {
+                URL.revokeObjectURL(localRoomImageUrl);
+            }
+        };
+    }, [localRoomImageUrl]);
 
     // Fetches custom room data and anchor points from API
     const loadRoom = async () => {
@@ -58,6 +68,24 @@ const AnchorPointEditor = () => {
             setRoomName(roomData.name);
             setRoomDescription(roomData.description || '');
             setAnchorPoints(roomData.anchorPoints || []);
+
+            // Demo privacy mode: load the image locally (IndexedDB) when the marker is present
+            if (roomData.imageUrl && roomData.imageUrl.startsWith('demo-local:')) {
+                const blob = await getDemoRoomImage(roomData._id);
+                if (!blob) {
+                    throw new Error('Demo room image not found in this browser. Please re-upload the photo.');
+                }
+                const objectUrl = URL.createObjectURL(blob);
+                setLocalRoomImageUrl((prev) => {
+                    if (prev) URL.revokeObjectURL(prev);
+                    return objectUrl;
+                });
+            } else {
+                setLocalRoomImageUrl((prev) => {
+                    if (prev) URL.revokeObjectURL(prev);
+                    return null;
+                });
+            }
 
             // Log image URL for debugging
             console.log('Custom room imageUrl:', roomData.imageUrl);
@@ -382,6 +410,7 @@ const AnchorPointEditor = () => {
                         <img
                             ref={imageRef}
                             src={(() => {
+                                if (localRoomImageUrl) return localRoomImageUrl;
                                 if (!room.imageUrl) return '';
                                 // If it's a relative path, prefix with backend URL
                                 if (room.imageUrl.startsWith('/')) {

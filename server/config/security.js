@@ -64,11 +64,6 @@ const securityConfig = {
             process.env.FRONTEND_URL
           ].filter(Boolean);
 
-          // Also allow any *.onrender.com subdomain for flexibility during development
-          if (origin.endsWith('.onrender.com')) {
-            return callback(null, true);
-          }
-
           if (allowedOrigins.includes(origin)) {
             callback(null, true);
           } else {
@@ -99,7 +94,7 @@ const securityConfig = {
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
-        scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for MVP
+        scriptSrc: ["'self'"],
         connectSrc: ["'self'", "https://api.openai.com", "https://api.stability.ai"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],

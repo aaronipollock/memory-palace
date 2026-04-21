@@ -19,6 +19,8 @@ Low·sAI ("we," "our," or "us") is committed to protecting your privacy. This Pr
 **User-Generated Content:**
 - Memory palace data (memorable items, associations)
 - Room preferences and settings
+- Custom room photos you upload (if you choose to upload a room image)
+- Anchor points and descriptions you add to rooms
 - Art style preferences
 - Saved memory palaces
 
@@ -116,6 +118,9 @@ We implement appropriate technical and organizational measures to protect your i
 - Access controls and authentication
 - Secure development practices
 
+### 5.3 Demo Mode Room Photo Handling
+If you use our public demo account, room photos you select/upload as part of creating a custom room are stored **locally in your browser** (for example, using browser storage) and are **not uploaded to our servers**. These demo-mode room photos are intended to be available only within the same browser environment you used to create them.
+
 ### 5.2 Data Breach Response
 In the event of a data breach, we will:
 - Notify affected users within 72 hours
@@ -128,6 +133,8 @@ In the event of a data breach, we will:
 ### 6.1 Retention Periods
 - **Account data**: Retained while your account is active
 - **User-generated content**: Retained until account deletion
+- **Room photos (non-demo accounts)**: Retained while associated content is retained, unless deleted by you or as part of account deletion
+- **Demo room photos (demo account)**: Stored locally in your browser and cleared when you log out of the demo session (and may also be cleared by your browser at any time)
 - **Usage logs**: Retained for up to 12 months
 - **Analytics data**: Retained for up to 24 months
 

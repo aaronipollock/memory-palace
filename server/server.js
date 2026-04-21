@@ -15,6 +15,26 @@ const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5001;
 
+// Fail-fast config validation (production only)
+if (process.env.NODE_ENV === 'production') {
+  const missing = [];
+
+  if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
+  if (!process.env.JWT_REFRESH_SECRET) missing.push('JWT_REFRESH_SECRET');
+
+  if (missing.length) {
+    throw new Error(`Missing required env var(s): ${missing.join(', ')}`);
+  }
+
+  // Optional: basic strength guardrail
+  if (process.env.JWT_SECRET.length < 32) {
+    throw new Error('JWT_SECRET must be at least 32 characters');
+  }
+  if (process.env.JWT_REFRESH_SECRET.length < 32) {
+    throw new Error('JWT_REFRESH_SECRET must be at least 32 characters');
+  }
+}
+
 // Connect to MongoDB with security options
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/memory-palace', {
     maxPoolSize: 10,

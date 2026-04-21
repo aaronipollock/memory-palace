@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NavBar.css';  // We'll create this file next
 import { getApiUrl } from '../config/api';
+import { TokenManager } from '../utils/security';
+import { clearAllDemoRoomImages } from '../utils/demoRoomImageStore';
 
 const NavBar = ({ onLoginClick }) => {
     const navigate = useNavigate();
@@ -62,6 +64,9 @@ const NavBar = ({ onLoginClick }) => {
         try {
             const token = localStorage.getItem('token');
             if (token) {
+                const payload = TokenManager.getTokenPayload(token);
+                const isDemoUser = payload?.email === 'demo@example.com';
+
                 // Call the backend logout API to trigger demo palace reset
                 await fetch(getApiUrl('/api/auth/logout'), {
                     method: 'POST',
@@ -71,6 +76,15 @@ const NavBar = ({ onLoginClick }) => {
                     },
                     credentials: 'include'
                 });
+
+                // Demo privacy mode: clear locally-stored demo room images on logout
+                if (isDemoUser) {
+                    try {
+                        await clearAllDemoRoomImages();
+                    } catch (e) {
+                        console.warn('Failed to clear demo room images:', e);
+                    }
+                }
             }
         } catch (error) {
             console.error('Logout API call failed:', error);

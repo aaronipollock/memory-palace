@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
 import { useToast } from '../context/ToastContext';
-import { SecureAPIClient } from '../utils/security';
+import { SecureAPIClient, TokenManager } from '../utils/security';
 import { getApiUrl } from '../config/api';
+import { saveDemoRoomImage } from '../utils/demoRoomImageStore';
 
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
@@ -150,31 +151,43 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
         setError(null);
 
         try {
-            // Upload image file to get URL (avoids storing base64 in database)
-            const formDataToUpload = new FormData();
-            formDataToUpload.append('image', selectedFile);
+            const token = TokenManager.getAccessToken();
+            const payload = TokenManager.getTokenPayload(token);
+            const isDemoUser = payload?.email === 'demo@example.com';
 
-            const uploadResponse = await fetch(`${getApiUrl('')}/api/upload-image`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
-                },
-                credentials: 'include',
-                body: formDataToUpload
-            });
+            let imageUrl;
 
-            if (!uploadResponse.ok) {
-                const errorData = await uploadResponse.json();
-                console.error('Upload error:', errorData);
-                throw new Error(errorData.error || 'Failed to upload image');
-            }
+            if (isDemoUser) {
+                // Demo privacy mode: do not upload/store images on the server.
+                // We'll store the image locally (IndexedDB) after the room is created.
+                imageUrl = 'demo-local:pending';
+            } else {
+                // Upload image file to get URL (avoids storing base64 in database)
+                const formDataToUpload = new FormData();
+                formDataToUpload.append('image', selectedFile);
 
-            const uploadData = await uploadResponse.json();
-            const imageUrl = uploadData.originalUrl || uploadData.optimizedUrl;
+                const uploadResponse = await fetch(`${getApiUrl('')}/api/upload-image`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'X-CSRF-Token': localStorage.getItem('csrfToken') || ''
+                    },
+                    credentials: 'include',
+                    body: formDataToUpload
+                });
 
-            if (!imageUrl) {
-                throw new Error('No image URL returned from upload');
+                if (!uploadResponse.ok) {
+                    const errorData = await uploadResponse.json();
+                    console.error('Upload error:', errorData);
+                    throw new Error(errorData.error || 'Failed to upload image');
+                }
+
+                const uploadData = await uploadResponse.json();
+                imageUrl = uploadData.originalUrl || uploadData.optimizedUrl;
+
+                if (!imageUrl) {
+                    throw new Error('No image URL returned from upload');
+                }
             }
 
             // Create custom room with the image URL
@@ -192,6 +205,25 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
 
             const room = await response.json();
             showSuccess('Room created successfully!');
+
+            if (isDemoUser) {
+                // Persist the image locally keyed by room id
+                await saveDemoRoomImage(room._id, selectedFile);
+
+                // Update the room record with a stable demo-local marker
+                const markerResponse = await apiClient.put(`/api/custom-rooms/${room._id}`, {
+                    imageUrl: `demo-local:${room._id}`
+                });
+
+                if (markerResponse.ok) {
+                    const updatedRoom = await markerResponse.json();
+                    if (onSuccess) onSuccess(updatedRoom);
+                    onClose();
+                    navigate(`/custom-rooms/${updatedRoom._id}/edit`);
+                    return;
+                }
+                // If marker update fails, still allow navigation; editor will show error if image cannot be loaded.
+            }
 
             if (onSuccess) {
                 onSuccess(room);
