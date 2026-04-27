@@ -95,7 +95,12 @@ const securityConfig = {
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
         scriptSrc: ["'self'"],
-        connectSrc: ["'self'", "https://api.openai.com", "https://api.stability.ai"],
+        connectSrc: [
+          "'self'",
+          "https://api.openai.com",
+          "https://api.anthropic.com",
+          "https://api.stability.ai"
+        ],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: []
