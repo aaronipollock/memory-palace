@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
 const AppError = require('../utils/AppError');
+const { enhancePrompt } = require('../services/promptEnhancerService');
 require('dotenv').config();
 
 // Stable Diffusion API endpoint
@@ -72,7 +73,22 @@ const generateOptimizedImage = async (originalPath, optimizedPath) => {
 
 // Generate images using Stability AI API
 exports.generateImages = async (req, res) => {
-    const { prompt, association } = req.body;
+    const { prompt, association, useLlm } = req.body;
+    // Reserved for future prompt expansion: artStyle, roomType, mode
+
+    if (!association || typeof association.anchor !== 'string' || typeof association.memorableItem !== 'string') {
+        throw new AppError('Invalid or missing association (anchor and memorableItem required)', 400);
+    }
+
+    const trimmedClientPrompt = typeof prompt === 'string' ? prompt.trim() : '';
+    let finalPrompt = trimmedClientPrompt || null;
+
+    if (!finalPrompt) {
+        if (useLlm === false) {
+            throw new AppError('prompt is required when useLlm is false', 400);
+        }
+        finalPrompt = await enhancePrompt(association.anchor, association.memorableItem);
+    }
 
     // Check if API key is configured
     if (!API_KEY) {
@@ -83,13 +99,15 @@ exports.generateImages = async (req, res) => {
             imageData: placeholderImage,
             mimeType: 'image/png',
             filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
-            isPlaceholder: true
+            isPlaceholder: true,
+            prompt: finalPrompt
         });
     }
 
     // Enhanced parameters for better tapestry, dais, and anchor point generation
-    const isTapestryPrompt = prompt.toLowerCase().includes('tapestry');
-    const isDaisPrompt = prompt.toLowerCase().includes('dais');
+    const promptLower = finalPrompt.toLowerCase();
+    const isTapestryPrompt = promptLower.includes('tapestry');
+    const isDaisPrompt = promptLower.includes('dais');
     const needsEnhancedParams = isTapestryPrompt || isDaisPrompt;
     const cfgScale = needsEnhancedParams ? 8 : 7; // Higher CFG for complex architectural elements
     const steps = needsEnhancedParams ? 35 : 30; // More steps for complex architectural elements
@@ -108,7 +126,7 @@ exports.generateImages = async (req, res) => {
             data: {
                 text_prompts: [
                     {
-                        "text": prompt,
+                        "text": finalPrompt,
                         "weight": 1
                     }
                 ],
@@ -129,7 +147,8 @@ exports.generateImages = async (req, res) => {
             success: true,
             imageData: imageData.base64,
             mimeType: 'image/png',
-            filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`
+            filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
+            prompt: finalPrompt
         };
         res.json(responseData);
 
@@ -146,7 +165,8 @@ exports.generateImages = async (req, res) => {
                 imageData: placeholderImage,
                 mimeType: 'image/png',
                 filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
-                isPlaceholder: true
+                isPlaceholder: true,
+                prompt: finalPrompt
             });
         }
 
