@@ -47,8 +47,9 @@ const VisualizerPage = () => {
   // Get the current palace data from localStorage
   const currentPalace = JSON.parse(localStorage.getItem('currentPalace') || '{}');
   const {
-    roomType = 'throne room',
+    roomType = currentPalace.roomType || 'throne room',
     associations = [],
+    artStyle = currentPalace.artStyle || 'Random',
     acceptedImages: palaceAcceptedImages = {},
     name: palaceName = '',
     _id: palaceId = null,
@@ -578,7 +579,7 @@ const VisualizerPage = () => {
       } else {
         // Generate new image if no accepted image exists
         console.log('Generating image for association:', association);
-        const result = await generateImage(association, setCurrentPrompt);
+        const result = await generateImage({ association, roomType, artStyle, mode: 'normal', useLlm: true }, setCurrentPrompt);
         console.log('Image generation result:', {
           hasImageData: !!result.imageData,
           hasOptimizedUrl: !!result.optimizedUrl,
@@ -653,7 +654,7 @@ const VisualizerPage = () => {
 
       try {
         // Use "Make it Stranger" instead of regular regenerate
-        const result = await generateStrangerImage(selectedAssociation, setCurrentPrompt);
+        const result = await generateStrangerImage({ association: selectedAssociation, roomType, artStyle, mode: 'stranger', useLlm: true }, setCurrentPrompt);
         // Handle base64 image data from backend
         if (result.imageData) {
           setGeneratedImage(`data:image/png;base64,${result.imageData}`);
@@ -680,7 +681,7 @@ const VisualizerPage = () => {
       setCurrentPrompt('');
 
       try {
-        const result = await generateImage(selectedAssociation, setCurrentPrompt);
+        const result = await generateImage({ association: selectedAssociation, roomType, artStyle, mode: 'normal', useLlm: true }, setCurrentPrompt);
         // Handle base64 image data from backend
         if (result.imageData) {
           setGeneratedImage(`data:image/png;base64,${result.imageData}`);

@@ -13,7 +13,7 @@ let imageCache = {};
  * @param {Object} association - The association object containing anchor and memorable
  * @returns {Promise} - Promise resolving to the image data
  */
-export const generateImage = async (association, setCurrentPrompt) => {
+export const generateImage = async ({ association, roomType, artStyle, mode, useLlm }, setCurrentPrompt) => {
   try {
     // Sanitize input
     const sanitizedAssociation = InputSanitizer.sanitizeObject(association);
@@ -25,42 +25,47 @@ export const generateImage = async (association, setCurrentPrompt) => {
       throw error;
     }
 
-    // Generate the prompt
-    const promptResult = await generatePrompt(sanitizedAssociation, setCurrentPrompt);
+    // Server-first: let backend do Step A (LLM) then Step B (image model).
+    // If that fails, fall back to client-side prompt generation and retry with useLlm:false.
+    let response;
+    try {
+      response = await apiClient.post('/api/generate-images', {
+        association: sanitizedAssociation,
+        roomType,
+        artStyle,
+        mode,
+        useLlm
+      });
+    } catch (e) {
+      response = null;
+    }
 
-    // Check if prompt generation was successful
-    if (!promptResult || !promptResult.fullPrompt) {
-      console.error('Failed to generate prompt:', promptResult);
-      // Use a fallback prompt
-      const fallbackPrompt = `a ${sanitizedAssociation.memorableItem} near a ${sanitizedAssociation.anchor}, digital art`;
+    if (!response || !response.ok) {
+      const promptResult = await generatePrompt(sanitizedAssociation, setCurrentPrompt);
+      const fallbackPrompt =
+        promptResult?.fullPrompt ||
+        `a ${sanitizedAssociation.memorableItem} near a ${sanitizedAssociation.anchor}, digital art`;
 
-      if (setCurrentPrompt) {
-        setCurrentPrompt(fallbackPrompt);
-      }
+      if (setCurrentPrompt) setCurrentPrompt(fallbackPrompt);
 
-      // Make API request with fallback prompt
-      const response = await apiClient.post('/api/generate-images', {
+      const retry = await apiClient.post('/api/generate-images', {
         prompt: fallbackPrompt,
-        association: sanitizedAssociation
+        association: sanitizedAssociation,
+        roomType,
+        artStyle,
+        mode,
+        useLlm: false
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!retry.ok) {
+        const errorData = await retry.json();
         const error = new Error(errorData.error || 'Failed to generate image');
-        error.response = { status: response.status, data: errorData };
+        error.response = { status: retry.status, data: errorData };
         throw error;
       }
 
-      const data = await response.json();
-      return data;
+      return await retry.json();
     }
-
-    // Make API request with generated prompt
-    console.log('Making API request to /api/generate-images with prompt:', promptResult.fullPrompt);
-    const response = await apiClient.post('/api/generate-images', {
-      prompt: promptResult.fullPrompt,
-      association: sanitizedAssociation
-    });
 
     console.log('API response status:', response.status, response.statusText);
 
@@ -108,7 +113,7 @@ export const generateImage = async (association, setCurrentPrompt) => {
  * Generates a STRANGER version of an image (for "Make it Stranger" button)
  * Uses more extreme prompts to create more memorable, bizarre images
  */
-export const generateStrangerImage = async (association, setCurrentPrompt) => {
+export const generateStrangerImage = async ({ association, roomType, artStyle, mode, useLlm }, setCurrentPrompt) => {
   try {
     // Sanitize input
     const sanitizedAssociation = InputSanitizer.sanitizeObject(association);
@@ -120,30 +125,47 @@ export const generateStrangerImage = async (association, setCurrentPrompt) => {
       throw error;
     }
 
-    // Generate the stranger prompt
-    const promptResult = await generateStrangerPrompt(sanitizedAssociation, setCurrentPrompt);
-
-    if (!promptResult || !promptResult.fullPrompt) {
-      console.error('Failed to generate stranger prompt:', promptResult);
-      // Fallback to regular prompt if stranger prompt fails
-      return generateImage(association, setCurrentPrompt);
+    let response;
+    try {
+      response = await apiClient.post('/api/generate-images', {
+        association: sanitizedAssociation,
+        roomType,
+        artStyle,
+        mode,
+        useLlm
+      });
+    } catch (e) {
+      response = null;
     }
 
-    // Make API request with stranger prompt
-    const response = await apiClient.post('/api/generate-images', {
-      prompt: promptResult.fullPrompt,
-      association: sanitizedAssociation
-    });
+    if (!response || !response.ok) {
+      const promptResult = await generateStrangerPrompt(sanitizedAssociation, setCurrentPrompt);
+      const fallbackPrompt =
+        promptResult?.fullPrompt ||
+        `a surreal, bizarre scene of ${sanitizedAssociation.memorableItem} interacting with a ${sanitizedAssociation.anchor}`;
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      const error = new Error(errorData.error || 'Failed to generate stranger image');
-      error.response = { status: response.status, data: errorData };
-      throw error;
+      if (setCurrentPrompt) setCurrentPrompt(fallbackPrompt);
+
+      const retry = await apiClient.post('/api/generate-images', {
+        prompt: fallbackPrompt,
+        association: sanitizedAssociation,
+        roomType,
+        artStyle,
+        mode,
+        useLlm: false
+      });
+
+      if (!retry.ok) {
+        const errorData = await retry.json();
+        const error = new Error(errorData.error || 'Failed to generate stranger image');
+        error.response = { status: retry.status, data: errorData };
+        throw error;
+      }
+
+      return await retry.json();
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('Stranger image generation error:', error);
 

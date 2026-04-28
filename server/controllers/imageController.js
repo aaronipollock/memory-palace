@@ -73,8 +73,7 @@ const generateOptimizedImage = async (originalPath, optimizedPath) => {
 
 // Generate images using Stability AI API
 exports.generateImages = async (req, res) => {
-    const { prompt, association, useLlm } = req.body;
-    // Reserved for future prompt expansion: artStyle, roomType, mode
+    const { prompt, association, artStyle, roomType, mode, room_context, useLlm } = req.body;
 
     if (!association || typeof association.anchor !== 'string' || typeof association.memorableItem !== 'string') {
         throw new AppError('Invalid or missing association (anchor and memorableItem required)', 400);
@@ -82,12 +81,35 @@ exports.generateImages = async (req, res) => {
 
     const trimmedClientPrompt = typeof prompt === 'string' ? prompt.trim() : '';
     let finalPrompt = trimmedClientPrompt || null;
+    let negativePrompt = '';
+    let promptMeta = null;
 
     if (!finalPrompt) {
+        console.log('No client prompt provided; expanding via LLM...', {
+            anchor: association.anchor,
+            mode: mode || 'normal',
+            artStyle: artStyle || 'Random',
+            roomType: roomType || '',
+            hasRoomContext: !!(room_context && String(room_context).trim())
+        });
         if (useLlm === false) {
             throw new AppError('prompt is required when useLlm is false', 400);
         }
-        finalPrompt = await enhancePrompt(association.anchor, association.memorableItem);
+        const contract = await enhancePrompt({
+            anchor: association.anchor,
+            memorableItem: association.memorableItem,
+            artStyle: artStyle || 'Random',
+            roomType: roomType || '',
+            room_context: room_context || '',
+            mode: mode || 'normal'
+        });
+        finalPrompt = contract.prompt;
+        negativePrompt = contract.negative_prompt || '';
+        promptMeta = {
+            ...contract,
+            llm_provider: 'anthropic',
+            llm_model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5'
+        };
     }
 
     // Check if API key is configured
@@ -100,7 +122,9 @@ exports.generateImages = async (req, res) => {
             mimeType: 'image/png',
             filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
             isPlaceholder: true,
-            prompt: finalPrompt
+            prompt: finalPrompt,
+            negative_prompt: negativePrompt,
+            prompt_meta: promptMeta
         });
     }
 
@@ -125,10 +149,8 @@ exports.generateImages = async (req, res) => {
             },
             data: {
                 text_prompts: [
-                    {
-                        "text": finalPrompt,
-                        "weight": 1
-                    }
+                    { "text": finalPrompt, "weight": 1 },
+                    ...(negativePrompt ? [{ "text": negativePrompt, "weight": -1 }] : [])
                 ],
                 cfg_scale: cfgScale,
                 height: 1024,
@@ -148,7 +170,9 @@ exports.generateImages = async (req, res) => {
             imageData: imageData.base64,
             mimeType: 'image/png',
             filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
-            prompt: finalPrompt
+            prompt: finalPrompt,
+            negative_prompt: negativePrompt,
+            prompt_meta: promptMeta
         };
         res.json(responseData);
 
@@ -166,7 +190,9 @@ exports.generateImages = async (req, res) => {
                 mimeType: 'image/png',
                 filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
                 isPlaceholder: true,
-                prompt: finalPrompt
+                prompt: finalPrompt,
+                negative_prompt: negativePrompt,
+                prompt_meta: promptMeta
             });
         }
 
