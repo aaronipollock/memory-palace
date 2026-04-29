@@ -9,16 +9,32 @@ require('dotenv').config();
 // Stability AI config (env-driven model selection)
 const STABILITY_API_BASE_URL = 'https://api.stability.ai';
 const STABILITY_MODEL = process.env.STABILITY_MODEL || 'stable-diffusion-xl-1024-v1-0';
+const IS_STABLE_IMAGE_FAMILY = STABILITY_MODEL.startsWith('stable-image-') || STABILITY_MODEL.startsWith('sd3.5-');
 const IS_STABLE_IMAGE_ULTRA = STABILITY_MODEL === 'stable-image-ultra';
+const IS_SD35_MODEL = STABILITY_MODEL.startsWith('sd3.5-');
+const SUPPORTED_SD35_MODELS = new Set(['sd3.5-large', 'sd3.5-large-turbo', 'sd3.5-medium', 'sd3.5-flash']);
 const STABLE_DIFFUSION_API_URL = `${STABILITY_API_BASE_URL}/v1/generation/${STABILITY_MODEL}/text-to-image`;
 const STABLE_IMAGE_ULTRA_API_URL = `${STABILITY_API_BASE_URL}/v2beta/stable-image/generate/ultra`;
+const STABLE_IMAGE_SD35_API_URL = `${STABILITY_API_BASE_URL}/v2beta/stable-image/generate/sd3`;
 const API_KEY = process.env.STABILITY_API_KEY;
 let stabilityModelValidationPromise = null;
 
 async function validateConfiguredStabilityModel() {
     if (!API_KEY) return;
-    if (IS_STABLE_IMAGE_ULTRA) {
-        console.log('Using Stability model: stable-image-ultra (v2beta stable-image endpoint)');
+    if (IS_STABLE_IMAGE_FAMILY) {
+        if (IS_STABLE_IMAGE_ULTRA) {
+            console.log('Using Stability model: stable-image-ultra (v2beta stable-image ultra endpoint)');
+            return;
+        }
+        if (IS_SD35_MODEL && SUPPORTED_SD35_MODELS.has(STABILITY_MODEL)) {
+            console.log('Using Stability model:', STABILITY_MODEL, '(v2beta stable-image sd3 endpoint)');
+            return;
+        }
+        console.warn('Configured STABILITY_MODEL is not supported by current stable-image routing', {
+            configuredModel: STABILITY_MODEL,
+            supportedUltra: 'stable-image-ultra',
+            supportedSd35: Array.from(SUPPORTED_SD35_MODELS)
+        });
         return;
     }
     try {
@@ -92,6 +108,53 @@ async function generateWithStableImageUltra({ prompt, negativePrompt }) {
 
     if (!base64) {
         const error = new Error('Stable Image Ultra returned no image data');
+        error.response = { status: response.status, data: payload };
+        throw error;
+    }
+
+    return {
+        base64,
+        seed: payload?.seed,
+        finishReason: payload?.finish_reason
+    };
+}
+
+async function generateWithStableImageSd35({ prompt, negativePrompt, model }) {
+    const form = new FormData();
+    form.append('prompt', prompt);
+    form.append('mode', 'text-to-image');
+    form.append('model', model);
+    if (negativePrompt) {
+        form.append('negative_prompt', negativePrompt);
+    }
+    form.append('output_format', 'png');
+    form.append('aspect_ratio', '1:1');
+
+    const response = await fetch(STABLE_IMAGE_SD35_API_URL, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Accept': 'application/json'
+        },
+        body: form
+    });
+
+    let payload = null;
+    try {
+        payload = await response.json();
+    } catch (_) {
+        payload = null;
+    }
+
+    if (!response.ok) {
+        const error = new Error(`Stable Image SD3.5 request failed: HTTP ${response.status}`);
+        error.response = { status: response.status, data: payload };
+        throw error;
+    }
+
+    const base64 = payload?.image || payload?.artifacts?.[0]?.base64 || null;
+    if (!base64) {
+        const error = new Error('Stable Image SD3.5 returned no image data');
         error.response = { status: response.status, data: payload };
         throw error;
     }
@@ -249,6 +312,15 @@ exports.generateImages = async (req, res) => {
         let imageBase64;
         let imageProviderMeta = {};
 
+        if (IS_STABLE_IMAGE_FAMILY && !IS_STABLE_IMAGE_ULTRA && !(IS_SD35_MODEL && SUPPORTED_SD35_MODELS.has(STABILITY_MODEL))) {
+            throw new AppError('Unsupported STABILITY_MODEL for stable-image endpoint in current implementation', 500, {
+                configuredModel: STABILITY_MODEL,
+                supportedUltra: 'stable-image-ultra',
+                supportedSd35: Array.from(SUPPORTED_SD35_MODELS),
+                hint: 'Set STABILITY_MODEL to stable-image-ultra, sd3.5-large, sd3.5-large-turbo, sd3.5-medium, sd3.5-flash, or a v1 generation model id'
+            });
+        }
+
         if (IS_STABLE_IMAGE_ULTRA) {
             const ultraResult = await generateWithStableImageUltra({
                 prompt: finalPrompt,
@@ -258,6 +330,17 @@ exports.generateImages = async (req, res) => {
             imageProviderMeta = {
                 stability_finish_reason: ultraResult.finishReason || null,
                 stability_seed: ultraResult.seed ?? null
+            };
+        } else if (IS_SD35_MODEL) {
+            const sd35Result = await generateWithStableImageSd35({
+                prompt: finalPrompt,
+                negativePrompt,
+                model: STABILITY_MODEL
+            });
+            imageBase64 = sd35Result.base64;
+            imageProviderMeta = {
+                stability_finish_reason: sd35Result.finishReason || null,
+                stability_seed: sd35Result.seed ?? null
             };
         } else {
             // Generate image using Stability v1 SDXL-style endpoint
