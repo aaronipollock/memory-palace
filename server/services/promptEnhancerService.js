@@ -42,23 +42,30 @@ Return ONLY valid JSON with these keys EXACTLY:
 prompt_version, mode, anchor, memorableItem, artStyle, label_text, prompt, negative_prompt, rationale, tags
 
 Rules:
-1) prompt must be ONE English sentence, concrete and surreal-but-coherent, highly visual, not abstract.
-2) The anchor object must be clearly visible and central to the interaction.
-3) If memorableItem is a proper noun (person/place), an acronym, or an abstract concept, you MUST add a phonetic/visual pun element (e.g. Washington → washing + ton). If it’s already a common concrete noun, you may depict it literally without wordplay.
-4) artStyle handling:
+1) prompt must be ONE English sentence optimized for SDXL literal rendering: concrete, visual, and easy to depict.
+2) Keep prompt compact and literal: 25-60 words, up to 12 comma-separated clauses, no poetic or abstract language.
+3) The anchor object must be explicitly named and visually central to the main interaction.
+4) If memorableItem is a proper noun (person/place), acronym, or abstract concept, you MUST include at least one clear phonetic/visual wordplay element.
+5) Prefer simple scene graphs: one primary interaction, up to two secondary props, clean/uncluttered background.
+6) artStyle handling:
    - If input artStyle is NOT "Random": set JSON artStyle to EXACTLY the same string as input.
    - If input artStyle IS "Random": choose ONE final rendering style and set JSON artStyle to that chosen value.
-     - Prefer picking uniformly at random from: "Digital Art", "Cartoon", "3D Render", "Watercolor", "Pop Art", "Photorealistic"
-     - Optionally choose a different short style label (e.g. "ink illustration", "low-poly 3D", "claymorphism") for variety, but it must read as a clear rendering style.
+     - Prefer picking from: "Digital Art", "Cartoon", "3D Render", "Watercolor", "Pop Art", "Photorealistic"
+     - Optional variety labels are allowed only if they are clear rendering styles.
    - Whatever JSON artStyle is, prompt MUST reflect it.
-5) Keep prompt under ~75 tokens.
-6) Avoid generic phrasing like "a symbol of" / "represents" / "embodies".
 7) Use roomType/room_context only for atmosphere/materials/lighting; do not replace the anchor interaction.
-8) If mode is "stranger", amplify absurdity with ONE extra bizarre prop or scale twist while staying safe and readable.
-9) negative_prompt: compact list that suppresses logos/watermarks/extra text/clutter + common quality issues.
-10) rationale: 1-2 sentences explaining the mnemonic mapping.
-11) tags: 3-8 short kebab-case strings.
-12) If label_text is non-empty, do not include the word “text” in negative_prompt. If label_text is empty, you may include “text” in negative_prompt.
+8) If mode is "stranger", amplify absurdity with exactly ONE of:
+   - one bizarre prop, OR
+   - one scale twist.
+   Keep the scene clearly depictable.
+9) label_text rules:
+   - Use "" unless text is necessary for the mnemonic.
+   - If non-empty, keep it short (1-3 words) and physically placeable on a visible object/sign.
+10) negative_prompt must be compact and practical (quality + clutter + watermark/logo suppression).
+11) If label_text is non-empty, DO NOT include "text" in negative_prompt.
+12) If label_text is empty, you MAY include "text" in negative_prompt.
+13) rationale: 1-2 sentences explaining the mnemonic mapping.
+14) tags: 3-8 short kebab-case strings.
 
 Safety:
 Keep content non-sexual, non-gory, non-hateful. Avoid instructions targeting real private individuals.

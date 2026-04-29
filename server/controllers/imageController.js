@@ -6,9 +6,114 @@ const AppError = require('../utils/AppError');
 const { enhancePrompt } = require('../services/promptEnhancerService');
 require('dotenv').config();
 
-// Stable Diffusion API endpoint
-const STABLE_DIFFUSION_API_URL = 'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image';
+// Stability AI config (env-driven model selection)
+const STABILITY_API_BASE_URL = 'https://api.stability.ai';
+const STABILITY_MODEL = process.env.STABILITY_MODEL || 'stable-diffusion-xl-1024-v1-0';
+const IS_STABLE_IMAGE_ULTRA = STABILITY_MODEL === 'stable-image-ultra';
+const STABLE_DIFFUSION_API_URL = `${STABILITY_API_BASE_URL}/v1/generation/${STABILITY_MODEL}/text-to-image`;
+const STABLE_IMAGE_ULTRA_API_URL = `${STABILITY_API_BASE_URL}/v2beta/stable-image/generate/ultra`;
 const API_KEY = process.env.STABILITY_API_KEY;
+let stabilityModelValidationPromise = null;
+
+async function validateConfiguredStabilityModel() {
+    if (!API_KEY) return;
+    if (IS_STABLE_IMAGE_ULTRA) {
+        console.log('Using Stability model: stable-image-ultra (v2beta stable-image endpoint)');
+        return;
+    }
+    try {
+        const response = await axios({
+            method: 'get',
+            url: `${STABILITY_API_BASE_URL}/v1/models`,
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`
+            },
+            timeout: 10000
+        });
+
+        const models = Array.isArray(response.data) ? response.data : [];
+        const ids = models
+            .map((m) => m?.id || m?.name || '')
+            .filter(Boolean);
+        const isConfiguredModelAvailable = ids.includes(STABILITY_MODEL);
+
+        if (!isConfiguredModelAvailable) {
+            console.warn('Configured STABILITY_MODEL not found in /v1/models response', {
+                configuredModel: STABILITY_MODEL,
+                discoveredModelCount: ids.length
+            });
+        } else {
+            console.log('Using Stability model:', STABILITY_MODEL);
+        }
+    } catch (error) {
+        console.warn('Unable to validate STABILITY_MODEL via /v1/models. Continuing with configured model.', {
+            configuredModel: STABILITY_MODEL,
+            error: error.message
+        });
+    }
+}
+
+async function generateWithStableImageUltra({ prompt, negativePrompt }) {
+    const form = new FormData();
+    form.append('prompt', prompt);
+    if (negativePrompt) {
+        form.append('negative_prompt', negativePrompt);
+    }
+    form.append('output_format', 'png');
+    form.append('aspect_ratio', '1:1');
+
+    const response = await fetch(STABLE_IMAGE_ULTRA_API_URL, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Accept': 'application/json'
+        },
+        body: form
+    });
+
+    let payload = null;
+    try {
+        payload = await response.json();
+    } catch (_) {
+        payload = null;
+    }
+
+    if (!response.ok) {
+        const error = new Error(`Stable Image Ultra request failed: HTTP ${response.status}`);
+        error.response = { status: response.status, data: payload };
+        throw error;
+    }
+
+    const base64 =
+        payload?.image ||
+        payload?.artifacts?.[0]?.base64 ||
+        null;
+
+    if (!base64) {
+        const error = new Error('Stable Image Ultra returned no image data');
+        error.response = { status: response.status, data: payload };
+        throw error;
+    }
+
+    return {
+        base64,
+        seed: payload?.seed,
+        finishReason: payload?.finish_reason
+    };
+}
+
+async function ensureStabilityModelValidated() {
+    if (!stabilityModelValidationPromise) {
+        stabilityModelValidationPromise = validateConfiguredStabilityModel();
+    }
+    await stabilityModelValidationPromise;
+}
+
+if (API_KEY) {
+    // Startup validation (non-blocking)
+    stabilityModelValidationPromise = validateConfiguredStabilityModel();
+}
 
 
 
@@ -108,7 +213,9 @@ exports.generateImages = async (req, res) => {
         promptMeta = {
             ...contract,
             llm_provider: 'anthropic',
-            llm_model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5'
+            llm_model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5',
+            image_provider: 'stabilityai',
+            image_model: STABILITY_MODEL
         };
     }
 
@@ -137,42 +244,66 @@ exports.generateImages = async (req, res) => {
     const steps = needsEnhancedParams ? 35 : 30; // More steps for complex architectural elements
 
     try {
-        console.log('Calling Stability AI API for image generation...');
-        // Generate image using Stability AI API
-        const response = await axios({
-            method: 'post',
-            url: STABLE_DIFFUSION_API_URL,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            data: {
-                text_prompts: [
-                    { "text": finalPrompt, "weight": 1 },
-                    ...(negativePrompt ? [{ "text": negativePrompt, "weight": -1 }] : [])
-                ],
-                cfg_scale: cfgScale,
-                height: 1024,
-                width: 1024,
-                steps: steps,
-                samples: 1
-            },
-            timeout: 30000 // 30 second timeout
-        });
+        await ensureStabilityModelValidated();
+        console.log('Calling Stability AI API for image generation...', { model: STABILITY_MODEL });
+        let imageBase64;
+        let imageProviderMeta = {};
 
-        // Extract the image data from the response
-        const imageData = response.data.artifacts[0];
+        if (IS_STABLE_IMAGE_ULTRA) {
+            const ultraResult = await generateWithStableImageUltra({
+                prompt: finalPrompt,
+                negativePrompt
+            });
+            imageBase64 = ultraResult.base64;
+            imageProviderMeta = {
+                stability_finish_reason: ultraResult.finishReason || null,
+                stability_seed: ultraResult.seed ?? null
+            };
+        } else {
+            // Generate image using Stability v1 SDXL-style endpoint
+            const response = await axios({
+                method: 'post',
+                url: STABLE_DIFFUSION_API_URL,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${API_KEY}`
+                },
+                data: {
+                    text_prompts: [
+                        { "text": finalPrompt, "weight": 1 },
+                        ...(negativePrompt ? [{ "text": negativePrompt, "weight": -1 }] : [])
+                    ],
+                    cfg_scale: cfgScale,
+                    height: 1024,
+                    width: 1024,
+                    steps: steps,
+                    samples: 1
+                },
+                timeout: 30000 // 30 second timeout
+            });
+            imageBase64 = response.data?.artifacts?.[0]?.base64;
+        }
+
+        if (!imageBase64) {
+            throw new AppError('Image generation service returned no image data', 502, {
+                provider: 'StabilityAI',
+                model: STABILITY_MODEL
+            });
+        }
 
         // Return base64 data directly without saving to disk
         const responseData = {
             success: true,
-            imageData: imageData.base64,
+            imageData: imageBase64,
             mimeType: 'image/png',
             filename: `${Date.now()}-${association.anchor}-${association.memorableItem}.png`,
             prompt: finalPrompt,
             negative_prompt: negativePrompt,
-            prompt_meta: promptMeta
+            prompt_meta: {
+                ...(promptMeta || {}),
+                ...imageProviderMeta
+            }
         };
         res.json(responseData);
 
