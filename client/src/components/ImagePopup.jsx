@@ -7,6 +7,7 @@ const ImagePopup = ({
   optimized,
   srcSet,
   prompt,
+  promptMeta,
   isLoading,
   error,
   onClose,
@@ -16,6 +17,8 @@ const ImagePopup = ({
 }) => {
   const popupRef = useRef(null);
   const closeButtonRef = useRef(null);
+
+  const rationaleText = promptMeta?.rationale;
 
   // Focus trap and Escape key support
   useEffect(() => {
@@ -125,6 +128,13 @@ const ImagePopup = ({
                 console.error('Image failed to load:', e);
               }}
             />
+
+            {rationaleText && (
+              <div className="mt-4 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3 text-sm text-gray-800">
+                <div className="font-semibold text-purple-800 mb-1">Why this works</div>
+                <div className="leading-relaxed">{rationaleText}</div>
+              </div>
+            )}
 
             <div className="flex justify-center space-x-4 mt-6">
               <button

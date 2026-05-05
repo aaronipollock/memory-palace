@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ROOM_IMAGES, ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
+import {
+  ROOM_IMAGES,
+  ROOM_ANCHOR_POSITIONS,
+  getAnchorNamesClockwiseFromPositions,
+  getCustomAnchorNamesClockwise
+} from '../constants/roomData';
 import ImagePopup from './ImagePopup';
 import SaveRoomModal from './SaveRoomModal';
 import { generateImage, generateStrangerImage } from '../services/imageService';
@@ -21,6 +26,7 @@ const VisualizerPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPrompt, setCurrentPrompt] = useState('');
+  const [currentPromptMeta, setCurrentPromptMeta] = useState(null);
   // Store accepted images in memory only (no localStorage to avoid quota issues)
   const [acceptedImages, setAcceptedImages] = useState({});
 
@@ -249,10 +255,41 @@ const VisualizerPage = () => {
     return ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS["throne room"];
   }, [customRoomId, customRoomAnchorPoints, roomType]);
 
-  // Check if all images have been accepted (only for visible associations)
-  const visibleAssociations = associations.filter(
-    assoc => anchorPositions[assoc.anchor] && assoc.memorableItem
+  const visibleAssociations = useMemo(
+    () =>
+      associations.filter(
+        (assoc) => anchorPositions[assoc.anchor] && assoc.memorableItem
+      ),
+    [associations, anchorPositions]
   );
+
+  const anchorClockwiseOrder = useMemo(() => {
+    if (customRoomId && customRoomAnchorPoints.length > 0) {
+      return getCustomAnchorNamesClockwise(customRoomAnchorPoints);
+    }
+    const pos = ROOM_ANCHOR_POSITIONS[roomType] || ROOM_ANCHOR_POSITIONS['throne room'];
+    return getAnchorNamesClockwiseFromPositions(pos);
+  }, [customRoomId, customRoomAnchorPoints, roomType]);
+
+  const anchorClockwiseRank = useMemo(() => {
+    const m = new Map();
+    anchorClockwiseOrder.forEach((name, i) => m.set(name, i));
+    return m;
+  }, [anchorClockwiseOrder]);
+
+  const displayNumberByAssociationKey = useMemo(() => {
+    const key = (a) => `${a.anchor}\x1e${a.memorableItem}`;
+    const sorted = [...visibleAssociations].sort(
+      (a, b) =>
+        (anchorClockwiseRank.get(a.anchor) ?? 1e9) -
+        (anchorClockwiseRank.get(b.anchor) ?? 1e9)
+    );
+    const m = new Map();
+    sorted.forEach((assoc, i) => {
+      m.set(key(assoc), i + 1);
+    });
+    return m;
+  }, [visibleAssociations, anchorClockwiseRank]);
 
     // Helper function to check if an image is accepted (either in memory or metadata)
   const isImageAccepted = (assoc) => {
@@ -555,6 +592,7 @@ const VisualizerPage = () => {
     setError(null);
     setGeneratedImage(null);
     setCurrentPrompt('');
+    setCurrentPromptMeta(null);
 
     try {
       // Check if we have an accepted image for this anchor (in memory or metadata)
@@ -572,6 +610,7 @@ const VisualizerPage = () => {
         }
         setGeneratedImage(fullImageUrl);
         setCurrentPrompt(acceptedImages[association.anchor].prompt);
+        setCurrentPromptMeta(imageMetadata?.[association.anchor]?.prompt_meta || null);
       } else if (imageMetadata[association.anchor]) {
         // Image was accepted but not in memory (e.g., after page reload)
         // We'll need to regenerate it
@@ -586,6 +625,7 @@ const VisualizerPage = () => {
           hasImageUrl: !!result.imageUrl,
           isPlaceholder: result.isPlaceholder
         });
+        setCurrentPromptMeta(result.prompt_meta || null);
         // Handle base64 image data from backend
         if (result.imageData) {
           // Check if it's a placeholder (SVG) or real image (PNG)
@@ -615,6 +655,7 @@ const VisualizerPage = () => {
     setSelectedAssociation(null);
     setGeneratedImage(null);
     setCurrentPrompt('');
+    setCurrentPromptMeta(null);
   };
 
   const handleAcceptImage = () => {
@@ -635,6 +676,7 @@ const VisualizerPage = () => {
         [selectedAssociation.anchor]: {
           prompt: currentPrompt,
           association: selectedAssociation,
+          prompt_meta: currentPromptMeta || null,
           timestamp: Date.now()
         }
       }));
@@ -651,10 +693,12 @@ const VisualizerPage = () => {
       setError(null);
       setGeneratedImage(null);
       setCurrentPrompt('');
+      setCurrentPromptMeta(null);
 
       try {
         // Use "Make it Stranger" instead of regular regenerate
         const result = await generateStrangerImage({ association: selectedAssociation, roomType, artStyle, mode: 'stranger', useLlm: true }, setCurrentPrompt);
+        setCurrentPromptMeta(result.prompt_meta || null);
         // Handle base64 image data from backend
         if (result.imageData) {
           setGeneratedImage(`data:image/png;base64,${result.imageData}`);
@@ -679,9 +723,11 @@ const VisualizerPage = () => {
       setError(null);
       setGeneratedImage(null);
       setCurrentPrompt('');
+      setCurrentPromptMeta(null);
 
       try {
         const result = await generateImage({ association: selectedAssociation, roomType, artStyle, mode: 'normal', useLlm: true }, setCurrentPrompt);
+        setCurrentPromptMeta(result.prompt_meta || null);
         // Handle base64 image data from backend
         if (result.imageData) {
           setGeneratedImage(`data:image/png;base64,${result.imageData}`);
@@ -965,9 +1011,9 @@ const VisualizerPage = () => {
 
             // Check if this anchor has an accepted image
             const hasAcceptedImage = isImageAccepted(assoc);
-            // Get the display number (1-based index for visible associations only)
-            const visibleIndex = visibleAssociations.findIndex(v => v.anchor === assoc.anchor && v.memorableItem === assoc.memorableItem);
-            const displayNumber = visibleIndex >= 0 ? visibleIndex + 1 : index + 1;
+            const displayKey = `${assoc.anchor}\x1e${assoc.memorableItem}`;
+            const displayNumber =
+              displayNumberByAssociationKey.get(displayKey) ?? index + 1;
 
             return (
               <button
@@ -1018,6 +1064,11 @@ const VisualizerPage = () => {
               association={selectedAssociation}
               image={generatedImage}
               prompt={currentPrompt}
+              promptMeta={
+                currentPromptMeta ||
+                imageMetadata?.[selectedAssociation.anchor]?.prompt_meta ||
+                null
+              }
               isLoading={isLoading}
               error={error}
               onClose={handleClosePopup}

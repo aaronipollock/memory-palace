@@ -2,6 +2,7 @@ const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
+const util = require('util');
 const AppError = require('../utils/AppError');
 const { enhancePrompt } = require('../services/promptEnhancerService');
 require('dotenv').config();
@@ -18,6 +19,25 @@ const STABLE_IMAGE_ULTRA_API_URL = `${STABILITY_API_BASE_URL}/v2beta/stable-imag
 const STABLE_IMAGE_SD35_API_URL = `${STABILITY_API_BASE_URL}/v2beta/stable-image/generate/sd3`;
 const API_KEY = process.env.STABILITY_API_KEY;
 let stabilityModelValidationPromise = null;
+
+function summarizeStabilityErrorPayload(data) {
+    if (data == null) return null;
+    if (typeof data === 'string') return data.slice(0, 400);
+    if (typeof data === 'object') {
+        if (Array.isArray(data.errors)) {
+            return data.errors.map(String).join('; ').slice(0, 400);
+        }
+        if (data.message) return String(data.message).slice(0, 400);
+        if (data.error) {
+            return String(typeof data.error === 'string' ? data.error : JSON.stringify(data.error)).slice(0, 400);
+        }
+    }
+    try {
+        return JSON.stringify(data).slice(0, 400);
+    } catch {
+        return null;
+    }
+}
 
 async function validateConfiguredStabilityModel() {
     if (!API_KEY) return;
@@ -120,6 +140,7 @@ async function generateWithStableImageUltra({ prompt, negativePrompt }) {
 }
 
 async function generateWithStableImageSd35({ prompt, negativePrompt, model }) {
+    // Stability's /v2beta/stable-image/generate/sd3 endpoint expects multipart/form-data.
     const form = new FormData();
     form.append('prompt', prompt);
     form.append('mode', 'text-to-image');
@@ -133,17 +154,36 @@ async function generateWithStableImageSd35({ prompt, negativePrompt, model }) {
     const response = await fetch(STABLE_IMAGE_SD35_API_URL, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${API_KEY}`,
-            'Accept': 'application/json'
+            Authorization: `Bearer ${API_KEY}`,
+            Accept: 'application/json'
         },
         body: form
     });
 
+    const contentType = response.headers.get('content-type') || '';
+
     let payload = null;
-    try {
-        payload = await response.json();
-    } catch (_) {
-        payload = null;
+    if (contentType.includes('image/png')) {
+        const buf = Buffer.from(await response.arrayBuffer());
+        if (response.ok) {
+            return {
+                base64: buf.toString('base64'),
+                seed: null,
+                finishReason: null
+            };
+        }
+        payload = { raw: 'non-OK response with image/png body' };
+    } else {
+        try {
+            const text = await response.text();
+            try {
+                payload = JSON.parse(text);
+            } catch {
+                payload = { raw: text.slice(0, 800) };
+            }
+        } catch (_) {
+            payload = null;
+        }
     }
 
     if (!response.ok) {
@@ -152,7 +192,22 @@ async function generateWithStableImageSd35({ prompt, negativePrompt, model }) {
         throw error;
     }
 
-    const base64 = payload?.image || payload?.artifacts?.[0]?.base64 || null;
+    const art0 = payload?.artifacts?.[0];
+    const firstArtifact = Array.isArray(art0) ? art0[0] : art0;
+    const base64 =
+        payload?.image || firstArtifact?.base64 || null;
+    const finishReason =
+        payload?.finish_reason ??
+        firstArtifact?.finishReason ??
+        firstArtifact?.finish_reason ??
+        null;
+
+    if (finishReason === 'CONTENT_FILTERED') {
+        const error = new Error('Stable Image SD3.5 content filtered');
+        error.response = { status: response.status, data: payload };
+        throw error;
+    }
+
     if (!base64) {
         const error = new Error('Stable Image SD3.5 returned no image data');
         error.response = { status: response.status, data: payload };
@@ -161,8 +216,8 @@ async function generateWithStableImageSd35({ prompt, negativePrompt, model }) {
 
     return {
         base64,
-        seed: payload?.seed,
-        finishReason: payload?.finish_reason
+        seed: payload?.seed ?? firstArtifact?.seed,
+        finishReason
     };
 }
 
@@ -394,6 +449,19 @@ exports.generateImages = async (req, res) => {
         const errorStatus = apiError.response?.status;
         const errorData = apiError.response?.data;
 
+        console.error(
+            'Stability AI error',
+            util.inspect(
+                {
+                    status: errorStatus,
+                    code: apiError.code,
+                    message: apiError.message,
+                    upstream: errorData
+                },
+                { depth: 6, colors: false, maxArrayLength: 50 }
+            )
+        );
+
         // If API key is missing, invalid, or insufficient balance, generate a placeholder image (fallback)
         if (errorStatus === 401 || errorStatus === 403 || (errorData?.name === 'insufficient_balance')) {
             console.warn('Stability AI API authentication/authorization failed. Generating placeholder image.');
@@ -418,10 +486,11 @@ exports.generateImages = async (req, res) => {
             throw new AppError('Image generation service timeout', 504, { provider: 'StabilityAI' });
         }
 
-        // Generic upstream error
+        const upstreamMessage = summarizeStabilityErrorPayload(errorData);
         throw new AppError('Image generation service failed', 502, {
             provider: 'StabilityAI',
-            status: errorStatus
+            status: errorStatus,
+            ...(upstreamMessage ? { upstreamMessage } : {})
         });
     }
 };

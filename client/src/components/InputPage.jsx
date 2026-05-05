@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ROOM_ANCHOR_POSITIONS } from '../constants/roomData';
+import { ROOM_ANCHOR_POSITIONS, getAnchorNamesClockwiseFromPositions, getCustomAnchorNamesClockwise } from '../constants/roomData';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
@@ -83,8 +83,8 @@ const InputPage = ({ setIsLoading, isLoading }) => {
     const currentAnchorPoints = !roomType && !selectedCustomRoom
         ? []
         : selectedCustomRoom && selectedCustomRoom.anchorPoints
-        ? selectedCustomRoom.anchorPoints.map(ap => ap.name)
-        : Object.keys(ROOM_ANCHOR_POSITIONS[roomType] || []);
+        ? getCustomAnchorNamesClockwise(selectedCustomRoom.anchorPoints)
+        : getAnchorNamesClockwiseFromPositions(ROOM_ANCHOR_POSITIONS[roomType] || {});
 
     // Handle room type change
     const handleRoomTypeChange = (e) => {
@@ -273,7 +273,7 @@ const InputPage = ({ setIsLoading, isLoading }) => {
                                     aria-readonly="true"
                                     aria-label="Demo anchor points for the selected room type"
                                 >
-                                    {currentAnchorPoints.join('\n')}
+                                    {currentAnchorPoints.map((name, i) => `${i + 1}. ${name}`).join('\n')}
                                 </div>
                             </div>
                         ) : (
