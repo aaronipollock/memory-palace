@@ -6,7 +6,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { logger } = require('./utils/logger');
-const { setupSecurityMiddleware, routeSecurity } = require('./config/security');
+const { setupSecurityMiddleware, routeSecurity, securityConfig } = require('./config/security');
 const { sanitizeInput, xssProtection } = require('./middleware/validation');
 const { csrfProtection } = require('./middleware/auth');
 
@@ -140,8 +140,17 @@ app.use('/api/custom-rooms', ...routeSecurity.customRoomRoutes, customRoomRoutes
 const roomController = require('./controllers/roomController');
 const imageController = require('./controllers/imageController');
 const asyncHandler = require('./utils/asyncHandler');
+
+// Apply the LLM limiter only when the request will actually call Claude (no prompt provided and useLlm !== false).
+const maybeLimitLlm = (req, res, next) => {
+  const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+  const willCallLlm = req.body?.useLlm !== false && !prompt;
+  if (!willCallLlm) return next();
+  return securityConfig.llmLimiter(req, res, next);
+};
+
 app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, asyncHandler(roomController.generateRoom));
-app.post('/api/generate-images', ...routeSecurity.imageGenRoutes, asyncHandler(imageController.generateImages));
+app.post('/api/generate-images', ...routeSecurity.imageGenRoutes, maybeLimitLlm, asyncHandler(imageController.generateImages));
 
 // Apply CSRF protection to all other API routes (after auth, feedback, image, and memory palace routes)
 app.use('/api', csrfProtection);

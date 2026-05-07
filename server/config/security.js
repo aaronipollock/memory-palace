@@ -48,6 +48,9 @@ const securityConfig = {
   // Speed limiting for general requests
   speedLimiter: createSpeedLimit(15 * 60 * 1000, 100, 500),
 
+  // Rate limiting for LLM call route
+  llmLimiter: createRateLimit(60 * 60 * 1000, 30, 'LLM rate limit reached, please try again later.'),
+
   // CORS configuration
   corsOptions: {
     origin: process.env.NODE_ENV === 'production'
@@ -165,7 +168,10 @@ const routeSecurity = {
   memoryPalaceRoutes: [securityConfig.generalLimiter],
 
   // Custom room routes with general security
-  customRoomRoutes: [securityConfig.generalLimiter]
+  customRoomRoutes: [securityConfig.generalLimiter],
+
+  // LLM call route with specific rate limiting
+  llmRoutes: [securityConfig.llmLimiter],
 };
 
 module.exports = {
