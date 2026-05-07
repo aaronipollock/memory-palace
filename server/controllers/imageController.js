@@ -111,7 +111,7 @@ async function generateWithStableImageUltra({ prompt, negativePrompt }) {
     let payload = null;
     try {
         payload = await response.json();
-    } catch (_) {
+    } catch {
         payload = null;
     }
 
@@ -181,7 +181,7 @@ async function generateWithStableImageSd35({ prompt, negativePrompt, model }) {
             } catch {
                 payload = { raw: text.slice(0, 800) };
             }
-        } catch (_) {
+    } catch {
             payload = null;
         }
     }
@@ -521,7 +521,7 @@ exports.uploadImage = async (req, res) => {
                 if (fs.existsSync(req.file.path)) {
                     fs.unlinkSync(req.file.path);
                 }
-            } catch (cleanupError) {
+            } catch {
                 // Ignore cleanup errors
             }
             throw new AppError('Failed to save uploaded file', 500, { originalError: error.message });

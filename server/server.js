@@ -83,7 +83,7 @@ app.use(xssProtection);
 
 // Serve static files with security headers
 app.use('/public', express.static(path.join(__dirname, 'public'), {
-    setHeaders: (res, path) => {
+    setHeaders: (res, _filePath) => {
         res.setHeader('X-Content-Type-Options', 'nosniff');
         res.setHeader('Cache-Control', 'public, max-age=31536000');
     }

@@ -24,7 +24,7 @@ const generateRefreshToken = (userId) => {
 const verifyToken = (token) => {
     try {
         return jwt.verify(token, JWT_SECRET);
-    } catch (error) {
+    } catch {
         throw new Error('Invalid token');
     }
 };
@@ -37,7 +37,7 @@ const verifyRefreshToken = (token) => {
             throw new Error('Invalid refresh token');
         }
         return decoded;
-    } catch (error) {
+    } catch {
         throw new Error('Invalid refresh token');
     }
 };
@@ -56,7 +56,7 @@ const isTokenBlacklisted = (token) => {
 const decodeToken = (token) => {
     try {
         return jwt.decode(token);
-    } catch (error) {
+    } catch {
         return null;
     }
 };
@@ -71,7 +71,7 @@ const refreshToken = (token) => {
         delete decoded.exp;
         delete decoded.iat;
         return generateAccessToken(decoded.userId, decoded.email);
-    } catch (error) {
+    } catch {
         throw new Error('Invalid token for refresh');
     }
 };

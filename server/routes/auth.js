@@ -48,7 +48,7 @@ router.post('/refresh', (req, res) => {
       accessToken: newAccessToken,
       message: 'Token refreshed successfully'
     });
-  } catch (error) {
+  } catch {
     res.status(401).json({
       error: 'Invalid refresh token',
       code: 'INVALID_REFRESH_TOKEN'

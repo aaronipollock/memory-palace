@@ -1,10 +1,4 @@
 const natural = require('natural');
-const path = require('path');
-const fs = require('fs');
-const axios = require('axios');
-
-// Cache for embeddings to improve performance
-const embeddingCache = new Map();
 
 // Use WordNet for basic semantic relationships
 const wordnet = new natural.WordNet();
@@ -67,7 +61,7 @@ const historicalFigures = {
   'monroe': 'a president in Revolutionary War uniform proclaiming a doctrine',
   'jackson': 'a battle-hardened general on horseback',
   'van buren': 'a silver-haired politician with distinctive sideburns',
-  'harrison': 'a general in a log cabin wearing a coonskin cap',
+  'william_harrison': 'a general in a log cabin wearing a coonskin cap',
   'tyler': 'a president standing alone symbolizing independence',
   'polk': 'an expansionist president with a map of western territories',
   'taylor': 'a military hero in uniform nicknamed "Old Rough and Ready"',
@@ -75,32 +69,32 @@ const historicalFigures = {
   'pierce': 'a handsome but troubled president with a glass of alcohol',
   'buchanan': 'a president watching the Union fracture before the Civil War',
   'lincoln': 'a tall figure in a stovepipe hat freeing slaves',
-  'johnson': 'a tailor-turned-president holding an impeachment document',
+  'andrew_johnson': 'a tailor-turned-president holding an impeachment document',
   'grant': 'a Civil War general in a blue uniform smoking a cigar',
   'hayes': 'a president with a contested election and a full beard',
   'garfield': 'a president struck down by an assassin\'s bullet',
   'arthur': 'an elegant president with distinctive sideburns and formal attire',
   'cleveland': 'a robust president serving two non-consecutive terms',
-  'harrison': 'a small president standing in the shadow of his grandfather',
+  'benjamin_harrison': 'a small president standing in the shadow of his grandfather',
   'mckinley': 'a president promoting the gold standard',
-  'roosevelt': 'a robust president with glasses and a big stick',
+  'teddy_roosevelt': 'a robust president with glasses and a big stick',
   'taft': 'a large president stuck in a bathtub',
   'wilson': 'an academic president with the League of Nations',
   'harding': 'a handsome president surrounded by scandal',
   'coolidge': 'a quiet, stern president known for few words',
   'hoover': 'an engineer president during the Great Depression',
-  'roosevelt': 'a president in a wheelchair with a cigarette holder',
+  'franklin_roosevelt': 'a president in a wheelchair with a cigarette holder',
   'truman': 'a plain-speaking president holding "The Buck Stops Here" sign',
   'eisenhower': 'a military general with D-Day plans',
   'kennedy': 'a young, charismatic president in an open-top car',
-  'johnson': 'a tall Texan president signing civil rights legislation',
+  'lyndon_johnson': 'a tall Texan president signing civil rights legislation',
   'nixon': 'a president making the victory sign during resignation',
   'ford': 'a president stumbling down airplane stairs',
   'carter': 'a peanut farmer president with a wide smile',
   'reagan': 'a president actor on horseback at a ranch',
-  'bush': 'a president with a thousand points of light',
+  'george_hw_bush': 'a president with a thousand points of light',
   'clinton': 'a saxophone-playing president wagging his finger',
-  'bush': 'a president standing on rubble with a bullhorn',
+  'george_w_bush': 'a president standing on rubble with a bullhorn',
   'obama': 'a president with large ears making a hope poster',
   'trump': 'a president with distinctive orange hair and long tie',
   'biden': 'an elderly president wearing aviator sunglasses'

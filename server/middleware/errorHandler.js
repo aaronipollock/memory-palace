@@ -8,7 +8,7 @@ const { getRouteTemplate } = require('../utils/routeTemplate');
  *
  * SECURITY: Never exposes stack traces or internal error details in production
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => {
     const log = req.log || logger;
 
     let error = { ...err };

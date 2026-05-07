@@ -123,7 +123,7 @@ function extractFirstJsonObject(text) {
       const candidate = text.slice(start, i + 1);
       try {
         return JSON.parse(candidate);
-      } catch (_) {
+      } catch {
         return null;
       }
     }
@@ -144,22 +144,53 @@ function sanitizeTags(tags) {
     .slice(0, 12);
 }
 
-function validateAndCoerceContract(obj, input) {
-  if (!obj || typeof obj !== 'object') return null;
+function isPlainObject(x) {
+  if (x === null || typeof x !== 'object') return false;
+  if (Array.isArray(x)) return false;
 
-  const out = { ...obj };
+  // Accept normal objects (including ones with null prototype)
+  const proto = Object.getPrototypeOf(x);
+  return proto === Object.prototype || proto === null;
+}
+
+function hasString(x, key) {
+  return (
+    x !== null &&
+    typeof x === 'object' &&
+    typeof x[key] === 'string'
+  );
+}
+
+function isStringArray(x) {
+  return Array.isArray(x) && x.every((t) => typeof t === 'string');
+}
+
+function validateAndCoerceContract(obj, input) {
+  if (!isPlainObject(obj)) return null;
+
+  // Only copy known/expected fields; avoid spreading arbitrary model output
+  const out = {};
+
   // Force required identity fields from input to avoid drift.
   out.prompt_version = PROMPT_VERSION;
   out.mode = normalizeMode(input.mode);
   out.anchor = input.anchor;
   out.memorableItem = input.memorableItem;
 
-  if (!isNonEmptyString(out.artStyle)) out.artStyle = input.artStyle;
-  if (!isNonEmptyString(out.label_text)) out.label_text = '';
-  if (!isNonEmptyString(out.prompt)) return null;
-  if (!isNonEmptyString(out.negative_prompt)) out.negative_prompt = '';
-  if (!isNonEmptyString(out.rationale)) out.rationale = '';
-  out.tags = sanitizeTags(out.tags);
+  // Required: prompt
+  out.prompt = hasString(obj, 'prompt') && isNonEmptyString(obj.prompt) ? obj.prompt : '';
+  if (!out.prompt) return null;
+
+  // Optional: artStyle falls back to input
+  out.artStyle = isNonEmptyString(obj.artStyle) ? obj.artStyle : input.artStyle;
+
+  // Optional: string default to ''
+  out.label_text = typeof obj.label_text === 'string' ? obj.label_text : '';
+  out.negative_prompt = typeof obj.negative_prompt === 'string' ? obj.negative_prompt : '';
+  out.rationale = typeof obj.rationale === 'string' ? obj.rationale : '';
+
+  // Optional: tags sanitized to string[]
+  out.tags = sanitizeTags(isStringArray(obj.tags) ? obj.tags : []);
 
   return out;
 }

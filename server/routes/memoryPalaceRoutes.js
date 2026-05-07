@@ -3,7 +3,6 @@ const router = express.Router();
 const MemoryPalace = require('../models/MemoryPalace');
 const { authenticateToken } = require('../middleware/auth');
 const { memoryPalaceValidation } = require('../middleware/validation');
-const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const asyncHandler = require('../utils/asyncHandler');
@@ -42,9 +41,6 @@ const processAcceptedImages = (acceptedImages) => {
     }
 
     const processedImages = {};
-    const totalImages = Object.keys(acceptedImages).length;
-    let savedCount = 0;
-    let failedCount = 0;
 
     for (const [anchor, imageData] of Object.entries(acceptedImages)) {
         if (imageData && imageData.image) {
@@ -59,11 +55,9 @@ const processAcceptedImages = (acceptedImages) => {
                         ...imageData,
                         image: filePath // Replace base64 with file path
                     };
-                    savedCount++;
                 } else {
                     // If saving failed, keep the original data
                     processedImages[anchor] = imageData;
-                    failedCount++;
                     console.error(`Failed to save image for ${anchor}`);
                 }
             } else {

@@ -10,11 +10,15 @@
   },
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server/server.js"
+    "dev": "nodemon server/server.js",
+    "lint:server": "eslint \"server/**/*.js\""
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "autoprefixer": "^10.4.20",
     "axios": "^1.9.0",
+    "eslint": "^9.39.4",
+    "globals": "^17.6.0",
     "postcss": "^8.5.1",
     "tailwindcss": "^4.0.0"
   },
