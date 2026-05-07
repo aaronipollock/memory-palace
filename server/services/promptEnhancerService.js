@@ -71,7 +71,61 @@ Rules:
 Safety:
 Keep content non-sexual, non-gory, non-hateful. Avoid instructions targeting real private individuals.
 
-Output: JSON only. No markdown, no commentary.`;
+Output: JSON only. No markdown, no commentary.
+
+---
+
+EXAMPLES (study these before every response):
+
+Example 1 — normal mode, proper noun with phonetic encoding
+Input:
+{
+  "prompt_version": "v1",
+  "mode": "normal",
+  "anchor": "wooden bookshelf",
+  "memorableItem": "Napoleon",
+  "artStyle": "Watercolor",
+  "roomType": "study",
+  "room_context": "warm lamplight, oak paneling"
+}
+Output:
+{
+  "prompt_version": "v1",
+  "mode": "normal",
+  "anchor": "wooden bookshelf",
+  "memorableItem": "Napoleon",
+  "artStyle": "Watercolor",
+  "label_text": "",
+  "prompt": "A small golden lion caught mid-nap on top of a wooden bookshelf, books splayed open beneath its chin, warm amber lamplight, loose watercolor washes.",
+  "negative_prompt": "blurry, low quality, watermark, logo, text, clutter, harsh lines",
+  "rationale": "Napoleon splits into 'nap' (sleeping) + 'leon' (lion): a lion napping on the anchor shelf. The mid-sleep posture makes the interaction kinetic and the phonetic split fires both syllables on recall.",
+  "tags": ["napoleon", "phonetic-split", "lion", "bookshelf", "napping", "watercolor", "study"]
+}
+
+Example 2 — stranger mode, abstract concept with phonetic split
+Input:
+{
+  "prompt_version": "v1",
+  "mode": "stranger",
+  "anchor": "kitchen faucet",
+  "memorableItem": "photosynthesis",
+  "artStyle": "Digital Art",
+  "roomType": "kitchen",
+  "room_context": "bright overhead lights, white tile"
+}
+Output:
+{
+  "prompt_version": "v1",
+  "mode": "stranger",
+  "anchor": "kitchen faucet",
+  "memorableItem": "photosynthesis",
+  "artStyle": "Digital Art",
+  "label_text": "",
+  "prompt": "A vintage film camera the size of a watermelon sprouting green vines from its lens instead of water, mounted where a chrome kitchen faucet should be, bright overhead light, digital art style.",
+  "negative_prompt": "blurry, low quality, watermark, logo, text, clutter, dark shadows",
+  "rationale": "Photosynthesis splits into 'photo' (camera) + 'synthesis' (growth): the camera replaces the faucet and grows vines instead of water. The oversized camera is the single stranger-mode scale twist.",
+  "tags": ["photosynthesis", "phonetic-split", "camera", "vines", "faucet", "stranger-mode", "digital-art"]
+}`;
 
 function pickRandom(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -276,18 +330,26 @@ exports.enhancePrompt = async (anchorOrInput, memorableItemMaybe) => {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': ANTHROPIC_VERSION
+        'anthropic-version': ANTHROPIC_VERSION,
+        'anthropic-beta': 'prompt-caching-2024-07-31'
       },
       data: {
         model: ANTHROPIC_MODEL,
-        max_tokens: 600,
+        max_tokens: 900,
         temperature: 0.75,
-        system: SYSTEM_PROMPT,
+        system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userMessage }]
       },
       timeout: REQUEST_TIMEOUT_MS
     });
 
+    const usage = response.data?.usage;
+    console.log('Anthropic prompt expansion token usage:', {
+      input: usage?.input_tokens,
+      output: usage?.output_tokens,
+      cache_created: usage?.cache_creation_input_tokens,
+      cache_read: usage?.cache_read_input_tokens
+    });
     const text = extractTextFromMessage(response.data);
     console.log('Anthropic prompt expansion raw text length:', text ? text.length : 0);
     const parsed = extractFirstJsonObject(text);
