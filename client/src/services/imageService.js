@@ -5,9 +5,6 @@ import { generatePrompt, generateStrangerPrompt } from '../utils/promptGenerator
 import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
-// Cache for storing generated images
-let imageCache = {};
-
 /**
  * Generates an image based on the provided association
  * @param {Object} association - The association object containing anchor and memorable
@@ -36,7 +33,7 @@ export const generateImage = async ({ association, roomType, artStyle, mode, use
         mode,
         useLlm
       });
-    } catch (e) {
+    } catch {
       response = null;
     }
 
@@ -64,31 +61,28 @@ export const generateImage = async ({ association, roomType, artStyle, mode, use
         throw error;
       }
 
-      return await retry.json();
+      const retryBody = await retry.json();
+      // Server may omit prompt_meta when a client prompt was sent; signal UI that we recovered via local prompt.
+      return {
+        ...retryBody,
+        prompt_meta: {
+          ...(retryBody.prompt_meta || {}),
+          client_prompt_fallback: true
+        }
+      };
     }
 
     console.log('API response status:', response.status, response.statusText);
-
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch (e) {
-        errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
-      }
-      console.error('Image generation API error:', errorData);
-      const error = new Error(errorData.error || 'Failed to generate image');
-      error.response = { status: response.status, data: errorData };
-      throw error;
-    }
 
     const data = await response.json();
     console.log('Image generation successful:', {
       hasImageData: !!data.imageData,
       hasOptimizedUrl: !!data.optimizedUrl,
       hasImageUrl: !!data.imageUrl,
-      isPlaceholder: data.isPlaceholder
+      isPlaceholder: data.isPlaceholder,
+      llm_fallback: data.prompt_meta?.llm_fallback
     });
+    // prompt_meta.llm_fallback / llm_fallback_reason come from server when LLM path was used
     return data;
   } catch (error) {
     console.error('Image generation error:', error);
@@ -134,7 +128,7 @@ export const generateStrangerImage = async ({ association, roomType, artStyle, m
         mode,
         useLlm
       });
-    } catch (e) {
+    } catch {
       response = null;
     }
 
@@ -162,7 +156,14 @@ export const generateStrangerImage = async ({ association, roomType, artStyle, m
         throw error;
       }
 
-      return await retry.json();
+      const retryBody = await retry.json();
+      return {
+        ...retryBody,
+        prompt_meta: {
+          ...(retryBody.prompt_meta || {}),
+          client_prompt_fallback: true
+        }
+      };
     }
 
     return await response.json();
@@ -176,11 +177,4 @@ export const generateStrangerImage = async ({ association, roomType, artStyle, m
 
     throw error;
   }
-};
-
-/**
- * Clears the image cache
- */
-export const clearImageCache = () => {
-  imageCache = {};
 };

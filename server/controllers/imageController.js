@@ -475,6 +475,8 @@ exports.generateImages = async (req, res) => {
                 prompt: finalPrompt,
                 negative_prompt: negativePrompt,
                 prompt_meta: promptMeta
+                    ? { ...promptMeta }
+                    : { image_fallback: true, image_fallback_reason: 'stability_auth' }
             });
         }
 

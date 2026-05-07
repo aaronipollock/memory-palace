@@ -81,7 +81,14 @@ function normalizeMode(mode) {
   return mode === 'stranger' ? 'stranger' : 'normal';
 }
 
-function fallbackContract({ anchor, memorableItem, mode = 'normal', artStyle = 'Random' }) {
+function fallbackContract({
+  anchor,
+  memorableItem,
+  mode = 'normal',
+  artStyle = 'Random',
+  llm_fallback = true,
+  llm_fallback_reason = 'generic'
+}) {
   const chosenStyle =
     artStyle && artStyle !== 'Random'
       ? artStyle
@@ -96,6 +103,8 @@ function fallbackContract({ anchor, memorableItem, mode = 'normal', artStyle = '
     label_text: '',
     prompt: `${memorableItem} interacting with a ${anchor}, ${chosenStyle.toLowerCase()}.`,
     negative_prompt: 'blurry, low quality, watermark, logo, extra text, clutter',
+    llm_fallback,
+    llm_fallback_reason,
     rationale: `Place ${memorableItem} in an exaggerated interaction with the anchor "${anchor}".`,
     tags: ['mnemonic', 'anchor-object', 'surreal']
   };
@@ -229,13 +238,15 @@ exports.enhancePrompt = async (anchorOrInput, memorableItemMaybe) => {
       anchor: input.anchor || 'object',
       memorableItem: input.memorableItem || 'subject',
       mode: input.mode,
-      artStyle: input.artStyle
+      artStyle: input.artStyle,
+      llm_fallback: false,
+      llm_fallback_reason: 'invalid_input'
     });
   }
 
   if (!ANTHROPIC_API_KEY) {
     console.warn('ANTHROPIC_API_KEY not configured, using fallback prompt');
-    return fallbackContract(input);
+    return fallbackContract({ ...input, llm_fallback_reason: 'missing_api_key' });
   }
 
   const userMessage = JSON.stringify(
@@ -283,11 +294,11 @@ exports.enhancePrompt = async (anchorOrInput, memorableItemMaybe) => {
     const contract = validateAndCoerceContract(parsed, input);
     if (!contract) {
       console.warn('Claude returned invalid JSON contract, using fallback');
-      return fallbackContract(input);
+      return fallbackContract({ ...input, llm_fallback_reason: 'invalid_contract' });
     }
 
     console.log('Anthropic prompt expansion parsed contract:\n' + JSON.stringify(contract, null, 2));
-    return contract;
+    return { ...contract, llm_fallback: false, llm_fallback_reason: null };
   } catch (error) {
     const status = error.response?.status;
     const body = error.response?.data;
@@ -320,6 +331,6 @@ exports.enhancePrompt = async (anchorOrInput, memorableItemMaybe) => {
 
       Sentry.captureException(error);
     });
-    return fallbackContract(input);
+    return fallbackContract({ ...input, llm_fallback_reason: 'anthropic_error' });
   }
 };
