@@ -7,6 +7,7 @@
  */
 
 const axios = require('axios');
+const Sentry = require('@sentry/node');
 require('dotenv').config();
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
@@ -293,6 +294,31 @@ exports.enhancePrompt = async (anchorOrInput, memorableItemMaybe) => {
     console.error('Error enhancing prompt with Claude:', error.message, {
       status,
       body: typeof body === 'object' ? body : undefined
+    });
+    Sentry.withScope((scope) => {
+      scope.setTag('service', 'promptEnhancer');
+      scope.setTag('llm_provider', 'anthropic');
+      scope.setTag('llm_model', ANTHROPIC_MODEL);
+      scope.setTag('mode', input.mode);
+
+      scope.setContext('anthropic', {
+        status: error.response?.status,
+        // keep it bounded; avoid dumping huge payloads
+        bodyPreview:
+          typeof error.response?.data === 'string'
+            ? error.response.data.slice(0, 800)
+            : error.response?.data
+      });
+
+      scope.setContext('prompt_input', {
+        anchor: input.anchor,
+        memorableItem: input.memorableItem,
+        artStyle: input.artStyle,
+        roomType: input.roomType,
+        room_context: input.room_context
+      });
+
+      Sentry.captureException(error);
     });
     return fallbackContract(input);
   }
