@@ -336,7 +336,7 @@ exports.enhancePrompt = async (anchorOrInput, memorableItemMaybe) => {
       data: {
         model: ANTHROPIC_MODEL,
         max_tokens: 900,
-        temperature: 0.75,
+        temperature: input.mode === 'stanger' ? 0.9 : 0.65,
         system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userMessage }]
       },
