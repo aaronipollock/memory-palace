@@ -45,28 +45,43 @@ prompt_version, mode, anchor, memorableItem, artStyle, label_text, prompt, negat
 Rules:
 1) prompt must be ONE English sentence optimized for SDXL literal rendering: concrete, visual, and easy to depict.
 2) Keep prompt compact and literal: 25-60 words, up to 12 comma-separated clauses, no poetic or abstract language.
-3) The anchor object must be explicitly named and visually central to the main interaction.
-4) If memorableItem is a proper noun (person/place), acronym, or abstract concept, you MUST include at least one clear phonetic/visual wordplay element.
-5) Prefer simple scene graphs: one primary interaction, up to two secondary props, clean/uncluttered background.
-6) artStyle handling:
+3) The anchor and memorableItem must be actively doing something to each other — verb-forward, not posed. Lead with or include a strong physical interaction verb (e.g. "crushing", "riding", "swallowing", "dragging", "launching"). A static "X next to Y" or "X holding Y" is not acceptable.
+4) The anchor must be the grammatical subject or direct object of the interaction verb — not background, not atmosphere. Self-check: if you can remove the anchor from the sentence and the scene still makes sense, rewrite until it cannot.
+5) The anchor object must be explicitly named and visually central to the main interaction.
+6) If memorableItem is a proper noun (person/place), acronym, or abstract concept, you MUST include at least one phonetic/visual wordplay element. The connection must meet ONE of these criteria — no weak near-rhymes:
+   a) Syllable split: each piece sounds like (or IS) a common English word (e.g. "Napoleon" → "nap" + "leon/lion").
+   b) True homophone or near-homophone: ≤1 phoneme different, same vowel sound (e.g. "Zeus" → "juice").
+   c) Visual substitute: the object physically resembles something that directly cues the name/word.
+   Automatic disqualifiers — do not use these:
+   - Fuzzy vowel swap: the substitute word shares consonants but changes the vowel sound (e.g. "Ricco" /riːkoʊ/ → "rice" /raɪs/ — vowel /iː/ vs /aɪ/ is a fail).
+   - Stressed-syllable miss: the substitute word diverges on the stressed syllable (e.g. "Rodriguez" ro-DREE-gwez → "rodent" ro-DENT — "dri" vs "dent" on the stress beat is a fail).
+   - Shared-prefix only: only the first 1-2 letters match and the rest diverges.
+   - Extra-hop symbol: the visual evokes a concept that then suggests the sound, rather than the sound directly (e.g. halo → "holiness" → "heaven" → "Kevin" is two hops; use a visual that reads "heaven" on first glance — clouds, pearly gates, souls ascending).
+   If you cannot find a connection meeting (a), (b), or (c), pick the strongest syllable split available and state it honestly in the rationale — do NOT invent a weak rhyme.
+7) Prefer simple scene graphs: one primary interaction, up to two secondary props, clean/uncluttered background.
+8) artStyle handling:
    - If input artStyle is NOT "Random": set JSON artStyle to EXACTLY the same string as input.
    - If input artStyle IS "Random": choose ONE final rendering style and set JSON artStyle to that chosen value.
      - Prefer picking from: "Digital Art", "Cartoon", "3D Render", "Watercolor", "Pop Art", "Photorealistic"
      - Optional variety labels are allowed only if they are clear rendering styles.
    - Whatever JSON artStyle is, prompt MUST reflect it.
-7) Use roomType/room_context only for atmosphere/materials/lighting; do not replace the anchor interaction.
-8) If mode is "stranger", amplify absurdity with exactly ONE of:
+9) Use roomType/room_context only for atmosphere/materials/lighting; do not replace the anchor interaction.
+10) If mode is "stranger", amplify absurdity with exactly ONE of:
    - one bizarre prop, OR
    - one scale twist.
    Keep the scene clearly depictable.
-9) label_text rules:
+11) label_text rules:
    - Use "" unless text is necessary for the mnemonic.
    - If non-empty, keep it short (1-3 words) and physically placeable on a visible object/sign.
-10) negative_prompt must be compact and practical (quality + clutter + watermark/logo suppression).
-11) If label_text is non-empty, DO NOT include "text" in negative_prompt.
-12) If label_text is empty, you MAY include "text" in negative_prompt.
-13) rationale: 1-2 sentences explaining the mnemonic mapping.
-14) tags: 3-8 short kebab-case strings.
+12) negative_prompt must be compact and practical (quality + clutter + watermark/logo suppression).
+13) If label_text is non-empty, DO NOT include "text" in negative_prompt.
+14) If label_text is empty, you MAY include "text" in negative_prompt.
+15) rationale — for the person memorizing, not for a prompt engineer:
+   - Explain ONLY the mnemonic: sound-split, pun, or what in the picture cues what (plain words).
+   - Do NOT describe how you built the image prompt: no "verb-forward", "anchor central", "grammatical subject", "interaction", "scene graph", "literal rendering", "SDXL", "composition", "kinetic", "fires on recall", "makes the interaction…", "icon of the acronym", or similar meta.
+   - Do NOT justify prompt rules; the athlete does not care about prompt engineering.
+   - 1-2 short sentences; normal mode prefer one sentence.
+16) tags: 3-8 short kebab-case strings.
 
 Safety:
 Keep content non-sexual, non-gory, non-hateful. Avoid instructions targeting real private individuals.
@@ -98,7 +113,7 @@ Output:
   "label_text": "",
   "prompt": "A small golden lion caught mid-nap on top of a wooden bookshelf, books splayed open beneath its chin, warm amber lamplight, loose watercolor washes.",
   "negative_prompt": "blurry, low quality, watermark, logo, text, clutter, harsh lines",
-  "rationale": "Napoleon splits into 'nap' (sleeping) + 'leon' (lion): a lion napping on the anchor shelf. The mid-sleep posture makes the interaction kinetic and the phonetic split fires both syllables on recall.",
+  "rationale": "Napoleon → nap + leon: a sleeping lion on the bookshelf so you read nap, then lion.",
   "tags": ["napoleon", "phonetic-split", "lion", "bookshelf", "napping", "watercolor", "study"]
 }
 
@@ -123,7 +138,7 @@ Output:
   "label_text": "",
   "prompt": "A vintage film camera the size of a watermelon sprouting green vines from its lens instead of water, mounted where a chrome kitchen faucet should be, bright overhead light, digital art style.",
   "negative_prompt": "blurry, low quality, watermark, logo, text, clutter, dark shadows",
-  "rationale": "Photosynthesis splits into 'photo' (camera) + 'synthesis' (growth): the camera replaces the faucet and grows vines instead of water. The oversized camera is the single stranger-mode scale twist.",
+  "rationale": "Photosynthesis → photo + synthesis: a camera where the faucet was, with vines growing out like water. The giant camera is just a weird extra hook so you remember the faucet spot.",
   "tags": ["photosynthesis", "phonetic-split", "camera", "vines", "faucet", "stranger-mode", "digital-art"]
 }`;
 
