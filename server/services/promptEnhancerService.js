@@ -25,6 +25,12 @@ const ANTHROPIC_VERSION = process.env.ANTHROPIC_VERSION || '2023-06-01';
 
 const REQUEST_TIMEOUT_MS = 25000;
 
+/** JSON contract needs room to finish; low max_tokens ⇒ truncation ⇒ invalid_contract. Override: ANTHROPIC_MAX_OUTPUT_TOKENS */
+const ANTHROPIC_MAX_OUTPUT_TOKENS = Math.min(
+  Math.max(Number.parseInt(process.env.ANTHROPIC_MAX_OUTPUT_TOKENS ?? '1536', 10), 256),
+  8192
+);
+
 const PROMPT_VERSION = process.env.PROMPT_VERSION || 'v1';
 
 const SYSTEM_PROMPT = `You are a prompt engineer for Stability SDXL text-to-image.
@@ -350,8 +356,8 @@ exports.enhancePrompt = async (anchorOrInput, memorableItemMaybe) => {
       },
       data: {
         model: ANTHROPIC_MODEL,
-        max_tokens: 900,
-        temperature: input.mode === 'stanger' ? 0.9 : 0.65,
+        max_tokens: ANTHROPIC_MAX_OUTPUT_TOKENS,
+        temperature: input.mode === 'stranger' ? 0.9 : 0.65,
         system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userMessage }]
       },
@@ -359,18 +365,30 @@ exports.enhancePrompt = async (anchorOrInput, memorableItemMaybe) => {
     });
 
     const usage = response.data?.usage;
+    const stopReason = response.data?.stop_reason;
     console.log('Anthropic prompt expansion token usage:', {
       input: usage?.input_tokens,
       output: usage?.output_tokens,
       cache_created: usage?.cache_creation_input_tokens,
-      cache_read: usage?.cache_read_input_tokens
+      cache_read: usage?.cache_read_input_tokens,
+      stop_reason: stopReason,
+      max_tokens: ANTHROPIC_MAX_OUTPUT_TOKENS
     });
     const text = extractTextFromMessage(response.data);
     console.log('Anthropic prompt expansion raw text length:', text ? text.length : 0);
     const parsed = extractFirstJsonObject(text);
     const contract = validateAndCoerceContract(parsed, input);
     if (!contract) {
-      console.warn('Claude returned invalid JSON contract, using fallback');
+      console.warn('Claude returned invalid JSON contract, using fallback', {
+        stop_reason: stopReason,
+        output_tokens: usage?.output_tokens,
+        max_tokens: ANTHROPIC_MAX_OUTPUT_TOKENS,
+        likely_truncated:
+          stopReason === 'max_tokens' ||
+          (typeof usage?.output_tokens === 'number' &&
+            usage.output_tokens >= ANTHROPIC_MAX_OUTPUT_TOKENS - 8),
+        raw_tail: typeof text === 'string' ? text.slice(-320) : undefined
+      });
       return fallbackContract({ ...input, llm_fallback_reason: 'invalid_contract' });
     }
 
