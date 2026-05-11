@@ -19,6 +19,20 @@ import { getDemoRoomImage } from '../utils/demoRoomImageStore';
 import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
+/** Strip base64 from accepted images for localStorage (server returns /images/user/... paths after save). */
+function normalizedAcceptedImagesForStorage(apiValue) {
+  if (!apiValue || typeof apiValue !== 'object') return {};
+  const raw = apiValue instanceof Map ? Object.fromEntries(apiValue) : apiValue;
+  const out = {};
+  Object.keys(raw).forEach((anchor) => {
+    const row = raw[anchor];
+    if (!row?.image || typeof row.image !== 'string') return;
+    if (row.image.startsWith('data:image')) return;
+    out[anchor] = row;
+  });
+  return out;
+}
+
 const VisualizerPage = () => {
   const navigate = useNavigate();
   const [selectedAssociation, setSelectedAssociation] = useState(null);
@@ -315,9 +329,9 @@ const VisualizerPage = () => {
 
   const handleSaveRoom = async (roomData) => {
     try {
-      // Clear localStorage to free up space before saving
-      localStorage.removeItem('currentPalace');
-      localStorage.removeItem('imageMetadata');
+      // Do not clear currentPalace / imageMetadata here — that forces the next render to read {}
+      // from localStorage until the request finishes (and wipes context on failed saves).
+
       // Create the palace data for the API
       const palaceData = {
         name: roomData.name,
@@ -376,23 +390,27 @@ const VisualizerPage = () => {
 
       const savedPalace = await response.json();
 
-      // Update localStorage with the saved palace data (including the ID for future updates)
-      // Only store essential data, not the full acceptedImages to avoid quota issues
+      const pathOnlyAccepted = normalizedAcceptedImagesForStorage(savedPalace.acceptedImages);
+
       const palaceDataForStorage = {
         _id: savedPalace._id,
         name: savedPalace.name,
         roomType: savedPalace.roomType,
         associations: savedPalace.associations,
+        artStyle: savedPalace.artStyle ?? artStyle,
         completionStatus: savedPalace.completionStatus,
-        acceptedImages: {}, // Don't store full image data in localStorage
+        acceptedImages: pathOnlyAccepted,
         customRoomId: savedPalace.customRoomId || null,
         customRoomImageUrl: savedPalace.customRoomImageUrl || null
       };
       localStorage.setItem('currentPalace', JSON.stringify(palaceDataForStorage));
 
-      // Update local state with the saved palace data to ensure images persist
       if (savedPalace.acceptedImages) {
-        setAcceptedImages(savedPalace.acceptedImages);
+        const fromApi =
+          savedPalace.acceptedImages instanceof Map
+            ? Object.fromEntries(savedPalace.acceptedImages)
+            : { ...savedPalace.acceptedImages };
+        setAcceptedImages((prev) => ({ ...prev, ...fromApi }));
       }
 
       setIsSaveModalOpen(false);
