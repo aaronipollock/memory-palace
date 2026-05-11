@@ -20,6 +20,9 @@ const ImagePopup = ({
 
   const rationaleText = promptMeta?.rationale;
   const isLlmFallback = promptMeta?.llm_fallback === true;
+  const isClientPromptFallback = promptMeta?.client_prompt_fallback === true;
+  const isImageFallback = promptMeta?.image_fallback === true;
+  const imageFallbackReason = promptMeta?.image_fallback_reason;
 
   // Focus trap and Escape key support
   useEffect(() => {
@@ -140,6 +143,19 @@ const ImagePopup = ({
             {isLlmFallback && (
               <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
                 Basic prompt used — mnemonic enhancer was unavailable. Try again for a richer image.
+              </div>
+            )}
+
+            {isClientPromptFallback && (
+              <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800">
+                Used a built-in prompt on this device after the server request did not complete. You can try generating again for the full enhancer.
+              </div>
+            )}
+
+            {isImageFallback && (
+              <div className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+                Placeholder or simplified image from the image service
+                {imageFallbackReason ? ` (${String(imageFallbackReason).replace(/_/g, ' ')})` : ''}.
               </div>
             )}
 
