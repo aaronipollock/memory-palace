@@ -5,6 +5,23 @@ import { generatePrompt, generateStrangerPrompt } from '../utils/promptGenerator
 import { getApiUrl } from '../config/api';
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
+/** Must match server `imageGenerationValidation.generateImage` (max 1000). */
+const MAX_CLIENT_PROMPT_CHARS = 1000;
+
+function clampPromptForApi(prompt) {
+  const s = typeof prompt === 'string' ? prompt : '';
+  if (s.length <= MAX_CLIENT_PROMPT_CHARS) return s;
+  return s.slice(0, MAX_CLIENT_PROMPT_CHARS);
+}
+
+function throwIfRateLimited(response) {
+  if (response && response.status === 429) {
+    const err = new Error('Rate limited — try again in a minute.');
+    err.response = { status: 429, data: { error: err.message } };
+    throw err;
+  }
+}
+
 /**
  * Generates an image based on the provided association
  * @param {Object} association - The association object containing anchor and memorable
@@ -38,10 +55,13 @@ export const generateImage = async ({ association, roomType, artStyle, mode, use
     }
 
     if (!response || !response.ok) {
+      throwIfRateLimited(response);
+
       const promptResult = await generatePrompt(sanitizedAssociation, setCurrentPrompt);
-      const fallbackPrompt =
+      const fallbackPromptRaw =
         promptResult?.fullPrompt ||
         `a ${sanitizedAssociation.memorableItem} near a ${sanitizedAssociation.anchor}, digital art`;
+      const fallbackPrompt = clampPromptForApi(fallbackPromptRaw);
 
       if (setCurrentPrompt) setCurrentPrompt(fallbackPrompt);
 
@@ -133,10 +153,13 @@ export const generateStrangerImage = async ({ association, roomType, artStyle, m
     }
 
     if (!response || !response.ok) {
+      throwIfRateLimited(response);
+
       const promptResult = await generateStrangerPrompt(sanitizedAssociation, setCurrentPrompt);
-      const fallbackPrompt =
+      const fallbackPromptRaw =
         promptResult?.fullPrompt ||
         `a surreal, bizarre scene of ${sanitizedAssociation.memorableItem} interacting with a ${sanitizedAssociation.anchor}`;
+      const fallbackPrompt = clampPromptForApi(fallbackPromptRaw);
 
       if (setCurrentPrompt) setCurrentPrompt(fallbackPrompt);
 
