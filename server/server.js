@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { logger } = require('./utils/logger');
 const { setupSecurityMiddleware, routeSecurity, securityConfig } = require('./config/security');
-const { sanitizeInput, xssProtection } = require('./middleware/validation');
+const { sanitizeInput, xssProtection, imageGenerationValidation } = require('./middleware/validation');
 const { csrfProtection } = require('./middleware/auth');
 
 const app = express();
@@ -150,7 +150,7 @@ const maybeLimitLlm = (req, res, next) => {
 };
 
 app.post('/api/generate-room', ...routeSecurity.imageGenRoutes, asyncHandler(roomController.generateRoom));
-app.post('/api/generate-images', ...routeSecurity.imageGenRoutes, maybeLimitLlm, asyncHandler(imageController.generateImages));
+app.post('/api/generate-images', ...routeSecurity.imageGenRoutes, maybeLimitLlm, ...imageGenerationValidation.generateImage, asyncHandler(imageController.generateImages));
 
 // Apply CSRF protection to all other API routes (after auth, feedback, image, and memory palace routes)
 app.use('/api', csrfProtection);

@@ -243,9 +243,10 @@ const imageGenerationValidation = {
 
   generateImage: [
     body('prompt')
+      .optional({ checkFalsy: true })
       .trim()
-      .isLength({ min: 1, max: 1000 })
-      .withMessage('Prompt must be between 1 and 1000 characters'),
+      .isLength({ max: 1000 })
+      .withMessage('Prompt must be 1000 characters or fewer'),
 
     body('association')
       .isObject()

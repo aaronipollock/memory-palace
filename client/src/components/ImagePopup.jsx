@@ -19,6 +19,7 @@ const ImagePopup = ({
   const closeButtonRef = useRef(null);
 
   const rationaleText = promptMeta?.rationale;
+  const isLlmFallback = promptMeta?.llm_fallback === true;
 
   // Focus trap and Escape key support
   useEffect(() => {
@@ -133,6 +134,12 @@ const ImagePopup = ({
               <div className="mt-4 rounded-lg border border-purple-200 bg-purple-50 px-4 py-3 text-sm text-gray-800">
                 <div className="font-semibold text-purple-800 mb-1">Why this works</div>
                 <div className="leading-relaxed">{rationaleText}</div>
+              </div>
+            )}
+
+            {isLlmFallback && (
+              <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                Basic prompt used — mnemonic enhancer was unavailable. Try again for a richer image.
               </div>
             )}
 
