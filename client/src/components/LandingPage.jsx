@@ -155,18 +155,18 @@ const LandingPage = () => {
   const useCases = [
     {
       title: "Students",
-      description: "Improve retrieval through structured cues.",
+      description: "Lock in clinical terms, symptoms, and ordered lists with vivid spatial anchors.",
       icon: "🎓"
     },
     {
       title: "Professionals",
-      description: "Encode presentations, procedures, and key information into spatial anchors.",
+      description: "Encode speeches, presentations, and key sequences so they stay with you under pressure.",
       icon: "💼"
     },
     {
-      title: "Language Learners",
-      description: "Build vocabulary and grammar through memorable visual associations.",
-      icon: "🌍"
+      title: "Trivia Enthusiasts",
+      description: "Stop blanking on #6 through #10. Turn ranked lists and proper nouns into images that stick.",
+      icon: "🧠"
     }
   ];
 
@@ -288,16 +288,14 @@ const LandingPage = () => {
         />
         {/* New Feature Banner */}
         {showNewFeatureBanner && !isLoggedIn && (
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 mt-[80px] relative z-10">
+          <div className="bg-gradient-to-r from-violet-700 to-purple-600 text-white py-2 px-4 mt-[80px] relative z-10">
             <div className="container mx-auto max-w-6xl flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 flex-1">
-                <div>
-                  <span className="font-bold">New:</span> Create custom rooms with your own photos! Upload familiar spaces and use them as memory palace foundations.
-                </div>
-              </div>
+              <p className="flex-1 text-center text-sm">
+                <span className="font-bold">New:</span> Mnemonic image prompts powered by Claude, with a &ldquo;Why This Works&rdquo; rationale for every image.
+              </p>
               <button
                 onClick={() => setShowNewFeatureBanner(false)}
-                className="text-white hover:text-gray-200 transition-colors text-xl leading-none px-2"
+                className="text-white hover:text-gray-200 transition-colors text-xl leading-none px-2 shrink-0"
                 aria-label="Close banner"
               >
                 ×
@@ -312,19 +310,16 @@ const LandingPage = () => {
             {/* New Feature Announcement for Logged-in Users */}
             {showNewFeatureBanner && (
               <div className="container mx-auto max-w-6xl mb-8">
-                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 px-6 rounded-lg shadow-lg flex items-center justify-between gap-4">
+                <div className="bg-gradient-to-r from-violet-700 to-purple-600 text-white py-4 px-6 rounded-lg shadow-lg flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1">
                     <div>
-                      <div className="font-bold text-lg mb-1">New Feature: Custom Rooms</div>
-                      <div className="text-sm">Upload your own room photos and create memory palaces from familiar spaces!</div>
+                      <div className="font-bold text-lg mb-1">New: AI-Designed Mnemonic Images</div>
+                      <div className="text-sm">Every generated image includes a <em>"Why This Works"</em> rationale: the phonetic or visual logic that makes it stick.</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => {
-                        const event = new CustomEvent('openUploadModal');
-                        window.dispatchEvent(event);
-                      }}
+                      onClick={() => navigate('/input')}
                       className="bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-sm"
                     >
                       Try It Now
@@ -509,7 +504,10 @@ const LandingPage = () => {
               style={{ transitionDelay: '0ms' }}
             >
               <div className="p-2">
-                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-gray-100 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                <div className="relative w-full aspect-[4/3] rounded-2xl shadow-xl border border-purple-400/50 bg-white/80 hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                  <div className="absolute top-4 right-4 z-20 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    NEW
+                  </div>
                   <img
                     src="/images/memorable.png"
                     alt="Memorable"
@@ -518,7 +516,7 @@ const LandingPage = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/15 to-transparent z-[5]"></div>
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-end p-8 pb-12">
                     <h3 className="text-3xl md:text-4xl font-bold mb-2 text-white text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Encoding-first image generation</h3>
-                    <p className="text-lg md:text-xl text-white text-center max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Generate visual cues to support associations you define (not replace them).</p>
+                    <p className="text-lg md:text-xl text-white text-center max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">AI-crafted prompts use phonetic splits and visual substitutes to make every image recall the concept, with a <em>"Why This Works"</em> explanation so you understand the encoding.</p>
                   </div>
                 </div>
               </div>
@@ -652,7 +650,14 @@ const LandingPage = () => {
               {!isLoggedIn && (
               <div className="w-full mb-8">
                 <h3 className="text-2xl font-semibold text-white mb-6 text-center">Now Available</h3>
-                <div className="grid gap-4 md:grid-cols-1 max-w-2xl mx-auto">
+                <div className="grid gap-4 md:grid-cols-2 max-w-4xl mx-auto">
+                  <div className="rounded-lg p-4 text-center bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-400/30">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <div className="font-medium text-white">AI Mnemonic Enhancer</div>
+                      <span className="bg-purple-600 text-white px-2 py-0.5 rounded-full text-xs font-bold">NEW</span>
+                    </div>
+                    <div className="text-sm text-gray-200">Every image is prompted with phonetic splits, visual substitutes, and kinetic scenes designed to be recalled, not just generated. Includes a rationale explaining the encoding.</div>
+                  </div>
                   <div className="rounded-lg p-4 text-center bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-400/30">
                     <div className="flex items-center justify-center gap-2 mb-2">
                       <div className="font-medium text-white">Custom Rooms</div>
@@ -668,15 +673,10 @@ const LandingPage = () => {
               {!isLoggedIn && (
               <div className="w-full">
                 <h3 className="text-2xl font-semibold text-white mb-6 text-center">In Progress</h3>
-                <div className="grid gap-4 md:grid-cols-2 max-w-4xl mx-auto">
+                <div className="grid gap-4 md:grid-cols-1 max-w-2xl mx-auto">
                   <div className="rounded-lg p-4 text-center">
-                    <div className="font-medium mb-2 text-white">Custom Room Layouts</div>
-                    <div className="text-sm text-gray-200">Define your own room structures to match how you already think about physical spaces.</div>
-                  </div>
-                  <div className="rounded-lg p-4 text-center">
-                    <div className="font-medium mb-2 text-white">Encoding Suggestions</div>
-                    <div className="text-sm text-gray-200">Optional prompts suggest figurative associations to support stronger encoding, while keeping you in control.
-                    </div>
+                    <div className="font-medium mb-2 text-white">Dual Encoding</div>
+                    <div className="text-sm text-gray-200">Encode both a name and its associated concept in a single image, each independently decodable. Built for key-value memorization like Greek gods, elements, or historical figures.</div>
                   </div>
                 </div>
               </div>

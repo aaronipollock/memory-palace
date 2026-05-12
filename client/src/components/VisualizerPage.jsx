@@ -628,7 +628,12 @@ const VisualizerPage = () => {
         }
         setGeneratedImage(fullImageUrl);
         setCurrentPrompt(acceptedImages[association.anchor].prompt);
-        setCurrentPromptMeta(imageMetadata?.[association.anchor]?.prompt_meta || null);
+        setCurrentPromptMeta(
+          imageMetadata?.[association.anchor]?.prompt_meta ||
+          (acceptedImages[association.anchor].rationale
+            ? { rationale: acceptedImages[association.anchor].rationale }
+            : null)
+        );
       } else if (imageMetadata[association.anchor]) {
         // Image was accepted but not in memory (e.g., after page reload)
         // We'll need to regenerate it

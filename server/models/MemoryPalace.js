@@ -49,6 +49,7 @@ const memoryPalaceSchema = new mongoose.Schema({
         of: {
             image: String,
             prompt: String,
+            rationale: String,
             association: {
                 anchor: String,
                 memorableItem: String
