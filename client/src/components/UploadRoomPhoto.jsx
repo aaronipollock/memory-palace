@@ -5,6 +5,8 @@ import { useToast } from '../context/ToastContext';
 import { SecureAPIClient, TokenManager } from '../utils/security';
 import { getApiUrl } from '../config/api';
 import { saveDemoRoomImage } from '../utils/demoRoomImageStore';
+import { DEMO_BUNDLED_CUSTOM_ROOM_IMAGE_PATH } from '../config/demoSampleRoom';
+import { createDemoBundledSampleRoom } from '../utils/createDemoBundledSampleRoom';
 
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
@@ -20,6 +22,7 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [isDemoUser, setIsDemoUser] = useState(false);
 
     const navigate = useNavigate();
     const { showSuccess, showError } = useToast();
@@ -35,6 +38,13 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
             setError(null);
             setIsDragging(false);
         }
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const token = TokenManager.getAccessToken();
+        const payload = TokenManager.getTokenPayload(token);
+        setIsDemoUser(payload?.email === 'demo@example.com');
     }, [isOpen]);
 
     // Focus trap and Escape key support
@@ -131,6 +141,25 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleUseBundledSampleRoom = async () => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const room = await createDemoBundledSampleRoom(apiClient);
+            showSuccess('Sample room created—add anchor points on the next screen.');
+            if (onSuccess) onSuccess(room);
+            onClose();
+            navigate(`/custom-rooms/${room._id}/edit`);
+        } catch (err) {
+            console.error('Error creating sample demo room:', err);
+            setError(err.message || 'Failed to create sample room');
+            showError(err.message || 'Failed to create sample room');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Uploads image, creates custom room, and navigates to anchor point editor
@@ -366,6 +395,29 @@ const UploadRoomPhoto = ({ isOpen, onClose, onSuccess }) => {
                         </div>
                     </div>
 
+                    {isDemoUser && (
+                        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <p className="text-sm text-gray-700 mb-3">
+                                Prefer not to upload a photo? Use this bundled Oval Office image to try custom rooms
+                                in demo mode (served from the app, not stored as your personal upload).
+                            </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                <img
+                                    src={`${getApiUrl('').replace(/\/$/, '')}${DEMO_BUNDLED_CUSTOM_ROOM_IMAGE_PATH}`}
+                                    alt="Preview of bundled Oval Office sample room"
+                                    className="w-full sm:w-40 h-28 object-cover rounded-md border border-gray-200 bg-white"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleUseBundledSampleRoom}
+                                    disabled={isLoading}
+                                    className="px-4 py-2 border border-primary text-primary rounded-md hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                >
+                                    Use sample Oval Office room
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* NAME INPUT */}
                     <div className="mb-6">

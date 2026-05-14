@@ -1,6 +1,20 @@
 const CustomRoom = require('../models/CustomRoom');
 const mongoose = require('mongoose');
 const AppError = require('../utils/AppError');
+const { BUNDLED_CUSTOM_ROOM_IMAGE_PATH } = require('../config/demoSampleRoom');
+
+function assertDemoAccountImageUrlAllowed(email, imageUrl) {
+    if (email !== 'demo@example.com') return;
+    const u = imageUrl.trim();
+    const allowedBundled = u === BUNDLED_CUSTOM_ROOM_IMAGE_PATH;
+    const allowedLocalMarker = u.startsWith('demo-local:');
+    if (!allowedBundled && !allowedLocalMarker) {
+        throw new AppError(
+            'Demo accounts may only use demo-local room images or the bundled sample room image.',
+            400
+        );
+    }
+}
 
 // Helper function to check if ID is valid ObjectId format
 const isValidObjectId = (id) => {
@@ -93,6 +107,8 @@ exports.createCustomRoom = async (req, res) => {
         throw new AppError(`ImageUrl must be less than ${MAX_IMAGE_URL_LENGTH} characters`, 400);
     }
 
+    assertDemoAccountImageUrlAllowed(req.user.email, imageUrl);
+
     // Validate anchor points if provided
     if (anchorPoints !== undefined) {
         const validation = validateAnchorPoints(anchorPoints);
@@ -170,6 +186,7 @@ exports.updateCustomRoom = async (req, res) => {
         if (req.body.imageUrl.length > MAX_IMAGE_URL_LENGTH) {
             throw new AppError(`ImageUrl must be less than ${MAX_IMAGE_URL_LENGTH} characters`, 400);
         }
+        assertDemoAccountImageUrlAllowed(req.user.email, req.body.imageUrl);
         customRoom.imageUrl = req.body.imageUrl.trim();
     }
 

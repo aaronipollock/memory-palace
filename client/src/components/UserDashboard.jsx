@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import LoadingSpinner from './LoadingSpinner';
@@ -9,6 +9,7 @@ import { useToast } from '../context/ToastContext';
 import { SecureAPIClient } from '../utils/security';
 import { getApiUrl } from '../config/api';
 import { getDemoRoomImage } from '../utils/demoRoomImageStore';
+import { createDemoBundledSampleRoom } from '../utils/createDemoBundledSampleRoom';
 const apiClient = new SecureAPIClient(getApiUrl(''));
 
 const DemoRoomThumbnail = ({ roomId, alt, className }) => {
@@ -78,6 +79,7 @@ const UserDashboard = () => {
     const [customRoomToDelete, setCustomRoomToDelete] = useState(null);
     const navigate = useNavigate();
     const { showSuccess, showError, showInfo } = useToast();
+    const demoBundledSampleSeedingRef = useRef(false);
 
     // Define fetchPalaces before useEffect that uses it
     const fetchPalaces = useCallback(async () => {
@@ -128,7 +130,39 @@ const UserDashboard = () => {
         try {
             const response = await apiClient.get('/api/custom-rooms');
             if (response.ok) {
-                const data = await response.json();
+                let data = await response.json();
+
+                let isDemo = false;
+                try {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+                        isDemo = payload.email === 'demo@example.com';
+                    }
+                } catch {
+                    // ignore invalid token
+                }
+
+                if (
+                    isDemo &&
+                    Array.isArray(data) &&
+                    data.length === 0 &&
+                    !demoBundledSampleSeedingRef.current
+                ) {
+                    demoBundledSampleSeedingRef.current = true;
+                    try {
+                        await createDemoBundledSampleRoom(apiClient);
+                        const res2 = await apiClient.get('/api/custom-rooms');
+                        if (res2.ok) {
+                            data = await res2.json();
+                        }
+                    } catch (e) {
+                        console.warn('Failed to auto-seed demo bundled sample room:', e);
+                    } finally {
+                        demoBundledSampleSeedingRef.current = false;
+                    }
+                }
+
                 setCustomRooms(data);
             } else if (response.status === 429) {
                 // For rate limiting, keep existing custom rooms if any
