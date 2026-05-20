@@ -2,6 +2,11 @@
 
 This doc explains how logging and request tracing in this project support production debugging and safe operations.
 
+## Case studies
+
+- [Diagnosing Latency and Timeout Behavior with Sentry in Low·sAI](./latency-timeout-case-study.md)
+- [Debugging an Unreachable JWT Recovery Flow in Low·sAI](./unreachable-jwt-refresh-flow-case-study.md)
+
 ---
 
 ## Architecture
