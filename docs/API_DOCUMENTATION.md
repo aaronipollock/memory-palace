@@ -706,29 +706,98 @@ GET /api/figurative-association/creativity
 
 ## Error Handling
 
-All API endpoints return consistent error responses.
+Most errors return JSON with an `error` message. Auth middleware and `/api/auth/refresh` also include a machine-readable `code`. Route handlers that throw `AppError` use a separate shape (see below).
 
-### Error Response Format
+### Error Response Format (auth middleware & auth routes)
+
+Used by `authenticateToken`, CSRF checks, and `POST /api/auth/refresh`:
 
 ```json
 {
-  "error": "Error message",
-  "code": "ERROR_CODE",
-  "details": "Additional details (development only)"
+  "error": "Human-readable message",
+  "code": "ERROR_CODE"
 }
 ```
 
-### Common Error Codes
+**Example — expired access token:**
 
-| Code | Description |
-|------|-------------|
-| `INVALID_CREDENTIALS` | Wrong email/password |
-| `USER_EXISTS` | User already registered |
-| `MISSING_REFRESH_TOKEN` | No refresh token provided |
-| `INVALID_REFRESH_TOKEN` | Invalid or expired refresh token |
-| `ACCESS_DENIED` | User doesn't have permission |
-| `VALIDATION_ERROR` | Request validation failed |
-| `INTERNAL_ERROR` | Server error |
+```json
+{
+  "error": "Invalid or expired token",
+  "code": "INVALID_TOKEN"
+}
+```
+
+```http
+HTTP/1.1 401 Unauthorized
+```
+
+The client `SecureAPIClient` treats `401` responses as refreshable; `INVALID_TOKEN` is returned with **401** (not 403) so expired bearer tokens can trigger `/api/auth/refresh`.
+
+### Error Response Format (AppError / global handler)
+
+Used by controllers and validation for most non-auth middleware failures:
+
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "requestId": "uuid",
+  "details": {}
+}
+```
+
+`details` is optional. Signup/login operational errors may nest a code inside `details` (e.g. `{ "code": "USER_EXISTS" }`). In development only, `stack` may be included for 500 errors.
+
+### Authentication & access token codes
+
+Returned by `authenticateToken` when a Bearer token is present or required:
+
+| Code | HTTP | When |
+|------|------|------|
+| `MISSING_TOKEN` | 401 | No Bearer token on a protected route |
+| `TOKEN_BLACKLISTED` | 401 | Access token was invalidated (e.g. logout) |
+| `INVALID_TOKEN` | 401 | JWT missing, malformed, or expired (`verifyToken` failed) |
+| `AUTH_REQUIRED` | 401 | Role middleware: no authenticated user |
+
+### Refresh token codes
+
+Returned by `POST /api/auth/refresh`:
+
+| Code | HTTP | When |
+|------|------|------|
+| `MISSING_REFRESH_TOKEN` | 401 | `refreshToken` cookie not sent |
+| `INVALID_REFRESH_TOKEN` | 401 | Cookie present but JWT invalid or expired |
+
+### Authorization & CSRF codes
+
+| Code | HTTP | When |
+|------|------|------|
+| `CSRF_ERROR` | 403 | `X-CSRF-Token` header and `csrfToken` cookie missing or mismatched (non-GET/HEAD/OPTIONS) |
+| `INSUFFICIENT_PERMISSIONS` | 403 | Authenticated user lacks required role |
+| `ACCESS_DENIED` | 403 | User does not own the resource (or demo-only route) |
+| `RESOURCE_NOT_FOUND` | 404 | Resource ID not found in ownership middleware |
+
+### Registration & login codes
+
+Returned via `AppError` (often in `details.code`):
+
+| Code | HTTP | When |
+|------|------|------|
+| `INVALID_CREDENTIALS` | 401 | Wrong email or password on login |
+| `USER_EXISTS` | 400 | Email already registered on signup |
+| `USERNAME_EXISTS` | 400 | Username already taken on signup |
+
+### Rate limiting & auth lockout
+
+| Source | HTTP | Body |
+|--------|------|------|
+| Express rate limiters (`generalLimiter`, `authLimiter`, etc.) | 429 | `{ "error": "...", "retryAfter": <seconds> }` — no `code` field |
+| `authRateLimit` middleware | 429 | `{ "error": "Too many authentication attempts", "code": "AUTH_RATE_LIMIT", "retryAfter": 900 }` |
+
+### Other application errors
+
+Many routes return only `error` (and `requestId`) with an HTTP status—no `code`—for validation failures, not-found resources, and server errors. Prefer `code` where present for auth debugging; otherwise use status + `error` message.
 
 ### HTTP Status Codes
 
@@ -737,8 +806,8 @@ All API endpoints return consistent error responses.
 | `200` | Success |
 | `201` | Created |
 | `400` | Bad Request |
-| `401` | Unauthorized |
-| `403` | Forbidden |
+| `401` | Unauthorized (missing/invalid auth or credentials) |
+| `403` | Forbidden (CSRF failure, insufficient permissions, access denied) |
 | `404` | Not Found |
 | `429` | Too Many Requests |
 | `500` | Internal Server Error |
@@ -769,7 +838,7 @@ Retry-After: 900
 ```json
 {
   "error": "Too many requests, please try again later.",
-  "code": "RATE_LIMIT_EXCEEDED"
+  "retryAfter": 900
 }
 ```
 
